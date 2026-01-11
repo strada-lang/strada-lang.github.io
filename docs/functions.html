@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Functions - Strada Documentation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <a href="../index.html" class="logo">Strada<span>Lang</span></a>
+        <ul>
+            <li><a href="quickstart.html">QuickStart</a></li>
+            <li><a href="index.html">Docs</a></li>
+            <li><a href="reference.html">Reference</a></li>
+            <li><a href="https://github.com/strada-lang/strada-lang">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h3>Getting Started</h3>
+            <ul>
+                <li><a href="quickstart.html">QuickStart</a></li>
+                <li><a href="index.html">Documentation</a></li>
+            </ul>
+            <h3>Language Guide</h3>
+            <ul>
+                <li><a href="basics.html">Language Basics</a></li>
+                <li><a href="types.html">Types & Variables</a></li>
+                <li><a href="functions.html" class="active">Functions</a></li>
+                <li><a href="control-flow.html">Control Flow</a></li>
+                <li><a href="oop.html">Object-Oriented Programming</a></li>
+            </ul>
+            <h3>Reference</h3>
+            <ul>
+                <li><a href="reference.html">Built-in Functions</a></li>
+                <li><a href="cannoli.html">Cannoli Web Framework</a></li>
+            </ul>
+        </aside>
+
+        <main class="content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a> / <a href="index.html">Docs</a> / Functions
+            </div>
+
+            <h1><span>Functions</span></h1>
+            <p class="subtitle">Defining, calling, and advanced function features.</p>
+
+            <h2>Basic Function Definition</h2>
+
+            <p>Functions are declared with <code>func</code>, parameters with types, and a return type:</p>
+
+            <pre><code><span class="keyword">func</span> <span class="func">greet</span>(<span class="type">str</span> <span class="sigil">$name</span>) <span class="type">str</span> {
+    <span class="keyword">return</span> <span class="string">"Hello, "</span> . <span class="sigil">$name</span> . <span class="string">"!"</span>;
+}
+
+<span class="keyword">func</span> <span class="func">add</span>(<span class="type">int</span> <span class="sigil">$a</span>, <span class="type">int</span> <span class="sigil">$b</span>) <span class="type">int</span> {
+    <span class="keyword">return</span> <span class="sigil">$a</span> + <span class="sigil">$b</span>;
+}
+
+<span class="keyword">func</span> <span class="func">print_message</span>(<span class="type">str</span> <span class="sigil">$msg</span>) <span class="type">void</span> {
+    <span class="func">say</span>(<span class="sigil">$msg</span>);
+    <span class="comment"># No return needed for void functions</span>
+}</code></pre>
+
+            <h2>Calling Functions</h2>
+
+            <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$greeting</span> = <span class="func">greet</span>(<span class="string">"World"</span>);
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$sum</span> = <span class="func">add</span>(<span class="number">10</span>, <span class="number">20</span>);
+<span class="func">print_message</span>(<span class="string">"Hello!"</span>);</code></pre>
+
+            <h2>Parameter Types</h2>
+
+            <h3>Scalar Parameters</h3>
+
+            <pre><code><span class="keyword">func</span> <span class="func">process</span>(<span class="type">int</span> <span class="sigil">$n</span>, <span class="type">str</span> <span class="sigil">$label</span>, <span class="type">num</span> <span class="sigil">$factor</span>) <span class="type">void</span> {
+    <span class="func">say</span>(<span class="sigil">$label</span> . <span class="string">": "</span> . (<span class="sigil">$n</span> * <span class="sigil">$factor</span>));
+}</code></pre>
+
+            <h3>Array Parameters</h3>
+
+            <pre><code><span class="keyword">func</span> <span class="func">sum_array</span>(<span class="type">array</span> <span class="sigil">@numbers</span>) <span class="type">int</span> {
+    <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$total</span> = <span class="number">0</span>;
+    <span class="keyword">foreach</span> <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$n</span> (<span class="sigil">@numbers</span>) {
+        <span class="sigil">$total</span> += <span class="sigil">$n</span>;
+    }
+    <span class="keyword">return</span> <span class="sigil">$total</span>;
+}
+
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@nums</span> = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>];
+<span class="func">say</span>(<span class="func">sum_array</span>(<span class="sigil">@nums</span>));  <span class="comment"># 15</span></code></pre>
+
+            <h3>Hash Parameters</h3>
+
+            <pre><code><span class="keyword">func</span> <span class="func">print_config</span>(<span class="type">hash</span> <span class="sigil">%config</span>) <span class="type">void</span> {
+    <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@keys</span> = <span class="func">keys</span>(<span class="sigil">%config</span>);
+    <span class="keyword">foreach</span> <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$key</span> (<span class="sigil">@keys</span>) {
+        <span class="func">say</span>(<span class="sigil">$key</span> . <span class="string">": "</span> . <span class="sigil">$config</span>{<span class="sigil">$key</span>});
+    }
+}</code></pre>
+
+            <h2>Return Types</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Return Type</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>void</code></td><td>No return value</td></tr>
+                    <tr><td><code>int</code></td><td>Returns integer</td></tr>
+                    <tr><td><code>num</code></td><td>Returns floating-point</td></tr>
+                    <tr><td><code>str</code></td><td>Returns string</td></tr>
+                    <tr><td><code>array</code></td><td>Returns array</td></tr>
+                    <tr><td><code>hash</code></td><td>Returns hash</td></tr>
+                    <tr><td><code>scalar</code></td><td>Returns any value</td></tr>
+                </tbody>
+            </table>
+
+            <h2>Anonymous Functions (Closures)</h2>
+
+            <p>Strada supports first-class anonymous functions that capture variables from their enclosing scope:</p>
+
+            <pre><code><span class="comment"># Create an anonymous function</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$double</span> = <span class="keyword">func</span> (<span class="type">int</span> <span class="sigil">$n</span>) {
+    <span class="keyword">return</span> <span class="sigil">$n</span> * <span class="number">2</span>;
+};
+
+<span class="comment"># Call with arrow syntax</span>
+<span class="func">say</span>(<span class="sigil">$double</span>->(<span class="number">5</span>));  <span class="comment"># 10</span>
+<span class="func">say</span>(<span class="sigil">$double</span>->(<span class="number">21</span>)); <span class="comment"># 42</span></code></pre>
+
+            <h3>Capturing Variables</h3>
+
+            <p>Closures capture variables by reference:</p>
+
+            <pre><code><span class="keyword">func</span> <span class="func">make_counter</span>() <span class="type">scalar</span> {
+    <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$count</span> = <span class="number">0</span>;
+
+    <span class="keyword">return</span> <span class="keyword">func</span> () {
+        <span class="sigil">$count</span>++;
+        <span class="keyword">return</span> <span class="sigil">$count</span>;
+    };
+}
+
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$counter</span> = <span class="func">make_counter</span>();
+<span class="func">say</span>(<span class="sigil">$counter</span>->());  <span class="comment"># 1</span>
+<span class="func">say</span>(<span class="sigil">$counter</span>->());  <span class="comment"># 2</span>
+<span class="func">say</span>(<span class="sigil">$counter</span>->());  <span class="comment"># 3</span></code></pre>
+
+            <h3>Higher-Order Functions</h3>
+
+            <pre><code><span class="keyword">func</span> <span class="func">apply</span>(<span class="type">scalar</span> <span class="sigil">$fn</span>, <span class="type">int</span> <span class="sigil">$value</span>) <span class="type">scalar</span> {
+    <span class="keyword">return</span> <span class="sigil">$fn</span>->(<span class="sigil">$value</span>);
+}
+
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$square</span> = <span class="keyword">func</span> (<span class="type">int</span> <span class="sigil">$n</span>) { <span class="keyword">return</span> <span class="sigil">$n</span> * <span class="sigil">$n</span>; };
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$negate</span> = <span class="keyword">func</span> (<span class="type">int</span> <span class="sigil">$n</span>) { <span class="keyword">return</span> -<span class="sigil">$n</span>; };
+
+<span class="func">say</span>(<span class="func">apply</span>(<span class="sigil">$square</span>, <span class="number">5</span>));  <span class="comment"># 25</span>
+<span class="func">say</span>(<span class="func">apply</span>(<span class="sigil">$negate</span>, <span class="number">5</span>)); <span class="comment"># -5</span></code></pre>
+
+            <h2>Optional Parameters</h2>
+
+            <p>Parameters with default values are optional:</p>
+
+            <pre><code><span class="keyword">func</span> <span class="func">greet</span>(<span class="type">str</span> <span class="sigil">$name</span>, <span class="type">str</span> <span class="sigil">$greeting</span> = <span class="string">"Hello"</span>) <span class="type">str</span> {
+    <span class="keyword">return</span> <span class="sigil">$greeting</span> . <span class="string">", "</span> . <span class="sigil">$name</span> . <span class="string">"!"</span>;
+}
+
+<span class="func">say</span>(<span class="func">greet</span>(<span class="string">"Alice"</span>));             <span class="comment"># Hello, Alice!</span>
+<span class="func">say</span>(<span class="func">greet</span>(<span class="string">"Bob"</span>, <span class="string">"Hi"</span>));        <span class="comment"># Hi, Bob!</span></code></pre>
+
+            <h2>Variable Arguments</h2>
+
+            <p>Accept any number of arguments with <code>@args</code>:</p>
+
+            <pre><code><span class="keyword">func</span> <span class="func">sum</span>(<span class="type">array</span> <span class="sigil">@numbers</span>) <span class="type">int</span> {
+    <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$total</span> = <span class="number">0</span>;
+    <span class="keyword">foreach</span> <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$n</span> (<span class="sigil">@numbers</span>) {
+        <span class="sigil">$total</span> += <span class="sigil">$n</span>;
+    }
+    <span class="keyword">return</span> <span class="sigil">$total</span>;
+}
+
+<span class="func">say</span>(<span class="func">sum</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>));         <span class="comment"># 6</span>
+<span class="func">say</span>(<span class="func">sum</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>)); <span class="comment"># 15</span></code></pre>
+
+            <h2>Function References</h2>
+
+            <p>Get a reference to a named function with <code>\&funcname</code>:</p>
+
+            <pre><code><span class="keyword">func</span> <span class="func">double</span>(<span class="type">int</span> <span class="sigil">$n</span>) <span class="type">int</span> {
+    <span class="keyword">return</span> <span class="sigil">$n</span> * <span class="number">2</span>;
+}
+
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$ref</span> = \&<span class="func">double</span>;
+<span class="func">say</span>(<span class="sigil">$ref</span>->(<span class="number">10</span>));  <span class="comment"># 20</span></code></pre>
+
+            <h2>Recursion</h2>
+
+            <pre><code><span class="keyword">func</span> <span class="func">factorial</span>(<span class="type">int</span> <span class="sigil">$n</span>) <span class="type">int</span> {
+    <span class="keyword">if</span> (<span class="sigil">$n</span> <= <span class="number">1</span>) {
+        <span class="keyword">return</span> <span class="number">1</span>;
+    }
+    <span class="keyword">return</span> <span class="sigil">$n</span> * <span class="func">factorial</span>(<span class="sigil">$n</span> - <span class="number">1</span>);
+}
+
+<span class="func">say</span>(<span class="func">factorial</span>(<span class="number">5</span>));  <span class="comment"># 120</span>
+
+<span class="keyword">func</span> <span class="func">fibonacci</span>(<span class="type">int</span> <span class="sigil">$n</span>) <span class="type">int</span> {
+    <span class="keyword">if</span> (<span class="sigil">$n</span> <= <span class="number">1</span>) {
+        <span class="keyword">return</span> <span class="sigil">$n</span>;
+    }
+    <span class="keyword">return</span> <span class="func">fibonacci</span>(<span class="sigil">$n</span> - <span class="number">1</span>) + <span class="func">fibonacci</span>(<span class="sigil">$n</span> - <span class="number">2</span>);
+}</code></pre>
+
+            <h2>External Functions (C Interop)</h2>
+
+            <p>Declare external C functions with <code>extern</code>:</p>
+
+            <pre><code><span class="comment"># Declare external C function</span>
+<span class="keyword">extern</span> <span class="keyword">func</span> <span class="func">my_c_function</span>(<span class="type">int</span> <span class="sigil">$arg</span>) <span class="type">int</span>;
+
+<span class="comment"># Call it like any other function</span>
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$result</span> = <span class="func">my_c_function</span>(<span class="number">42</span>);</code></pre>
+
+            <h2>Signal Handlers</h2>
+
+            <p>Functions can be used as signal handlers:</p>
+
+            <pre><code><span class="keyword">func</span> <span class="func">handle_sigint</span>() <span class="type">void</span> {
+    <span class="func">say</span>(<span class="string">"Caught SIGINT!"</span>);
+    <span class="func">sys::exit</span>(<span class="number">0</span>);
+}
+
+<span class="comment"># Register the handler</span>
+<span class="func">sys::signal</span>(<span class="string">"INT"</span>, \&<span class="func">handle_sigint</span>);
+
+<span class="comment"># Or ignore signals</span>
+<span class="func">sys::signal</span>(<span class="string">"PIPE"</span>, <span class="string">"IGNORE"</span>);</code></pre>
+
+            <h2>Best Practices</h2>
+
+            <div class="info-box">
+                <strong>Function Design Tips</strong>
+                <ul>
+                    <li>Use specific types when possible, <code>scalar</code> only when needed</li>
+                    <li>Keep functions small and focused on one task</li>
+                    <li>Use descriptive names: <code>calculate_total</code> not <code>calc</code></li>
+                    <li>Document complex functions with comments</li>
+                </ul>
+            </div>
+
+            <div class="page-nav">
+                <a href="types.html">
+                    <span class="label">&larr; Previous</span>
+                    <span class="title">Types & Variables</span>
+                </a>
+                <a href="control-flow.html" class="next">
+                    <span class="label">Next &rarr;</span>
+                    <span class="title">Control Flow</span>
+                </a>
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <p><a href="../index.html">Strada</a> - A strongly-typed language inspired by Perl</p>
+    </footer>
+</body>
+</html>

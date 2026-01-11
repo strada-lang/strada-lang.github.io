@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cannoli Web Framework - Strada Documentation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <a href="../index.html" class="logo">Strada<span>Lang</span></a>
+        <ul>
+            <li><a href="quickstart.html">QuickStart</a></li>
+            <li><a href="index.html">Docs</a></li>
+            <li><a href="reference.html">Reference</a></li>
+            <li><a href="https://github.com/strada-lang/strada-lang">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h3>Getting Started</h3>
+            <ul>
+                <li><a href="quickstart.html">QuickStart</a></li>
+                <li><a href="index.html">Documentation</a></li>
+            </ul>
+            <h3>Language Guide</h3>
+            <ul>
+                <li><a href="basics.html">Language Basics</a></li>
+                <li><a href="types.html">Types & Variables</a></li>
+                <li><a href="functions.html">Functions</a></li>
+                <li><a href="control-flow.html">Control Flow</a></li>
+                <li><a href="oop.html">Object-Oriented Programming</a></li>
+            </ul>
+            <h3>Reference</h3>
+            <ul>
+                <li><a href="reference.html">Built-in Functions</a></li>
+                <li><a href="cannoli.html" class="active">Cannoli Web Framework</a></li>
+            </ul>
+        </aside>
+
+        <main class="content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a> / <a href="index.html">Docs</a> / Cannoli
+            </div>
+
+            <h1>Cannoli <span>Web Framework</span></h1>
+            <p class="subtitle">Build web applications with Strada's built-in web framework.</p>
+
+            <h2>Overview</h2>
+
+            <p>Cannoli is Strada's built-in web framework for building HTTP servers. It provides:</p>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h4>Routing</h4>
+                    <p>URL path matching and HTTP method handling</p>
+                </div>
+                <div class="card">
+                    <h4>Request Parsing</h4>
+                    <p>Query params, form data, JSON bodies, headers, cookies</p>
+                </div>
+                <div class="card">
+                    <h4>Response Building</h4>
+                    <p>JSON, HTML, redirects, custom headers, cookies</p>
+                </div>
+                <div class="card">
+                    <h4>File Uploads</h4>
+                    <p>Multipart form-data parsing for file uploads</p>
+                </div>
+                <div class="card">
+                    <h4>SSL/TLS</h4>
+                    <p>HTTPS support with certificate configuration</p>
+                </div>
+                <div class="card">
+                    <h4>Static Files</h4>
+                    <p>Built-in static file serving with directory listing</p>
+                </div>
+            </div>
+
+            <h2>Quick Start</h2>
+
+            <pre><code><span class="keyword">func</span> <span class="func">handle</span>(<span class="type">scalar</span> <span class="sigil">$c</span>) <span class="type">hash</span> {
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$path</span> = <span class="sigil">$c</span>-><span class="func">path</span>();
+
+    <span class="keyword">if</span> (<span class="sigil">$path</span> eq <span class="string">"/"</span>) {
+        <span class="keyword">return</span> <span class="sigil">$c</span>-><span class="func">json</span>({
+            <span class="string">"message"</span> => <span class="string">"Hello, Cannoli!"</span>
+        });
+    }
+
+    <span class="keyword">if</span> (<span class="sigil">$path</span> eq <span class="string">"/greet"</span>) {
+        <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$name</span> = <span class="sigil">$c</span>-><span class="func">param</span>(<span class="string">"name"</span>);
+        <span class="keyword">if</span> (<span class="sigil">$name</span> eq <span class="string">""</span>) {
+            <span class="sigil">$name</span> = <span class="string">"World"</span>;
+        }
+        <span class="keyword">return</span> <span class="sigil">$c</span>-><span class="func">text</span>(<span class="string">"Hello, "</span> . <span class="sigil">$name</span> . <span class="string">"!"</span>);
+    }
+
+    <span class="keyword">return</span> <span class="sigil">$c</span>-><span class="func">not_found</span>();
+}
+
+<span class="keyword">func</span> <span class="func">main</span>() <span class="type">void</span> {
+    <span class="func">Cannoli::run</span>(<span class="number">8080</span>, \&<span class="func">handle</span>);
+}</code></pre>
+
+            <p>Run with:</p>
+            <pre><code>./strada -r myapp.strada</code></pre>
+
+            <p>Visit <code>http://localhost:8080/</code> to see your app.</p>
+
+            <h2>The Cannoli Context Object</h2>
+
+            <p>Every request handler receives a Cannoli context object (<code>$c</code>) with methods for accessing request data and building responses.</p>
+
+            <h3>Request Methods</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Method</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>$c->path()</code></td><td>Get request path (e.g., "/users")</td></tr>
+                    <tr><td><code>$c->method()</code></td><td>Get HTTP method (GET, POST, etc.)</td></tr>
+                    <tr><td><code>$c->param($name)</code></td><td>Get query/form parameter</td></tr>
+                    <tr><td><code>$c->params()</code></td><td>Get all parameters as hash</td></tr>
+                    <tr><td><code>$c->body()</code></td><td>Get raw request body</td></tr>
+                    <tr><td><code>$c->json_body()</code></td><td>Parse body as JSON</td></tr>
+                    <tr><td><code>$c->header($name)</code></td><td>Get request header</td></tr>
+                    <tr><td><code>$c->headers()</code></td><td>Get all headers as hash</td></tr>
+                    <tr><td><code>$c->cookie($name)</code></td><td>Get cookie value</td></tr>
+                    <tr><td><code>$c->cookies()</code></td><td>Get all cookies as hash</td></tr>
+                    <tr><td><code>$c->user_agent()</code></td><td>Get User-Agent header</td></tr>
+                    <tr><td><code>$c->host()</code></td><td>Get Host header</td></tr>
+                    <tr><td><code>$c->remote_addr()</code></td><td>Get client IP address</td></tr>
+                    <tr><td><code>$c->is_ajax()</code></td><td>Check for XMLHttpRequest</td></tr>
+                    <tr><td><code>$c->accepts_json()</code></td><td>Check Accept header for JSON</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Response Methods</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Method</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>$c->status($code)</code></td><td>Set HTTP status code</td></tr>
+                    <tr><td><code>$c->content_type($type)</code></td><td>Set Content-Type header</td></tr>
+                    <tr><td><code>$c->set_header($name, $val)</code></td><td>Set response header</td></tr>
+                    <tr><td><code>$c->set_cookie($name, $val, $opts)</code></td><td>Set cookie</td></tr>
+                    <tr><td><code>$c->write_body($data)</code></td><td>Write to response body</td></tr>
+                    <tr><td><code>$c->build_response()</code></td><td>Build final response hash</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Response Shortcuts</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Method</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>$c->json($data)</code></td><td>Return JSON response (200)</td></tr>
+                    <tr><td><code>$c->text($str)</code></td><td>Return plain text response</td></tr>
+                    <tr><td><code>$c->html($str)</code></td><td>Return HTML response</td></tr>
+                    <tr><td><code>$c->redirect($url)</code></td><td>Redirect (302)</td></tr>
+                    <tr><td><code>$c->redirect_permanent($url)</code></td><td>Redirect (301)</td></tr>
+                    <tr><td><code>$c->not_found()</code></td><td>Return 404 response</td></tr>
+                    <tr><td><code>$c->error($code, $msg)</code></td><td>Return error response</td></tr>
+                </tbody>
+            </table>
+
+            <h2>Routing Examples</h2>
+
+            <pre><code><span class="keyword">func</span> <span class="func">handle</span>(<span class="type">scalar</span> <span class="sigil">$c</span>) <span class="type">hash</span> {
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$path</span> = <span class="sigil">$c</span>-><span class="func">path</span>();
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$method</span> = <span class="sigil">$c</span>-><span class="func">method</span>();
+
+    <span class="comment"># Static routes</span>
+    <span class="keyword">if</span> (<span class="sigil">$path</span> eq <span class="string">"/"</span>) {
+        <span class="keyword">return</span> <span class="sigil">$c</span>-><span class="func">html</span>(<span class="string">"&lt;h1&gt;Welcome&lt;/h1&gt;"</span>);
+    }
+
+    <span class="comment"># Method-based routing</span>
+    <span class="keyword">if</span> (<span class="sigil">$path</span> eq <span class="string">"/users"</span>) {
+        <span class="keyword">if</span> (<span class="sigil">$method</span> eq <span class="string">"GET"</span>) {
+            <span class="keyword">return</span> <span class="func">list_users</span>(<span class="sigil">$c</span>);
+        }
+        <span class="keyword">if</span> (<span class="sigil">$method</span> eq <span class="string">"POST"</span>) {
+            <span class="keyword">return</span> <span class="func">create_user</span>(<span class="sigil">$c</span>);
+        }
+    }
+
+    <span class="comment"># Path matching with regex</span>
+    <span class="keyword">if</span> (<span class="sigil">$path</span> =~ /^\/users\/([0-9]+)$/) {
+        <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$id</span> = $1;
+        <span class="keyword">return</span> <span class="func">get_user</span>(<span class="sigil">$c</span>, <span class="sigil">$id</span>);
+    }
+
+    <span class="comment"># Path prefix matching</span>
+    <span class="keyword">if</span> (<span class="sigil">$path</span> =~ /^\/api\//) {
+        <span class="keyword">return</span> <span class="func">handle_api</span>(<span class="sigil">$c</span>);
+    }
+
+    <span class="keyword">return</span> <span class="sigil">$c</span>-><span class="func">not_found</span>();
+}</code></pre>
+
+            <h2>Request Data</h2>
+
+            <h3>Query Parameters</h3>
+
+            <pre><code><span class="comment"># GET /search?q=hello&limit=10</span>
+
+<span class="keyword">func</span> <span class="func">handle_search</span>(<span class="type">scalar</span> <span class="sigil">$c</span>) <span class="type">hash</span> {
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$query</span> = <span class="sigil">$c</span>-><span class="func">param</span>(<span class="string">"q"</span>);
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$limit</span> = <span class="sigil">$c</span>-><span class="func">param</span>(<span class="string">"limit"</span>);
+
+    <span class="keyword">if</span> (<span class="sigil">$limit</span> eq <span class="string">""</span>) {
+        <span class="sigil">$limit</span> = <span class="string">"20"</span>;  <span class="comment"># Default value</span>
+    }
+
+    <span class="keyword">return</span> <span class="sigil">$c</span>-><span class="func">json</span>({
+        <span class="string">"query"</span> => <span class="sigil">$query</span>,
+        <span class="string">"limit"</span> => <span class="func">int</span>(<span class="sigil">$limit</span>)
+    });
+}</code></pre>
+
+            <h3>JSON Body</h3>
+
+            <pre><code><span class="comment"># POST /api/users with JSON body</span>
+
+<span class="keyword">func</span> <span class="func">create_user</span>(<span class="type">scalar</span> <span class="sigil">$c</span>) <span class="type">hash</span> {
+    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%data</span> = <span class="sigil">$c</span>-><span class="func">json_body</span>();
+
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$name</span> = <span class="sigil">$data</span>{<span class="string">"name"</span>};
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$email</span> = <span class="sigil">$data</span>{<span class="string">"email"</span>};
+
+    <span class="keyword">if</span> (<span class="sigil">$name</span> eq <span class="string">""</span> || <span class="sigil">$email</span> eq <span class="string">""</span>) {
+        <span class="keyword">return</span> <span class="sigil">$c</span>-><span class="func">error</span>(<span class="number">400</span>, <span class="string">"Name and email required"</span>);
+    }
+
+    <span class="comment"># Save user...</span>
+
+    <span class="sigil">$c</span>-><span class="func">status</span>(<span class="number">201</span>);
+    <span class="keyword">return</span> <span class="sigil">$c</span>-><span class="func">json</span>({
+        <span class="string">"id"</span> => <span class="number">123</span>,
+        <span class="string">"name"</span> => <span class="sigil">$name</span>,
+        <span class="string">"email"</span> => <span class="sigil">$email</span>
+    });
+}</code></pre>
+
+            <h3>Form Data</h3>
+
+            <pre><code><span class="comment"># POST /login with form data</span>
+
+<span class="keyword">func</span> <span class="func">handle_login</span>(<span class="type">scalar</span> <span class="sigil">$c</span>) <span class="type">hash</span> {
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$username</span> = <span class="sigil">$c</span>-><span class="func">param</span>(<span class="string">"username"</span>);
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$password</span> = <span class="sigil">$c</span>-><span class="func">param</span>(<span class="string">"password"</span>);
+
+    <span class="keyword">if</span> (<span class="func">authenticate</span>(<span class="sigil">$username</span>, <span class="sigil">$password</span>)) {
+        <span class="sigil">$c</span>-><span class="func">set_cookie</span>(<span class="string">"session"</span>, <span class="string">"abc123"</span>, <span class="string">"Path=/; HttpOnly"</span>);
+        <span class="keyword">return</span> <span class="sigil">$c</span>-><span class="func">redirect</span>(<span class="string">"/dashboard"</span>);
+    }
+
+    <span class="keyword">return</span> <span class="sigil">$c</span>-><span class="func">error</span>(<span class="number">401</span>, <span class="string">"Invalid credentials"</span>);
+}</code></pre>
+
+            <h2>File Uploads</h2>
+
+            <pre><code><span class="keyword">func</span> <span class="func">handle_upload</span>(<span class="type">scalar</span> <span class="sigil">$c</span>) <span class="type">hash</span> {
+    <span class="keyword">if</span> (<span class="sigil">$c</span>-><span class="func">has_file</span>(<span class="string">"avatar"</span>) == <span class="number">0</span>) {
+        <span class="keyword">return</span> <span class="sigil">$c</span>-><span class="func">error</span>(<span class="number">400</span>, <span class="string">"No file uploaded"</span>);
+    }
+
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$filename</span> = <span class="sigil">$c</span>-><span class="func">file_name</span>(<span class="string">"avatar"</span>);
+    <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$size</span> = <span class="sigil">$c</span>-><span class="func">file_size</span>(<span class="string">"avatar"</span>);
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$content_type</span> = <span class="sigil">$c</span>-><span class="func">file_type</span>(<span class="string">"avatar"</span>);
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$content</span> = <span class="sigil">$c</span>-><span class="func">file_content</span>(<span class="string">"avatar"</span>);
+
+    <span class="comment"># Validate file type</span>
+    <span class="keyword">if</span> (<span class="sigil">$content_type</span> !~ /^image\//) {
+        <span class="keyword">return</span> <span class="sigil">$c</span>-><span class="func">error</span>(<span class="number">400</span>, <span class="string">"Only images allowed"</span>);
+    }
+
+    <span class="comment"># Save file</span>
+    <span class="func">spew</span>(<span class="string">"/uploads/"</span> . <span class="sigil">$filename</span>, <span class="sigil">$content</span>);
+
+    <span class="keyword">return</span> <span class="sigil">$c</span>-><span class="func">json</span>({
+        <span class="string">"filename"</span> => <span class="sigil">$filename</span>,
+        <span class="string">"size"</span> => <span class="sigil">$size</span>,
+        <span class="string">"type"</span> => <span class="sigil">$content_type</span>
+    });
+}</code></pre>
+
+            <p>Test with curl:</p>
+            <pre><code>curl -F "avatar=@photo.jpg" http://localhost:8080/upload</code></pre>
+
+            <h2>Headers and Cookies</h2>
+
+            <h3>Request Headers</h3>
+
+            <pre><code><span class="keyword">func</span> <span class="func">handle</span>(<span class="type">scalar</span> <span class="sigil">$c</span>) <span class="type">hash</span> {
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$auth</span> = <span class="sigil">$c</span>-><span class="func">header</span>(<span class="string">"Authorization"</span>);
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$ua</span> = <span class="sigil">$c</span>-><span class="func">user_agent</span>();
+
+    <span class="keyword">if</span> (<span class="sigil">$auth</span> eq <span class="string">""</span>) {
+        <span class="keyword">return</span> <span class="sigil">$c</span>-><span class="func">error</span>(<span class="number">401</span>, <span class="string">"Authorization required"</span>);
+    }
+
+    <span class="comment"># Validate token...</span>
+    <span class="keyword">return</span> <span class="sigil">$c</span>-><span class="func">json</span>({<span class="string">"ok"</span> => <span class="number">1</span>});
+}</code></pre>
+
+            <h3>Response Headers</h3>
+
+            <pre><code><span class="keyword">func</span> <span class="func">handle</span>(<span class="type">scalar</span> <span class="sigil">$c</span>) <span class="type">hash</span> {
+    <span class="comment"># Set custom headers</span>
+    <span class="sigil">$c</span>-><span class="func">set_header</span>(<span class="string">"X-Custom-Header"</span>, <span class="string">"value"</span>);
+
+    <span class="comment"># CORS headers</span>
+    <span class="sigil">$c</span>-><span class="func">set_header</span>(<span class="string">"Access-Control-Allow-Origin"</span>, <span class="string">"*"</span>);
+
+    <span class="comment"># Cache control</span>
+    <span class="sigil">$c</span>-><span class="func">set_header</span>(<span class="string">"Cache-Control"</span>, <span class="string">"max-age=3600"</span>);
+
+    <span class="keyword">return</span> <span class="sigil">$c</span>-><span class="func">json</span>({<span class="string">"data"</span> => <span class="string">"here"</span>});
+}</code></pre>
+
+            <h3>Cookies</h3>
+
+            <pre><code><span class="comment"># Reading cookies</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$session</span> = <span class="sigil">$c</span>-><span class="func">cookie</span>(<span class="string">"session"</span>);
+
+<span class="comment"># Setting cookies</span>
+<span class="sigil">$c</span>-><span class="func">set_cookie</span>(<span class="string">"session"</span>, <span class="string">"abc123"</span>, <span class="string">"Path=/; HttpOnly; Secure"</span>);
+
+<span class="comment"># Delete cookie (set expiry in past)</span>
+<span class="sigil">$c</span>-><span class="func">set_cookie</span>(<span class="string">"session"</span>, <span class="string">""</span>, <span class="string">"Path=/; Max-Age=0"</span>);</code></pre>
+
+            <h2>Chunked Responses (Streaming)</h2>
+
+            <pre><code><span class="keyword">func</span> <span class="func">handle_stream</span>(<span class="type">scalar</span> <span class="sigil">$c</span>) <span class="type">hash</span> {
+    <span class="sigil">$c</span>-><span class="func">status</span>(<span class="number">200</span>);
+    <span class="sigil">$c</span>-><span class="func">content_type</span>(<span class="string">"text/plain"</span>);
+    <span class="sigil">$c</span>-><span class="func">start_chunked</span>();  <span class="comment"># Sends headers</span>
+
+    <span class="comment"># Stream data in chunks</span>
+    <span class="keyword">for</span> (<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$i</span> = <span class="number">0</span>; <span class="sigil">$i</span> < <span class="number">5</span>; <span class="sigil">$i</span>++) {
+        <span class="sigil">$c</span>-><span class="func">write_chunk</span>(<span class="string">"Chunk "</span> . <span class="sigil">$i</span> . <span class="string">"\n"</span>);
+        <span class="func">sys::sleep</span>(<span class="number">1</span>);
+    }
+
+    <span class="sigil">$c</span>-><span class="func">end_chunked</span>();  <span class="comment"># Sends final 0\r\n\r\n</span>
+    <span class="keyword">return</span> <span class="sigil">$c</span>-><span class="func">build_response</span>();
+}</code></pre>
+
+            <h2>HTTPS/SSL</h2>
+
+            <p>Cannoli supports HTTPS with certificate configuration:</p>
+
+            <pre><code><span class="comment"># Run with SSL</span>
+./cannoli --ssl --cert cert.pem --key key.pem --port 8443</code></pre>
+
+            <p>Or programmatically:</p>
+
+            <pre><code><span class="keyword">func</span> <span class="func">main</span>() <span class="type">void</span> {
+    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%opts</span> = {
+        <span class="string">"port"</span> => <span class="number">8443</span>,
+        <span class="string">"ssl"</span> => <span class="number">1</span>,
+        <span class="string">"cert"</span> => <span class="string">"/path/to/cert.pem"</span>,
+        <span class="string">"key"</span> => <span class="string">"/path/to/key.pem"</span>
+    };
+    <span class="func">Cannoli::run_with_opts</span>(<span class="sigil">%opts</span>, \&<span class="func">handle</span>);
+}</code></pre>
+
+            <h2>Static File Server</h2>
+
+            <p>Serve static files with directory listing:</p>
+
+            <pre><code><span class="comment"># Command line</span>
+./cannoli --static /var/www/html --listing --port 8080
+
+<span class="comment"># Shorthand (positional argument)</span>
+./cannoli /var/www/html --listing</code></pre>
+
+            <h2>Complete Example</h2>
+
+            <pre><code><span class="comment"># A simple JSON API</span>
+
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@todos</span> = [];
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$next_id</span> = <span class="number">1</span>;
+
+<span class="keyword">func</span> <span class="func">handle</span>(<span class="type">scalar</span> <span class="sigil">$c</span>) <span class="type">hash</span> {
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$path</span> = <span class="sigil">$c</span>-><span class="func">path</span>();
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$method</span> = <span class="sigil">$c</span>-><span class="func">method</span>();
+
+    <span class="comment"># CORS for all requests</span>
+    <span class="sigil">$c</span>-><span class="func">set_header</span>(<span class="string">"Access-Control-Allow-Origin"</span>, <span class="string">"*"</span>);
+
+    <span class="comment"># List all todos</span>
+    <span class="keyword">if</span> (<span class="sigil">$path</span> eq <span class="string">"/todos"</span> && <span class="sigil">$method</span> eq <span class="string">"GET"</span>) {
+        <span class="keyword">return</span> <span class="sigil">$c</span>-><span class="func">json</span>({ <span class="string">"todos"</span> => <span class="sigil">@todos</span> });
+    }
+
+    <span class="comment"># Create todo</span>
+    <span class="keyword">if</span> (<span class="sigil">$path</span> eq <span class="string">"/todos"</span> && <span class="sigil">$method</span> eq <span class="string">"POST"</span>) {
+        <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%body</span> = <span class="sigil">$c</span>-><span class="func">json_body</span>();
+        <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%todo</span> = {
+            <span class="string">"id"</span> => <span class="sigil">$next_id</span>,
+            <span class="string">"title"</span> => <span class="sigil">$body</span>{<span class="string">"title"</span>},
+            <span class="string">"done"</span> => <span class="number">0</span>
+        };
+        <span class="sigil">$next_id</span>++;
+        <span class="func">push</span>(<span class="sigil">@todos</span>, <span class="sigil">%todo</span>);
+        <span class="sigil">$c</span>-><span class="func">status</span>(<span class="number">201</span>);
+        <span class="keyword">return</span> <span class="sigil">$c</span>-><span class="func">json</span>(<span class="sigil">%todo</span>);
+    }
+
+    <span class="keyword">return</span> <span class="sigil">$c</span>-><span class="func">not_found</span>();
+}
+
+<span class="keyword">func</span> <span class="func">main</span>() <span class="type">void</span> {
+    <span class="func">say</span>(<span class="string">"Starting server on http://localhost:8080"</span>);
+    <span class="func">Cannoli::run</span>(<span class="number">8080</span>, \&<span class="func">handle</span>);
+}</code></pre>
+
+            <div class="page-nav">
+                <a href="reference.html">
+                    <span class="label">&larr; Previous</span>
+                    <span class="title">Built-in Functions</span>
+                </a>
+                <a href="index.html" class="next">
+                    <span class="label">Back to &rarr;</span>
+                    <span class="title">Documentation</span>
+                </a>
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <p><a href="../index.html">Strada</a> - A strongly-typed language inspired by Perl</p>
+    </footer>
+</body>
+</html>

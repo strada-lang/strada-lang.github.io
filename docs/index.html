@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation - Strada</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <a href="../index.html" class="logo">Strada<span>Lang</span></a>
+        <ul>
+            <li><a href="quickstart.html">QuickStart</a></li>
+            <li><a href="index.html">Docs</a></li>
+            <li><a href="reference.html">Reference</a></li>
+            <li><a href="https://github.com/strada-lang/strada-lang">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h3>Getting Started</h3>
+            <ul>
+                <li><a href="quickstart.html">QuickStart</a></li>
+                <li><a href="index.html" class="active">Documentation</a></li>
+            </ul>
+            <h3>Language Guide</h3>
+            <ul>
+                <li><a href="basics.html">Language Basics</a></li>
+                <li><a href="types.html">Types & Variables</a></li>
+                <li><a href="functions.html">Functions</a></li>
+                <li><a href="control-flow.html">Control Flow</a></li>
+                <li><a href="oop.html">Object-Oriented Programming</a></li>
+            </ul>
+            <h3>Reference</h3>
+            <ul>
+                <li><a href="reference.html">Built-in Functions</a></li>
+                <li><a href="cannoli.html">Cannoli Web Framework</a></li>
+            </ul>
+        </aside>
+
+        <main class="content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a> / Documentation
+            </div>
+
+            <h1>Strada <span>Documentation</span></h1>
+            <p class="subtitle">Everything you need to master Strada programming.</p>
+
+            <h2>Getting Started</h2>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h4>QuickStart Guide</h4>
+                    <p>Install Strada and write your first program in 5 minutes.</p>
+                    <p><a href="quickstart.html">Get started &rarr;</a></p>
+                </div>
+                <div class="card">
+                    <h4>Language Basics</h4>
+                    <p>Learn syntax, operators, and fundamental concepts.</p>
+                    <p><a href="basics.html">Learn basics &rarr;</a></p>
+                </div>
+            </div>
+
+            <h2>Language Guide</h2>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h4>Types & Variables</h4>
+                    <p>Understand Strada's type system: int, num, str, array, hash, and sigils.</p>
+                    <p><a href="types.html">Read more &rarr;</a></p>
+                </div>
+                <div class="card">
+                    <h4>Functions</h4>
+                    <p>Define functions, use closures, and work with references.</p>
+                    <p><a href="functions.html">Read more &rarr;</a></p>
+                </div>
+                <div class="card">
+                    <h4>Control Flow</h4>
+                    <p>Conditionals, loops, foreach, and exception handling.</p>
+                    <p><a href="control-flow.html">Read more &rarr;</a></p>
+                </div>
+                <div class="card">
+                    <h4>Object-Oriented Programming</h4>
+                    <p>Classes, objects, methods, and inheritance with packages.</p>
+                    <p><a href="oop.html">Read more &rarr;</a></p>
+                </div>
+            </div>
+
+            <h2>Reference</h2>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h4>Built-in Functions</h4>
+                    <p>Complete reference for all built-in functions organized by category.</p>
+                    <p><a href="reference.html">View reference &rarr;</a></p>
+                </div>
+                <div class="card">
+                    <h4>Cannoli Web Framework</h4>
+                    <p>Build web applications with routing, file uploads, SSL, and more.</p>
+                    <p><a href="cannoli.html">Read docs &rarr;</a></p>
+                </div>
+            </div>
+
+            <h2>Compilation</h2>
+
+            <p>Strada compiles to C, which is then compiled to native executables:</p>
+
+            <pre><code><span class="comment"># One-step compilation (recommended)</span>
+./strada program.strada           <span class="comment"># Creates ./program executable</span>
+./strada -r program.strada        <span class="comment"># Compile and run</span>
+./strada -c program.strada        <span class="comment"># Keep generated .c file</span>
+./strada -g program.strada        <span class="comment"># Include debug symbols</span>
+./strada --shared lib.strada      <span class="comment"># Create shared library (.so)</span>
+
+<span class="comment"># Two-step compilation (manual)</span>
+./stradac input.strada output.c
+gcc -o output output.c runtime/strada_runtime.c -Iruntime -ldl -lm
+./output</code></pre>
+
+            <h2>Project Structure</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Directory</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>compiler/</code></td>
+                        <td>Self-hosting compiler source (Lexer, Parser, AST, CodeGen)</td>
+                    </tr>
+                    <tr>
+                        <td><code>runtime/</code></td>
+                        <td>C runtime library (StradaValue, reference counting, built-ins)</td>
+                    </tr>
+                    <tr>
+                        <td><code>bootstrap/</code></td>
+                        <td>Bootstrap compiler in C (used only to build self-hosting compiler)</td>
+                    </tr>
+                    <tr>
+                        <td><code>examples/</code></td>
+                        <td>Example programs demonstrating language features</td>
+                    </tr>
+                    <tr>
+                        <td><code>cannoli/</code></td>
+                        <td>Web framework source and examples</td>
+                    </tr>
+                    <tr>
+                        <td><code>lib/</code></td>
+                        <td>Standard library modules (ssl, etc.)</td>
+                    </tr>
+                    <tr>
+                        <td><code>t/</code></td>
+                        <td>Test suite (93 tests)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Testing</h2>
+
+            <pre><code><span class="comment"># Run all tests</span>
+make test-suite
+
+<span class="comment"># Verbose output</span>
+make test-suite V=1
+
+<span class="comment"># TAP format for CI/CD</span>
+make test-suite TAP=1
+
+<span class="comment"># Run specific tests</span>
+./t/run_tests.sh string     <span class="comment"># Tests matching "string"</span>
+./t/run_tests.sh -v oop     <span class="comment"># Verbose OOP tests</span></code></pre>
+
+        </main>
+    </div>
+
+    <footer>
+        <p><a href="../index.html">Strada</a> - A strongly-typed language inspired by Perl</p>
+        <p style="margin-top: 0.5rem; font-size: 0.85rem;">Licensed under <a href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html">GPLv2</a> | <a href="https://github.com/strada-lang/strada-lang">GitHub</a></p>
+    </footer>
+</body>
+</html>

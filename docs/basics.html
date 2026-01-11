@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Language Basics - Strada Documentation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <a href="../index.html" class="logo">Strada<span>Lang</span></a>
+        <ul>
+            <li><a href="quickstart.html">QuickStart</a></li>
+            <li><a href="index.html">Docs</a></li>
+            <li><a href="reference.html">Reference</a></li>
+            <li><a href="https://github.com/strada-lang/strada-lang">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h3>Getting Started</h3>
+            <ul>
+                <li><a href="quickstart.html">QuickStart</a></li>
+                <li><a href="index.html">Documentation</a></li>
+            </ul>
+            <h3>Language Guide</h3>
+            <ul>
+                <li><a href="basics.html" class="active">Language Basics</a></li>
+                <li><a href="types.html">Types & Variables</a></li>
+                <li><a href="functions.html">Functions</a></li>
+                <li><a href="control-flow.html">Control Flow</a></li>
+                <li><a href="oop.html">Object-Oriented Programming</a></li>
+            </ul>
+            <h3>Reference</h3>
+            <ul>
+                <li><a href="reference.html">Built-in Functions</a></li>
+                <li><a href="cannoli.html">Cannoli Web Framework</a></li>
+            </ul>
+        </aside>
+
+        <main class="content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a> / <a href="index.html">Docs</a> / Language Basics
+            </div>
+
+            <h1>Language <span>Basics</span></h1>
+            <p class="subtitle">Core syntax and fundamental concepts of Strada.</p>
+
+            <h2>Program Structure</h2>
+
+            <p>A Strada program consists of function definitions. Execution begins at the <code>main</code> function:</p>
+
+            <pre><code><span class="comment"># Comments start with #</span>
+
+<span class="keyword">func</span> <span class="func">helper</span>() <span class="type">void</span> {
+    <span class="func">say</span>(<span class="string">"I'm a helper function"</span>);
+}
+
+<span class="keyword">func</span> <span class="func">main</span>() <span class="type">void</span> {
+    <span class="func">helper</span>();
+    <span class="func">say</span>(<span class="string">"Hello from main!"</span>);
+}</code></pre>
+
+            <h2>Statements</h2>
+
+            <p>Statements end with semicolons:</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$x</span> = <span class="number">10</span>;
+<span class="func">say</span>(<span class="sigil">$x</span>);
+<span class="sigil">$x</span> = <span class="sigil">$x</span> + <span class="number">1</span>;</code></pre>
+
+            <h2>Comments</h2>
+
+            <pre><code><span class="comment"># This is a single-line comment</span>
+
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$x</span> = <span class="number">42</span>;  <span class="comment"># Inline comment</span></code></pre>
+
+            <h2>Operators</h2>
+
+            <h3>Arithmetic Operators</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Operator</th>
+                        <th>Description</th>
+                        <th>Example</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>+</code></td><td>Addition</td><td><code>$a + $b</code></td></tr>
+                    <tr><td><code>-</code></td><td>Subtraction</td><td><code>$a - $b</code></td></tr>
+                    <tr><td><code>*</code></td><td>Multiplication</td><td><code>$a * $b</code></td></tr>
+                    <tr><td><code>/</code></td><td>Division</td><td><code>$a / $b</code></td></tr>
+                    <tr><td><code>%</code></td><td>Modulo</td><td><code>$a % $b</code></td></tr>
+                    <tr><td><code>**</code></td><td>Exponentiation</td><td><code>$a ** $b</code></td></tr>
+                </tbody>
+            </table>
+
+            <h3>Comparison Operators</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Numeric</th>
+                        <th>String</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>==</code></td><td><code>eq</code></td><td>Equal</td></tr>
+                    <tr><td><code>!=</code></td><td><code>ne</code></td><td>Not equal</td></tr>
+                    <tr><td><code>&lt;</code></td><td><code>lt</code></td><td>Less than</td></tr>
+                    <tr><td><code>&gt;</code></td><td><code>gt</code></td><td>Greater than</td></tr>
+                    <tr><td><code>&lt;=</code></td><td><code>le</code></td><td>Less than or equal</td></tr>
+                    <tr><td><code>&gt;=</code></td><td><code>ge</code></td><td>Greater than or equal</td></tr>
+                </tbody>
+            </table>
+
+            <div class="info-box warning">
+                <strong>Important</strong>
+                Use <code>eq</code>/<code>ne</code> for string comparison, not <code>==</code>/<code>!=</code>.
+                Using numeric operators on strings compares them numerically.
+            </div>
+
+            <h3>Logical Operators</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Operator</th>
+                        <th>Description</th>
+                        <th>Example</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>&&</code></td><td>Logical AND</td><td><code>$a && $b</code></td></tr>
+                    <tr><td><code>||</code></td><td>Logical OR</td><td><code>$a || $b</code></td></tr>
+                    <tr><td><code>!</code></td><td>Logical NOT</td><td><code>!$a</code></td></tr>
+                    <tr><td><code>and</code></td><td>Low-precedence AND</td><td><code>$a and $b</code></td></tr>
+                    <tr><td><code>or</code></td><td>Low-precedence OR</td><td><code>$a or $b</code></td></tr>
+                    <tr><td><code>not</code></td><td>Low-precedence NOT</td><td><code>not $a</code></td></tr>
+                </tbody>
+            </table>
+
+            <h3>String Operators</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Operator</th>
+                        <th>Description</th>
+                        <th>Example</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>.</code></td><td>Concatenation</td><td><code>"Hello" . " World"</code></td></tr>
+                    <tr><td><code>x</code></td><td>Repetition</td><td><code>"ab" x 3</code> → <code>"ababab"</code></td></tr>
+                </tbody>
+            </table>
+
+            <h3>Bitwise Operators</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Operator</th>
+                        <th>Description</th>
+                        <th>Example</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>&amp;</code></td><td>Bitwise AND</td><td><code>$a &amp; $b</code></td></tr>
+                    <tr><td><code>|</code></td><td>Bitwise OR</td><td><code>$a | $b</code></td></tr>
+                    <tr><td><code>^</code></td><td>Bitwise XOR</td><td><code>$a ^ $b</code></td></tr>
+                    <tr><td><code>~</code></td><td>Bitwise NOT</td><td><code>~$a</code></td></tr>
+                    <tr><td><code>&lt;&lt;</code></td><td>Left shift</td><td><code>$a &lt;&lt; 2</code></td></tr>
+                    <tr><td><code>&gt;&gt;</code></td><td>Right shift</td><td><code>$a &gt;&gt; 2</code></td></tr>
+                </tbody>
+            </table>
+
+            <h3>Increment/Decrement</h3>
+
+            <pre><code><span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$i</span> = <span class="number">0</span>;
+
+<span class="sigil">$i</span>++;    <span class="comment"># Postfix increment (returns old value)</span>
+<span class="sigil">$i</span>--;    <span class="comment"># Postfix decrement</span>
+++<span class="sigil">$i</span>;    <span class="comment"># Prefix increment (returns new value)</span>
+--<span class="sigil">$i</span>;    <span class="comment"># Prefix decrement</span></code></pre>
+
+            <h3>Assignment Operators</h3>
+
+            <pre><code><span class="sigil">$x</span> = <span class="number">10</span>;     <span class="comment"># Assignment</span>
+<span class="sigil">$x</span> += <span class="number">5</span>;    <span class="comment"># Add and assign ($x = $x + 5)</span>
+<span class="sigil">$x</span> -= <span class="number">3</span>;    <span class="comment"># Subtract and assign</span>
+<span class="sigil">$x</span> *= <span class="number">2</span>;    <span class="comment"># Multiply and assign</span>
+<span class="sigil">$x</span> /= <span class="number">4</span>;    <span class="comment"># Divide and assign</span>
+<span class="sigil">$x</span> .= <span class="string">"!"</span>;  <span class="comment"># Concatenate and assign</span></code></pre>
+
+            <h3>Ternary and Other Operators</h3>
+
+            <pre><code><span class="comment"># Ternary conditional</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$result</span> = <span class="sigil">$x</span> > <span class="number">0</span> ? <span class="string">"positive"</span> : <span class="string">"non-positive"</span>;
+
+<span class="comment"># Range operator (creates array)</span>
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@nums</span> = (<span class="number">1</span>..<span class="number">10</span>);
+
+<span class="comment"># Reference operator</span>
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$x</span> = <span class="number">42</span>;
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$ref</span> = \<span class="sigil">$x</span>;      <span class="comment"># Reference to $x</span>
+
+<span class="comment"># Function reference</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$fn</span> = &amp;<span class="func">my_function</span>;</code></pre>
+
+            <h2>Blocks</h2>
+
+            <p>Blocks are delimited by curly braces and create a new scope:</p>
+
+            <pre><code>{
+    <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$x</span> = <span class="number">10</span>;  <span class="comment"># $x only visible in this block</span>
+    <span class="func">say</span>(<span class="sigil">$x</span>);
+}
+<span class="comment"># $x is not accessible here</span></code></pre>
+
+            <h2>Truthiness</h2>
+
+            <p>Values are considered "false" if they are:</p>
+
+            <ul>
+                <li>The number <code>0</code></li>
+                <li>The empty string <code>""</code></li>
+                <li><code>undef</code></li>
+            </ul>
+
+            <p>Everything else is "true".</p>
+
+            <pre><code><span class="keyword">if</span> (<span class="sigil">$value</span>) {
+    <span class="func">say</span>(<span class="string">"Value is true"</span>);
+} <span class="keyword">else</span> {
+    <span class="func">say</span>(<span class="string">"Value is false"</span>);
+}</code></pre>
+
+            <h2>Magic Namespaces</h2>
+
+            <p>Built-in functions are organized into namespaces:</p>
+
+            <h3>Core Functions (No Namespace)</h3>
+            <p>Common functions like <code>say()</code>, <code>print()</code>, <code>push()</code>, <code>pop()</code>, <code>len()</code>, etc.</p>
+
+            <h3>math:: Namespace</h3>
+            <pre><code><span class="func">math::sin</span>(<span class="number">3.14</span>)
+<span class="func">math::cos</span>(<span class="number">0</span>)
+<span class="func">math::sqrt</span>(<span class="number">16</span>)
+<span class="func">math::pow</span>(<span class="number">2</span>, <span class="number">10</span>)
+<span class="func">math::abs</span>(-<span class="number">5</span>)
+<span class="func">math::floor</span>(<span class="number">3.7</span>)
+<span class="func">math::ceil</span>(<span class="number">3.2</span>)</code></pre>
+
+            <h3>sys:: Namespace</h3>
+            <pre><code><span class="func">sys::open</span>(<span class="string">"file.txt"</span>, <span class="string">"r"</span>)
+<span class="func">sys::read</span>(<span class="sigil">$fd</span>, <span class="number">1024</span>)
+<span class="func">sys::write</span>(<span class="sigil">$fd</span>, <span class="sigil">$data</span>)
+<span class="func">sys::close</span>(<span class="sigil">$fd</span>)
+<span class="func">sys::fork</span>()
+<span class="func">sys::exec</span>(<span class="string">"ls"</span>, [<span class="string">"-la"</span>])
+<span class="func">sys::getenv</span>(<span class="string">"PATH"</span>)
+<span class="func">sys::time</span>()</code></pre>
+
+            <h2>Regex Operations</h2>
+
+            <h3>Pattern Matching</h3>
+
+            <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$s</span> = <span class="string">"Hello World"</span>;
+
+<span class="comment"># Match</span>
+<span class="keyword">if</span> (<span class="sigil">$s</span> =~ /World/) {
+    <span class="func">say</span>(<span class="string">"Found it!"</span>);
+}
+
+<span class="comment"># Negated match</span>
+<span class="keyword">if</span> (<span class="sigil">$s</span> !~ /Goodbye/) {
+    <span class="func">say</span>(<span class="string">"Not found"</span>);
+}</code></pre>
+
+            <h3>Substitution</h3>
+
+            <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$s</span> = <span class="string">"Hello World"</span>;
+
+<span class="comment"># Replace first occurrence</span>
+<span class="sigil">$s</span> =~ s/World/Strada/;
+
+<span class="comment"># Replace all occurrences (g flag)</span>
+<span class="sigil">$s</span> =~ s/l/L/g;
+
+<span class="comment"># Case-insensitive (i flag)</span>
+<span class="sigil">$s</span> =~ s/hello/Hi/i;</code></pre>
+
+            <h2>Input/Output</h2>
+
+            <h3>Console Output</h3>
+
+            <pre><code><span class="func">say</span>(<span class="string">"With newline"</span>);      <span class="comment"># Prints with newline</span>
+<span class="func">print</span>(<span class="string">"No newline"</span>);      <span class="comment"># Prints without newline</span></code></pre>
+
+            <h3>File I/O</h3>
+
+            <pre><code><span class="comment"># Read entire file</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$content</span> = <span class="func">slurp</span>(<span class="string">"file.txt"</span>);
+
+<span class="comment"># Write to file</span>
+<span class="func">spew</span>(<span class="string">"output.txt"</span>, <span class="sigil">$content</span>);
+
+<span class="comment"># Low-level file operations</span>
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$fd</span> = <span class="func">sys::open</span>(<span class="string">"file.txt"</span>, <span class="string">"r"</span>);
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$data</span> = <span class="func">sys::read</span>(<span class="sigil">$fd</span>, <span class="number">1024</span>);
+<span class="func">sys::close</span>(<span class="sigil">$fd</span>);</code></pre>
+
+            <div class="page-nav">
+                <a href="quickstart.html">
+                    <span class="label">&larr; Previous</span>
+                    <span class="title">QuickStart</span>
+                </a>
+                <a href="types.html" class="next">
+                    <span class="label">Next &rarr;</span>
+                    <span class="title">Types & Variables</span>
+                </a>
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <p><a href="../index.html">Strada</a> - A strongly-typed language inspired by Perl</p>
+    </footer>
+</body>
+</html>

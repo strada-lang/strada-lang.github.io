@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Object-Oriented Programming - Strada Documentation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <a href="../index.html" class="logo">Strada<span>Lang</span></a>
+        <ul>
+            <li><a href="quickstart.html">QuickStart</a></li>
+            <li><a href="index.html">Docs</a></li>
+            <li><a href="reference.html">Reference</a></li>
+            <li><a href="https://github.com/strada-lang/strada-lang">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h3>Getting Started</h3>
+            <ul>
+                <li><a href="quickstart.html">QuickStart</a></li>
+                <li><a href="index.html">Documentation</a></li>
+            </ul>
+            <h3>Language Guide</h3>
+            <ul>
+                <li><a href="basics.html">Language Basics</a></li>
+                <li><a href="types.html">Types & Variables</a></li>
+                <li><a href="functions.html">Functions</a></li>
+                <li><a href="control-flow.html">Control Flow</a></li>
+                <li><a href="oop.html" class="active">Object-Oriented Programming</a></li>
+            </ul>
+            <h3>Reference</h3>
+            <ul>
+                <li><a href="reference.html">Built-in Functions</a></li>
+                <li><a href="cannoli.html">Cannoli Web Framework</a></li>
+            </ul>
+        </aside>
+
+        <main class="content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a> / <a href="index.html">Docs</a> / OOP
+            </div>
+
+            <h1>Object-Oriented <span>Programming</span></h1>
+            <p class="subtitle">Classes, objects, methods, and inheritance in Strada.</p>
+
+            <h2>Overview</h2>
+
+            <p>Strada's OOP model is inspired by Perl:</p>
+            <ul>
+                <li>Classes are defined using <code>package</code></li>
+                <li>Objects are blessed hash references</li>
+                <li>Methods are functions that take <code>$self</code> as the first parameter</li>
+                <li>Automatic method registration enables <code>$obj->method()</code> syntax</li>
+            </ul>
+
+            <h2>Defining a Class</h2>
+
+            <pre><code><span class="keyword">package</span> <span class="type">Dog</span>;
+
+<span class="comment"># Constructor</span>
+<span class="keyword">func</span> <span class="func">new</span>(<span class="type">str</span> <span class="sigil">$name</span>, <span class="type">int</span> <span class="sigil">$age</span>) <span class="type">scalar</span> {
+    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%self</span> = {
+        <span class="string">"name"</span> => <span class="sigil">$name</span>,
+        <span class="string">"age"</span> => <span class="sigil">$age</span>
+    };
+    <span class="keyword">return</span> <span class="func">bless</span>(\<span class="sigil">%self</span>, <span class="string">"Dog"</span>);
+}
+
+<span class="comment"># Method</span>
+<span class="keyword">func</span> <span class="func">speak</span>(<span class="type">scalar</span> <span class="sigil">$self</span>) <span class="type">void</span> {
+    <span class="func">say</span>(<span class="sigil">$self</span>->{<span class="string">"name"</span>} . <span class="string">" says woof!"</span>);
+}
+
+<span class="comment"># Getter method</span>
+<span class="keyword">func</span> <span class="func">get_name</span>(<span class="type">scalar</span> <span class="sigil">$self</span>) <span class="type">str</span> {
+    <span class="keyword">return</span> <span class="sigil">$self</span>->{<span class="string">"name"</span>};
+}
+
+<span class="comment"># Setter method</span>
+<span class="keyword">func</span> <span class="func">set_age</span>(<span class="type">scalar</span> <span class="sigil">$self</span>, <span class="type">int</span> <span class="sigil">$age</span>) <span class="type">void</span> {
+    <span class="sigil">$self</span>->{<span class="string">"age"</span>} = <span class="sigil">$age</span>;
+}</code></pre>
+
+            <h2>Creating and Using Objects</h2>
+
+            <pre><code><span class="keyword">func</span> <span class="func">main</span>() <span class="type">void</span> {
+    <span class="comment"># Create object using constructor</span>
+    <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$dog</span> = <span class="type">Dog</span>::<span class="func">new</span>(<span class="string">"Rex"</span>, <span class="number">3</span>);
+
+    <span class="comment"># Call methods with arrow syntax</span>
+    <span class="sigil">$dog</span>-><span class="func">speak</span>();           <span class="comment"># "Rex says woof!"</span>
+
+    <span class="comment"># Access properties</span>
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$name</span> = <span class="sigil">$dog</span>-><span class="func">get_name</span>();
+    <span class="func">say</span>(<span class="string">"Dog's name: "</span> . <span class="sigil">$name</span>);
+
+    <span class="comment"># Modify properties</span>
+    <span class="sigil">$dog</span>-><span class="func">set_age</span>(<span class="number">4</span>);
+}</code></pre>
+
+            <h2>The bless() Function</h2>
+
+            <p><code>bless()</code> associates a hash reference with a class name, turning it into an object:</p>
+
+            <pre><code><span class="comment"># bless(reference, classname) -> object</span>
+<span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%data</span> = { <span class="string">"x"</span> => <span class="number">10</span> };
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$obj</span> = <span class="func">bless</span>(\<span class="sigil">%data</span>, <span class="string">"MyClass"</span>);</code></pre>
+
+            <h2>Package Auto-Prefixing</h2>
+
+            <p>Functions inside a <code>package</code> block are automatically prefixed with the class name:</p>
+
+            <pre><code><span class="keyword">package</span> <span class="type">Animal</span>;
+
+<span class="comment"># This becomes Animal_new</span>
+<span class="keyword">func</span> <span class="func">new</span>(<span class="type">str</span> <span class="sigil">$name</span>) <span class="type">scalar</span> {
+    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%self</span> = { <span class="string">"name"</span> => <span class="sigil">$name</span> };
+    <span class="keyword">return</span> <span class="func">bless</span>(\<span class="sigil">%self</span>, <span class="string">"Animal"</span>);
+}
+
+<span class="comment"># This becomes Animal_speak</span>
+<span class="keyword">func</span> <span class="func">speak</span>(<span class="type">scalar</span> <span class="sigil">$self</span>) <span class="type">void</span> {
+    <span class="func">say</span>(<span class="sigil">$self</span>->{<span class="string">"name"</span>} . <span class="string">" makes a sound"</span>);
+}
+
+<span class="comment"># Call with either syntax:</span>
+<span class="comment"># Animal::new("Rex") or $obj->speak()</span></code></pre>
+
+            <div class="info-box">
+                <strong>Auto-Prefix Rules</strong>
+                <ul>
+                    <li>Only applies to simple packages (no <code>::</code> in name)</li>
+                    <li>Skips <code>main</code> function and <code>package main;</code></li>
+                    <li>Skips functions that already look class-prefixed (e.g., <code>Dog_speak</code>)</li>
+                    <li><code>extern</code> functions are NOT auto-prefixed</li>
+                </ul>
+            </div>
+
+            <h2>Inheritance</h2>
+
+            <p>Implement inheritance by blessing with a derived class name and calling parent methods:</p>
+
+            <pre><code><span class="keyword">package</span> <span class="type">Animal</span>;
+
+<span class="keyword">func</span> <span class="func">new</span>(<span class="type">str</span> <span class="sigil">$name</span>) <span class="type">scalar</span> {
+    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%self</span> = { <span class="string">"name"</span> => <span class="sigil">$name</span> };
+    <span class="keyword">return</span> <span class="func">bless</span>(\<span class="sigil">%self</span>, <span class="string">"Animal"</span>);
+}
+
+<span class="keyword">func</span> <span class="func">speak</span>(<span class="type">scalar</span> <span class="sigil">$self</span>) <span class="type">void</span> {
+    <span class="func">say</span>(<span class="sigil">$self</span>->{<span class="string">"name"</span>} . <span class="string">" makes a sound"</span>);
+}
+
+<span class="keyword">package</span> <span class="type">Dog</span>;
+
+<span class="keyword">func</span> <span class="func">new</span>(<span class="type">str</span> <span class="sigil">$name</span>, <span class="type">str</span> <span class="sigil">$breed</span>) <span class="type">scalar</span> {
+    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%self</span> = {
+        <span class="string">"name"</span> => <span class="sigil">$name</span>,
+        <span class="string">"breed"</span> => <span class="sigil">$breed</span>
+    };
+    <span class="keyword">return</span> <span class="func">bless</span>(\<span class="sigil">%self</span>, <span class="string">"Dog"</span>);
+}
+
+<span class="comment"># Override parent method</span>
+<span class="keyword">func</span> <span class="func">speak</span>(<span class="type">scalar</span> <span class="sigil">$self</span>) <span class="type">void</span> {
+    <span class="func">say</span>(<span class="sigil">$self</span>->{<span class="string">"name"</span>} . <span class="string">" barks: Woof!"</span>);
+}
+
+<span class="keyword">func</span> <span class="func">get_breed</span>(<span class="type">scalar</span> <span class="sigil">$self</span>) <span class="type">str</span> {
+    <span class="keyword">return</span> <span class="sigil">$self</span>->{<span class="string">"breed"</span>};
+}
+
+<span class="keyword">package</span> <span class="type">Cat</span>;
+
+<span class="keyword">func</span> <span class="func">new</span>(<span class="type">str</span> <span class="sigil">$name</span>) <span class="type">scalar</span> {
+    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%self</span> = { <span class="string">"name"</span> => <span class="sigil">$name</span> };
+    <span class="keyword">return</span> <span class="func">bless</span>(\<span class="sigil">%self</span>, <span class="string">"Cat"</span>);
+}
+
+<span class="keyword">func</span> <span class="func">speak</span>(<span class="type">scalar</span> <span class="sigil">$self</span>) <span class="type">void</span> {
+    <span class="func">say</span>(<span class="sigil">$self</span>->{<span class="string">"name"</span>} . <span class="string">" meows: Meow!"</span>);
+}</code></pre>
+
+            <h2>UNIVERSAL Methods</h2>
+
+            <p>All objects have access to <code>isa()</code> and <code>can()</code> methods:</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$dog</span> = <span class="type">Dog</span>::<span class="func">new</span>(<span class="string">"Rex"</span>, <span class="string">"German Shepherd"</span>);
+
+<span class="comment"># Check if object is of a class</span>
+<span class="keyword">if</span> (<span class="sigil">$dog</span>-><span class="func">isa</span>(<span class="string">"Dog"</span>)) {
+    <span class="func">say</span>(<span class="string">"It's a Dog!"</span>);
+}
+
+<span class="comment"># Check if object has a method</span>
+<span class="keyword">if</span> (<span class="sigil">$dog</span>-><span class="func">can</span>(<span class="string">"speak"</span>)) {
+    <span class="sigil">$dog</span>-><span class="func">speak</span>();
+}
+
+<span class="keyword">if</span> (<span class="sigil">$dog</span>-><span class="func">can</span>(<span class="string">"fly"</span>)) {
+    <span class="func">say</span>(<span class="string">"Dog can fly"</span>);
+} <span class="keyword">else</span> {
+    <span class="func">say</span>(<span class="string">"Dogs cannot fly"</span>);
+}</code></pre>
+
+            <h2>Polymorphism</h2>
+
+            <pre><code><span class="keyword">func</span> <span class="func">make_sound</span>(<span class="type">scalar</span> <span class="sigil">$animal</span>) <span class="type">void</span> {
+    <span class="comment"># Polymorphic method call</span>
+    <span class="sigil">$animal</span>-><span class="func">speak</span>();
+}
+
+<span class="keyword">func</span> <span class="func">main</span>() <span class="type">void</span> {
+    <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$dog</span> = <span class="type">Dog</span>::<span class="func">new</span>(<span class="string">"Rex"</span>, <span class="string">"Lab"</span>);
+    <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$cat</span> = <span class="type">Cat</span>::<span class="func">new</span>(<span class="string">"Whiskers"</span>);
+
+    <span class="func">make_sound</span>(<span class="sigil">$dog</span>);  <span class="comment"># "Rex barks: Woof!"</span>
+    <span class="func">make_sound</span>(<span class="sigil">$cat</span>);  <span class="comment"># "Whiskers meows: Meow!"</span>
+
+    <span class="comment"># Store in array for iteration</span>
+    <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@animals</span> = [<span class="sigil">$dog</span>, <span class="sigil">$cat</span>];
+
+    <span class="keyword">foreach</span> <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$animal</span> (<span class="sigil">@animals</span>) {
+        <span class="sigil">$animal</span>-><span class="func">speak</span>();
+    }
+}</code></pre>
+
+            <h2>Function Pointers in Objects</h2>
+
+            <p>Objects can store function references as properties:</p>
+
+            <pre><code><span class="keyword">package</span> <span class="type">Button</span>;
+
+<span class="keyword">func</span> <span class="func">new</span>(<span class="type">str</span> <span class="sigil">$label</span>, <span class="type">scalar</span> <span class="sigil">$on_click</span>) <span class="type">scalar</span> {
+    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%self</span> = {
+        <span class="string">"label"</span> => <span class="sigil">$label</span>,
+        <span class="string">"on_click"</span> => <span class="sigil">$on_click</span>
+    };
+    <span class="keyword">return</span> <span class="func">bless</span>(\<span class="sigil">%self</span>, <span class="string">"Button"</span>);
+}
+
+<span class="keyword">func</span> <span class="func">click</span>(<span class="type">scalar</span> <span class="sigil">$self</span>) <span class="type">void</span> {
+    <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$handler</span> = <span class="sigil">$self</span>->{<span class="string">"on_click"</span>};
+    <span class="sigil">$handler</span>->();
+}
+
+<span class="comment"># Usage</span>
+<span class="keyword">func</span> <span class="func">main</span>() <span class="type">void</span> {
+    <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$btn</span> = <span class="type">Button</span>::<span class="func">new</span>(<span class="string">"Submit"</span>, <span class="keyword">func</span> () {
+        <span class="func">say</span>(<span class="string">"Button clicked!"</span>);
+    });
+
+    <span class="sigil">$btn</span>-><span class="func">click</span>();  <span class="comment"># "Button clicked!"</span>
+}</code></pre>
+
+            <h2>Method Chaining</h2>
+
+            <p>Return <code>$self</code> from methods to enable chaining:</p>
+
+            <pre><code><span class="keyword">package</span> <span class="type">Builder</span>;
+
+<span class="keyword">func</span> <span class="func">new</span>() <span class="type">scalar</span> {
+    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%self</span> = { <span class="string">"parts"</span> => [] };
+    <span class="keyword">return</span> <span class="func">bless</span>(\<span class="sigil">%self</span>, <span class="string">"Builder"</span>);
+}
+
+<span class="keyword">func</span> <span class="func">add</span>(<span class="type">scalar</span> <span class="sigil">$self</span>, <span class="type">str</span> <span class="sigil">$part</span>) <span class="type">scalar</span> {
+    <span class="func">push</span>(<span class="sigil">$self</span>->{<span class="string">"parts"</span>}, <span class="sigil">$part</span>);
+    <span class="keyword">return</span> <span class="sigil">$self</span>;  <span class="comment"># Return self for chaining</span>
+}
+
+<span class="keyword">func</span> <span class="func">build</span>(<span class="type">scalar</span> <span class="sigil">$self</span>) <span class="type">str</span> {
+    <span class="keyword">return</span> <span class="func">join</span>(<span class="string">", "</span>, <span class="sigil">$self</span>->{<span class="string">"parts"</span>});
+}
+
+<span class="comment"># Usage with chaining</span>
+<span class="keyword">func</span> <span class="func">main</span>() <span class="type">void</span> {
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$result</span> = <span class="type">Builder</span>::<span class="func">new</span>()
+        -><span class="func">add</span>(<span class="string">"header"</span>)
+        -><span class="func">add</span>(<span class="string">"body"</span>)
+        -><span class="func">add</span>(<span class="string">"footer"</span>)
+        -><span class="func">build</span>();
+
+    <span class="func">say</span>(<span class="sigil">$result</span>);  <span class="comment"># "header, body, footer"</span>
+}</code></pre>
+
+            <h2>Best Practices</h2>
+
+            <div class="info-box">
+                <strong>OOP Tips</strong>
+                <ul>
+                    <li>Always use <code>package</code> to define classes</li>
+                    <li>Name constructors <code>new</code> by convention</li>
+                    <li>First parameter of methods should be <code>scalar $self</code></li>
+                    <li>Store instance data in the blessed hash</li>
+                    <li>Use getters/setters for controlled access to properties</li>
+                    <li>Return <code>$self</code> from setters for method chaining</li>
+                </ul>
+            </div>
+
+            <div class="page-nav">
+                <a href="control-flow.html">
+                    <span class="label">&larr; Previous</span>
+                    <span class="title">Control Flow</span>
+                </a>
+                <a href="reference.html" class="next">
+                    <span class="label">Next &rarr;</span>
+                    <span class="title">Built-in Functions</span>
+                </a>
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <p><a href="../index.html">Strada</a> - A strongly-typed language inspired by Perl</p>
+    </footer>
+</body>
+</html>

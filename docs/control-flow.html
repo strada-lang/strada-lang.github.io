@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control Flow - Strada Documentation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <a href="../index.html" class="logo">Strada<span>Lang</span></a>
+        <ul>
+            <li><a href="quickstart.html">QuickStart</a></li>
+            <li><a href="index.html">Docs</a></li>
+            <li><a href="reference.html">Reference</a></li>
+            <li><a href="https://github.com/strada-lang/strada-lang">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h3>Getting Started</h3>
+            <ul>
+                <li><a href="quickstart.html">QuickStart</a></li>
+                <li><a href="index.html">Documentation</a></li>
+            </ul>
+            <h3>Language Guide</h3>
+            <ul>
+                <li><a href="basics.html">Language Basics</a></li>
+                <li><a href="types.html">Types & Variables</a></li>
+                <li><a href="functions.html">Functions</a></li>
+                <li><a href="control-flow.html" class="active">Control Flow</a></li>
+                <li><a href="oop.html">Object-Oriented Programming</a></li>
+            </ul>
+            <h3>Reference</h3>
+            <ul>
+                <li><a href="reference.html">Built-in Functions</a></li>
+                <li><a href="cannoli.html">Cannoli Web Framework</a></li>
+            </ul>
+        </aside>
+
+        <main class="content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a> / <a href="index.html">Docs</a> / Control Flow
+            </div>
+
+            <h1>Control <span>Flow</span></h1>
+            <p class="subtitle">Conditionals, loops, and exception handling.</p>
+
+            <h2>Conditionals</h2>
+
+            <h3>If / Elsif / Else</h3>
+
+            <pre><code><span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$x</span> = <span class="number">10</span>;
+
+<span class="keyword">if</span> (<span class="sigil">$x</span> > <span class="number">10</span>) {
+    <span class="func">say</span>(<span class="string">"Greater than 10"</span>);
+} <span class="keyword">elsif</span> (<span class="sigil">$x</span> == <span class="number">10</span>) {
+    <span class="func">say</span>(<span class="string">"Equal to 10"</span>);
+} <span class="keyword">else</span> {
+    <span class="func">say</span>(<span class="string">"Less than 10"</span>);
+}</code></pre>
+
+            <h3>Unless</h3>
+
+            <p><code>unless</code> is the opposite of <code>if</code>:</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$logged_in</span> = <span class="number">0</span>;
+
+<span class="keyword">unless</span> (<span class="sigil">$logged_in</span>) {
+    <span class="func">say</span>(<span class="string">"Please log in"</span>);
+}
+
+<span class="comment"># Equivalent to:</span>
+<span class="keyword">if</span> (!<span class="sigil">$logged_in</span>) {
+    <span class="func">say</span>(<span class="string">"Please log in"</span>);
+}</code></pre>
+
+            <h3>Ternary Operator</h3>
+
+            <pre><code><span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$age</span> = <span class="number">20</span>;
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$status</span> = <span class="sigil">$age</span> >= <span class="number">18</span> ? <span class="string">"adult"</span> : <span class="string">"minor"</span>;
+<span class="func">say</span>(<span class="sigil">$status</span>);  <span class="comment"># "adult"</span></code></pre>
+
+            <h2>Loops</h2>
+
+            <h3>While Loop</h3>
+
+            <pre><code><span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$i</span> = <span class="number">0</span>;
+<span class="keyword">while</span> (<span class="sigil">$i</span> < <span class="number">5</span>) {
+    <span class="func">say</span>(<span class="sigil">$i</span>);
+    <span class="sigil">$i</span>++;
+}</code></pre>
+
+            <h3>For Loop</h3>
+
+            <pre><code><span class="keyword">for</span> (<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$i</span> = <span class="number">0</span>; <span class="sigil">$i</span> < <span class="number">5</span>; <span class="sigil">$i</span>++) {
+    <span class="func">say</span>(<span class="string">"i = "</span> . <span class="sigil">$i</span>);
+}</code></pre>
+
+            <h3>Foreach Loop</h3>
+
+            <p>Iterate over arrays:</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@fruits</span> = [<span class="string">"apple"</span>, <span class="string">"banana"</span>, <span class="string">"cherry"</span>];
+
+<span class="comment"># With type declaration</span>
+<span class="keyword">foreach</span> <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$fruit</span> (<span class="sigil">@fruits</span>) {
+    <span class="func">say</span>(<span class="sigil">$fruit</span>);
+}
+
+<span class="comment"># Without type (uses existing variable)</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$item</span>;
+<span class="keyword">foreach</span> <span class="sigil">$item</span> (<span class="sigil">@fruits</span>) {
+    <span class="func">say</span>(<span class="sigil">$item</span>);
+}
+
+<span class="comment"># "for" works like "foreach" with arrays</span>
+<span class="keyword">for</span> <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$fruit</span> (<span class="sigil">@fruits</span>) {
+    <span class="func">say</span>(<span class="sigil">$fruit</span>);
+}</code></pre>
+
+            <h3>Increment/Decrement</h3>
+
+            <pre><code><span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$x</span> = <span class="number">5</span>;
+
+<span class="sigil">$x</span>++;        <span class="comment"># Post-increment: returns 5, then x becomes 6</span>
+++<span class="sigil">$x</span>;        <span class="comment"># Pre-increment: x becomes 7, returns 7</span>
+<span class="sigil">$x</span>--;        <span class="comment"># Post-decrement: returns 7, then x becomes 6</span>
+--<span class="sigil">$x</span>;        <span class="comment"># Pre-decrement: x becomes 5, returns 5</span>
+
+<span class="comment"># Often used in loops</span>
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$i</span> = <span class="number">0</span>;
+<span class="keyword">while</span> (<span class="sigil">$i</span> < <span class="number">10</span>) {
+    <span class="func">say</span>(<span class="sigil">$i</span>++);  <span class="comment"># Print then increment</span>
+}</code></pre>
+
+            <h3>Loop Control</h3>
+
+            <pre><code><span class="keyword">for</span> (<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$i</span> = <span class="number">0</span>; <span class="sigil">$i</span> < <span class="number">10</span>; <span class="sigil">$i</span>++) {
+    <span class="keyword">if</span> (<span class="sigil">$i</span> == <span class="number">3</span>) {
+        <span class="keyword">next</span>;      <span class="comment"># Skip to next iteration</span>
+    }
+    <span class="keyword">if</span> (<span class="sigil">$i</span> == <span class="number">7</span>) {
+        <span class="keyword">last</span>;      <span class="comment"># Exit loop</span>
+    }
+    <span class="func">say</span>(<span class="sigil">$i</span>);
+}
+<span class="comment"># Output: 0, 1, 2, 4, 5, 6</span></code></pre>
+
+            <h2>Labeled Loops</h2>
+
+            <p>Labels allow breaking out of nested loops:</p>
+
+            <pre><code><span class="keyword">OUTER:</span> <span class="keyword">for</span> (<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$i</span> = <span class="number">0</span>; <span class="sigil">$i</span> < <span class="number">5</span>; <span class="sigil">$i</span>++) {
+    <span class="keyword">INNER:</span> <span class="keyword">for</span> (<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$j</span> = <span class="number">0</span>; <span class="sigil">$j</span> < <span class="number">5</span>; <span class="sigil">$j</span>++) {
+        <span class="keyword">if</span> (<span class="sigil">$j</span> == <span class="number">2</span>) {
+            <span class="keyword">next</span> <span class="keyword">INNER</span>;   <span class="comment"># Skip to next inner iteration</span>
+        }
+        <span class="keyword">if</span> (<span class="sigil">$i</span> == <span class="number">3</span>) {
+            <span class="keyword">last</span> <span class="keyword">OUTER</span>;   <span class="comment"># Exit both loops</span>
+        }
+        <span class="func">say</span>(<span class="string">"i="</span> . <span class="sigil">$i</span> . <span class="string">" j="</span> . <span class="sigil">$j</span>);
+    }
+}</code></pre>
+
+            <h2>Exception Handling</h2>
+
+            <h3>Try / Catch / Throw</h3>
+
+            <pre><code><span class="keyword">func</span> <span class="func">divide</span>(<span class="type">int</span> <span class="sigil">$a</span>, <span class="type">int</span> <span class="sigil">$b</span>) <span class="type">int</span> {
+    <span class="keyword">if</span> (<span class="sigil">$b</span> == <span class="number">0</span>) {
+        <span class="keyword">throw</span> <span class="string">"Division by zero!"</span>;
+    }
+    <span class="keyword">return</span> <span class="sigil">$a</span> / <span class="sigil">$b</span>;
+}
+
+<span class="keyword">func</span> <span class="func">main</span>() <span class="type">void</span> {
+    <span class="keyword">try</span> {
+        <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$result</span> = <span class="func">divide</span>(<span class="number">10</span>, <span class="number">0</span>);
+        <span class="func">say</span>(<span class="string">"Result: "</span> . <span class="sigil">$result</span>);
+    } <span class="keyword">catch</span> (<span class="sigil">$e</span>) {
+        <span class="func">say</span>(<span class="string">"Error: "</span> . <span class="sigil">$e</span>);
+    }
+    <span class="func">say</span>(<span class="string">"Program continues..."</span>);
+}</code></pre>
+
+            <div class="info-box">
+                <strong>Exception Values</strong>
+                The <code>throw</code> statement can throw any value (string, number, etc.).
+                The <code>catch</code> block receives that value in its parameter.
+            </div>
+
+            <h3>Nested Try/Catch</h3>
+
+            <pre><code><span class="keyword">try</span> {
+    <span class="keyword">try</span> {
+        <span class="keyword">throw</span> <span class="string">"Inner error"</span>;
+    } <span class="keyword">catch</span> (<span class="sigil">$e</span>) {
+        <span class="func">say</span>(<span class="string">"Caught inner: "</span> . <span class="sigil">$e</span>);
+        <span class="keyword">throw</span> <span class="string">"Re-throwing"</span>;  <span class="comment"># Re-throw or throw new</span>
+    }
+} <span class="keyword">catch</span> (<span class="sigil">$e</span>) {
+    <span class="func">say</span>(<span class="string">"Caught outer: "</span> . <span class="sigil">$e</span>);
+}</code></pre>
+
+            <h2>Goto and Labels</h2>
+
+            <p>For exceptional control flow (use sparingly):</p>
+
+            <pre><code><span class="keyword">func</span> <span class="func">main</span>() <span class="type">void</span> {
+    <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$i</span> = <span class="number">0</span>;
+
+<span class="keyword">start:</span>
+    <span class="func">say</span>(<span class="sigil">$i</span>);
+    <span class="sigil">$i</span>++;
+    <span class="keyword">if</span> (<span class="sigil">$i</span> < <span class="number">5</span>) {
+        <span class="keyword">goto</span> <span class="keyword">start</span>;
+    }
+
+    <span class="func">say</span>(<span class="string">"Done"</span>);
+}</code></pre>
+
+            <div class="info-box warning">
+                <strong>Use Sparingly</strong>
+                <code>goto</code> can make code hard to follow. Prefer structured control flow
+                (loops, functions) in most cases. It's occasionally useful for cleanup code or
+                state machines.
+            </div>
+
+            <h2>Pattern Matching</h2>
+
+            <p>Use regex in conditionals:</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$input</span> = <span class="string">"hello123"</span>;
+
+<span class="keyword">if</span> (<span class="sigil">$input</span> =~ /[0-9]+/) {
+    <span class="func">say</span>(<span class="string">"Contains numbers"</span>);
+}
+
+<span class="keyword">if</span> (<span class="sigil">$input</span> !~ /^[0-9]+$/) {
+    <span class="func">say</span>(<span class="string">"Not purely numeric"</span>);
+}
+
+<span class="comment"># Case-insensitive match</span>
+<span class="keyword">if</span> (<span class="sigil">$input</span> =~ /HELLO/i) {
+    <span class="func">say</span>(<span class="string">"Found hello (case-insensitive)"</span>);
+}</code></pre>
+
+            <h2>Switch-like Patterns</h2>
+
+            <p>Strada doesn't have a switch statement, but you can use if/elsif chains or hashes:</p>
+
+            <pre><code><span class="comment"># Using if/elsif</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$day</span> = <span class="string">"Mon"</span>;
+
+<span class="keyword">if</span> (<span class="sigil">$day</span> eq <span class="string">"Mon"</span>) {
+    <span class="func">say</span>(<span class="string">"Monday"</span>);
+} <span class="keyword">elsif</span> (<span class="sigil">$day</span> eq <span class="string">"Tue"</span>) {
+    <span class="func">say</span>(<span class="string">"Tuesday"</span>);
+} <span class="keyword">elsif</span> (<span class="sigil">$day</span> eq <span class="string">"Wed"</span>) {
+    <span class="func">say</span>(<span class="string">"Wednesday"</span>);
+} <span class="keyword">else</span> {
+    <span class="func">say</span>(<span class="string">"Other day"</span>);
+}
+
+<span class="comment"># Using a hash (dispatch table)</span>
+<span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%day_names</span> = {
+    <span class="string">"Mon"</span> => <span class="string">"Monday"</span>,
+    <span class="string">"Tue"</span> => <span class="string">"Tuesday"</span>,
+    <span class="string">"Wed"</span> => <span class="string">"Wednesday"</span>
+};
+
+<span class="keyword">if</span> (<span class="func">exists</span>(<span class="sigil">%day_names</span>, <span class="sigil">$day</span>)) {
+    <span class="func">say</span>(<span class="sigil">$day_names</span>{<span class="sigil">$day</span>});
+} <span class="keyword">else</span> {
+    <span class="func">say</span>(<span class="string">"Unknown day"</span>);
+}</code></pre>
+
+            <h2>Short-Circuit Evaluation</h2>
+
+            <pre><code><span class="comment"># && and || short-circuit</span>
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$x</span> = <span class="number">0</span>;
+
+<span class="comment"># Second expression not evaluated if first is false</span>
+<span class="sigil">$x</span> && <span class="func">say</span>(<span class="string">"x is true"</span>);
+
+<span class="comment"># Second expression not evaluated if first is true</span>
+<span class="sigil">$x</span> || <span class="func">say</span>(<span class="string">"x is false"</span>);
+
+<span class="comment"># Use for default values</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$name</span> = <span class="string">""</span>;
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$display</span> = <span class="sigil">$name</span> || <span class="string">"Anonymous"</span>;</code></pre>
+
+            <div class="page-nav">
+                <a href="functions.html">
+                    <span class="label">&larr; Previous</span>
+                    <span class="title">Functions</span>
+                </a>
+                <a href="oop.html" class="next">
+                    <span class="label">Next &rarr;</span>
+                    <span class="title">OOP</span>
+                </a>
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <p><a href="../index.html">Strada</a> - A strongly-typed language inspired by Perl</p>
+    </footer>
+</body>
+</html>

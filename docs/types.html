@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Types & Variables - Strada Documentation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <a href="../index.html" class="logo">Strada<span>Lang</span></a>
+        <ul>
+            <li><a href="quickstart.html">QuickStart</a></li>
+            <li><a href="index.html">Docs</a></li>
+            <li><a href="reference.html">Reference</a></li>
+            <li><a href="https://github.com/strada-lang/strada-lang">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h3>Getting Started</h3>
+            <ul>
+                <li><a href="quickstart.html">QuickStart</a></li>
+                <li><a href="index.html">Documentation</a></li>
+            </ul>
+            <h3>Language Guide</h3>
+            <ul>
+                <li><a href="basics.html">Language Basics</a></li>
+                <li><a href="types.html" class="active">Types & Variables</a></li>
+                <li><a href="functions.html">Functions</a></li>
+                <li><a href="control-flow.html">Control Flow</a></li>
+                <li><a href="oop.html">Object-Oriented Programming</a></li>
+            </ul>
+            <h3>Reference</h3>
+            <ul>
+                <li><a href="reference.html">Built-in Functions</a></li>
+                <li><a href="cannoli.html">Cannoli Web Framework</a></li>
+            </ul>
+        </aside>
+
+        <main class="content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a> / <a href="index.html">Docs</a> / Types & Variables
+            </div>
+
+            <h1>Types & <span>Variables</span></h1>
+            <p class="subtitle">Understanding Strada's type system and variable declarations.</p>
+
+            <h2>Type System Overview</h2>
+
+            <p>Strada is <strong>strongly typed</strong>. Every variable has a declared type that is checked at compile time.</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Description</th>
+                        <th>Example</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>int</code></td><td>64-bit signed integer</td><td><code>42</code>, <code>-17</code></td></tr>
+                    <tr><td><code>num</code></td><td>64-bit floating point</td><td><code>3.14</code>, <code>-0.5</code></td></tr>
+                    <tr><td><code>str</code></td><td>UTF-8 string</td><td><code>"hello"</code></td></tr>
+                    <tr><td><code>array</code></td><td>Dynamic array</td><td><code>[1, 2, 3]</code></td></tr>
+                    <tr><td><code>hash</code></td><td>Key-value map</td><td><code>{"a" => 1}</code></td></tr>
+                    <tr><td><code>scalar</code></td><td>Generic type (any value)</td><td>Any value</td></tr>
+                    <tr><td><code>void</code></td><td>No value (function returns)</td><td>-</td></tr>
+                    <tr><td><code>undef</code></td><td>Undefined value</td><td><code>undef</code></td></tr>
+                </tbody>
+            </table>
+
+            <h2>Sigils</h2>
+
+            <p>Like Perl, Strada uses sigils to identify variable types:</p>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h4><code>$</code> - Scalar</h4>
+                    <p>Single values: integers, floats, strings, references, objects</p>
+                </div>
+                <div class="card">
+                    <h4><code>@</code> - Array</h4>
+                    <p>Ordered lists of values</p>
+                </div>
+                <div class="card">
+                    <h4><code>%</code> - Hash</h4>
+                    <p>Key-value maps (associative arrays)</p>
+                </div>
+            </div>
+
+            <h2>Variable Declaration</h2>
+
+            <p>Variables are declared with <code>my</code> followed by type and sigil:</p>
+
+            <pre><code><span class="comment"># Scalar variables ($ sigil)</span>
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$count</span> = <span class="number">0</span>;
+<span class="keyword">my</span> <span class="type">num</span> <span class="sigil">$price</span> = <span class="number">19.99</span>;
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$name</span> = <span class="string">"Alice"</span>;
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$anything</span> = <span class="number">42</span>;
+
+<span class="comment"># Array variables (@ sigil)</span>
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@numbers</span> = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>];
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@empty</span> = [];
+
+<span class="comment"># Hash variables (% sigil)</span>
+<span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%config</span> = {
+    <span class="string">"host"</span> => <span class="string">"localhost"</span>,
+    <span class="string">"port"</span> => <span class="number">8080</span>
+};</code></pre>
+
+            <div class="info-box">
+                <strong>Declaration without initialization</strong>
+                Variables can be declared without an initial value. They will be <code>undef</code> until assigned.
+                <pre><code><span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$x</span>;  <span class="comment"># $x is undef</span>
+<span class="sigil">$x</span> = <span class="number">10</span>;     <span class="comment"># Now $x is 10</span></code></pre>
+            </div>
+
+            <h2>Integers (int)</h2>
+
+            <pre><code><span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$a</span> = <span class="number">42</span>;
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$b</span> = -<span class="number">17</span>;
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$hex</span> = <span class="number">0xFF</span>;      <span class="comment"># Hexadecimal: 255</span>
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$oct</span> = <span class="number">0o755</span>;     <span class="comment"># Octal: 493</span>
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$bin</span> = <span class="number">0b1010</span>;    <span class="comment"># Binary: 10</span>
+
+<span class="comment"># Arithmetic</span>
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$sum</span> = <span class="sigil">$a</span> + <span class="sigil">$b</span>;
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$mod</span> = <span class="sigil">$a</span> % <span class="number">5</span>;     <span class="comment"># Modulo: 2</span>
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$pow</span> = <span class="number">2</span> ** <span class="number">10</span>;   <span class="comment"># Power: 1024</span></code></pre>
+
+            <h2>Floating Point (num)</h2>
+
+            <pre><code><span class="keyword">my</span> <span class="type">num</span> <span class="sigil">$pi</span> = <span class="number">3.14159</span>;
+<span class="keyword">my</span> <span class="type">num</span> <span class="sigil">$sci</span> = <span class="number">1.5e10</span>;    <span class="comment"># Scientific notation</span>
+<span class="keyword">my</span> <span class="type">num</span> <span class="sigil">$neg</span> = -<span class="number">0.001</span>;
+
+<span class="comment"># Math operations</span>
+<span class="keyword">my</span> <span class="type">num</span> <span class="sigil">$sqrt</span> = <span class="func">math::sqrt</span>(<span class="number">16</span>);     <span class="comment"># 4.0</span>
+<span class="keyword">my</span> <span class="type">num</span> <span class="sigil">$sin</span> = <span class="func">math::sin</span>(<span class="sigil">$pi</span>);     <span class="comment"># ~0</span>
+<span class="keyword">my</span> <span class="type">num</span> <span class="sigil">$floor</span> = <span class="func">math::floor</span>(<span class="number">3.7</span>); <span class="comment"># 3</span></code></pre>
+
+            <h2>Strings (str)</h2>
+
+            <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$s1</span> = <span class="string">"Hello"</span>;
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$s2</span> = <span class="string">'Single quotes also work'</span>;
+
+<span class="comment"># Escape sequences (in double quotes)</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$newline</span> = <span class="string">"Line 1\nLine 2"</span>;
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$tab</span> = <span class="string">"Col1\tCol2"</span>;
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$quote</span> = <span class="string">"She said \"Hi\""</span>;
+
+<span class="comment"># Concatenation</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$full</span> = <span class="sigil">$s1</span> . <span class="string">" World"</span>;
+
+<span class="comment"># Repetition</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$repeated</span> = <span class="string">"ab"</span> x <span class="number">3</span>;  <span class="comment"># "ababab"</span>
+
+<span class="comment"># String functions</span>
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$len</span> = <span class="func">strlen</span>(<span class="sigil">$s1</span>);           <span class="comment"># 5</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$upper</span> = <span class="func">uc</span>(<span class="sigil">$s1</span>);            <span class="comment"># "HELLO"</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$lower</span> = <span class="func">lc</span>(<span class="sigil">$s1</span>);            <span class="comment"># "hello"</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$sub</span> = <span class="func">substr</span>(<span class="sigil">$s1</span>, <span class="number">0</span>, <span class="number">3</span>);    <span class="comment"># "Hel"</span>
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$pos</span> = <span class="func">index</span>(<span class="sigil">$s1</span>, <span class="string">"ll"</span>);    <span class="comment"># 2</span></code></pre>
+
+            <h2>Arrays (array)</h2>
+
+            <pre><code><span class="comment"># Declaration</span>
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@nums</span> = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>];
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@mixed</span> = [<span class="number">1</span>, <span class="string">"two"</span>, <span class="number">3.0</span>];
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@nested</span> = [[<span class="number">1</span>, <span class="number">2</span>], [<span class="number">3</span>, <span class="number">4</span>]];
+
+<span class="comment"># Pre-allocate capacity for performance</span>
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@big</span>[<span class="number">1000</span>];  <span class="comment"># Empty array with capacity for 1000 elements</span>
+
+<span class="comment"># Access elements (use $ sigil for single element)</span>
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$first</span> = <span class="sigil">$nums</span>[<span class="number">0</span>];      <span class="comment"># 1</span>
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$last</span> = <span class="sigil">$nums</span>[-<span class="number">1</span>];     <span class="comment"># 5 (negative index)</span>
+
+<span class="comment"># Modify elements</span>
+<span class="sigil">$nums</span>[<span class="number">0</span>] = <span class="number">10</span>;
+
+<span class="comment"># Array functions</span>
+<span class="func">push</span>(<span class="sigil">@nums</span>, <span class="number">6</span>);                 <span class="comment"># Add to end</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$popped</span> = <span class="func">pop</span>(<span class="sigil">@nums</span>);  <span class="comment"># Remove from end</span>
+<span class="func">unshift</span>(<span class="sigil">@nums</span>, <span class="number">0</span>);              <span class="comment"># Add to beginning</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$shifted</span> = <span class="func">shift</span>(<span class="sigil">@nums</span>); <span class="comment"># Remove from beginning</span>
+
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$length</span> = <span class="func">len</span>(<span class="sigil">@nums</span>);    <span class="comment"># Get length</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$joined</span> = <span class="func">join</span>(<span class="string">","</span>, <span class="sigil">@nums</span>); <span class="comment"># Join to string</span>
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@sorted</span> = <span class="func">sort</span>(<span class="sigil">@nums</span>);  <span class="comment"># Sort array</span>
+<span class="func">reverse</span>(<span class="sigil">@nums</span>);                  <span class="comment"># Reverse in place</span></code></pre>
+
+            <div class="info-box warning">
+                <strong>Array Access Sigil</strong>
+                When accessing a single element, use <code>$array[index]</code>, not <code>@array[index]</code>.
+                The <code>@</code> sigil is for the whole array.
+            </div>
+
+            <h2>Hashes (hash)</h2>
+
+            <pre><code><span class="comment"># Declaration</span>
+<span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%person</span> = {
+    <span class="string">"name"</span> => <span class="string">"Alice"</span>,
+    <span class="string">"age"</span> => <span class="number">30</span>,
+    <span class="string">"city"</span> => <span class="string">"NYC"</span>
+};
+
+<span class="comment"># Pre-allocate capacity for performance</span>
+<span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%cache</span>[<span class="number">500</span>];  <span class="comment"># Empty hash with capacity for ~500 entries</span>
+
+<span class="comment"># Access values (use $ sigil for single value)</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$name</span> = <span class="sigil">$person</span>{<span class="string">"name"</span>};    <span class="comment"># "Alice"</span>
+
+<span class="comment"># Add/modify values</span>
+<span class="sigil">$person</span>{<span class="string">"email"</span>} = <span class="string">"alice@example.com"</span>;
+<span class="sigil">$person</span>{<span class="string">"age"</span>} = <span class="number">31</span>;
+
+<span class="comment"># Hash functions</span>
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@keys</span> = <span class="func">keys</span>(<span class="sigil">%person</span>);        <span class="comment"># Get all keys</span>
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@vals</span> = <span class="func">values</span>(<span class="sigil">%person</span>);      <span class="comment"># Get all values</span>
+
+<span class="comment"># Check if key exists</span>
+<span class="keyword">if</span> (<span class="func">exists</span>(<span class="sigil">%person</span>, <span class="string">"email"</span>)) {
+    <span class="func">say</span>(<span class="string">"Has email"</span>);
+}
+
+<span class="comment"># Delete a key</span>
+<span class="func">delete</span>(<span class="sigil">%person</span>, <span class="string">"city"</span>);</code></pre>
+
+            <div class="info-box danger">
+                <strong>Hash Access Syntax</strong>
+                Use <code>$hash{key}</code> for element access, NOT <code>%hash{key}</code>.
+                Using <code>%hash{key}</code> is a syntax error.
+            </div>
+
+            <h2>References</h2>
+
+            <p>References are created with the backslash operator <code>\</code>:</p>
+
+            <pre><code><span class="comment"># References to variables</span>
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$x</span> = <span class="number">42</span>;
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$ref</span> = \<span class="sigil">$x</span>;     <span class="comment"># Reference to scalar</span>
+
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@arr</span> = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>];
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$aref</span> = \<span class="sigil">@arr</span>;   <span class="comment"># Reference to array</span>
+
+<span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%h</span> = {<span class="string">"a"</span> => <span class="number">1</span>};
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$href</span> = \<span class="sigil">%h</span>;    <span class="comment"># Reference to hash</span>
+
+<span class="comment"># Dereference with arrow</span>
+<span class="func">say</span>(<span class="sigil">$aref</span>->[<span class="number">0</span>]);      <span class="comment"># 1</span>
+<span class="func">say</span>(<span class="sigil">$href</span>->{<span class="string">"a"</span>});    <span class="comment"># 1</span>
+
+<span class="comment"># Anonymous references</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$anon_arr</span> = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>];    <span class="comment"># Array reference</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$anon_hash</span> = {<span class="string">"x"</span> => <span class="number">1</span>};  <span class="comment"># Hash reference</span></code></pre>
+
+            <h2>Type Conversion</h2>
+
+            <pre><code><span class="comment"># String to int</span>
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$n</span> = <span class="func">int</span>(<span class="string">"42"</span>);
+
+<span class="comment"># Int to string (automatic via concatenation)</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$s</span> = <span class="string">""</span> . <span class="number">42</span>;
+
+<span class="comment"># Explicit string conversion</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$str</span> = <span class="func">stringify</span>(<span class="number">42</span>);</code></pre>
+
+            <h2>The scalar Type</h2>
+
+            <p>The <code>scalar</code> type can hold any value and is useful for generic programming:</p>
+
+            <pre><code><span class="keyword">func</span> <span class="func">print_anything</span>(<span class="type">scalar</span> <span class="sigil">$val</span>) <span class="type">void</span> {
+    <span class="func">say</span>(<span class="sigil">$val</span>);
+}
+
+<span class="func">print_anything</span>(<span class="number">42</span>);
+<span class="func">print_anything</span>(<span class="string">"hello"</span>);
+<span class="func">print_anything</span>([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]);</code></pre>
+
+            <div class="page-nav">
+                <a href="basics.html">
+                    <span class="label">&larr; Previous</span>
+                    <span class="title">Language Basics</span>
+                </a>
+                <a href="functions.html" class="next">
+                    <span class="label">Next &rarr;</span>
+                    <span class="title">Functions</span>
+                </a>
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <p><a href="../index.html">Strada</a> - A strongly-typed language inspired by Perl</p>
+    </footer>
+</body>
+</html>

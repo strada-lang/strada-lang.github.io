@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Built-in Functions Reference - Strada Documentation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <a href="../index.html" class="logo">Strada<span>Lang</span></a>
+        <ul>
+            <li><a href="quickstart.html">QuickStart</a></li>
+            <li><a href="index.html">Docs</a></li>
+            <li><a href="reference.html">Reference</a></li>
+            <li><a href="https://github.com/strada-lang/strada-lang">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h3>Getting Started</h3>
+            <ul>
+                <li><a href="quickstart.html">QuickStart</a></li>
+                <li><a href="index.html">Documentation</a></li>
+            </ul>
+            <h3>Language Guide</h3>
+            <ul>
+                <li><a href="basics.html">Language Basics</a></li>
+                <li><a href="types.html">Types & Variables</a></li>
+                <li><a href="functions.html">Functions</a></li>
+                <li><a href="control-flow.html">Control Flow</a></li>
+                <li><a href="oop.html">Object-Oriented Programming</a></li>
+            </ul>
+            <h3>Reference</h3>
+            <ul>
+                <li><a href="reference.html" class="active">Built-in Functions</a></li>
+                <li><a href="cannoli.html">Cannoli Web Framework</a></li>
+            </ul>
+        </aside>
+
+        <main class="content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a> / <a href="index.html">Docs</a> / Built-in Functions
+            </div>
+
+            <h1>Built-in <span>Functions</span></h1>
+            <p class="subtitle">Complete reference for all built-in functions.</p>
+
+            <h2>Output Functions</h2>
+
+            <table>
+                <thead>
+                    <tr><th>Function</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>say($value)</code></td><td>Print value with newline</td></tr>
+                    <tr><td><code>print($value)</code></td><td>Print value without newline</td></tr>
+                    <tr><td><code>warn($msg)</code></td><td>Print warning to stderr</td></tr>
+                    <tr><td><code>die($msg)</code></td><td>Print error and exit</td></tr>
+                </tbody>
+            </table>
+
+            <h2>String Functions</h2>
+
+            <table>
+                <thead>
+                    <tr><th>Function</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>strlen($str)</code></td><td>Return string length</td></tr>
+                    <tr><td><code>substr($str, $start, $len)</code></td><td>Extract substring</td></tr>
+                    <tr><td><code>index($str, $substr)</code></td><td>Find first occurrence, -1 if not found</td></tr>
+                    <tr><td><code>rindex($str, $substr)</code></td><td>Find last occurrence</td></tr>
+                    <tr><td><code>uc($str)</code></td><td>Convert to uppercase</td></tr>
+                    <tr><td><code>lc($str)</code></td><td>Convert to lowercase</td></tr>
+                    <tr><td><code>ucfirst($str)</code></td><td>Uppercase first character</td></tr>
+                    <tr><td><code>lcfirst($str)</code></td><td>Lowercase first character</td></tr>
+                    <tr><td><code>trim($str)</code></td><td>Remove leading/trailing whitespace</td></tr>
+                    <tr><td><code>split($sep, $str)</code></td><td>Split string into array</td></tr>
+                    <tr><td><code>join($sep, @arr)</code></td><td>Join array into string</td></tr>
+                    <tr><td><code>chr($code)</code></td><td>Character from ASCII code</td></tr>
+                    <tr><td><code>ord($char)</code></td><td>ASCII code from character</td></tr>
+                    <tr><td><code>sprintf($fmt, ...)</code></td><td>Formatted string (like C sprintf)</td></tr>
+                    <tr><td><code>stringify($val)</code></td><td>Convert value to string</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Examples</h3>
+            <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$s</span> = <span class="string">"  Hello World  "</span>;
+<span class="func">say</span>(<span class="func">strlen</span>(<span class="sigil">$s</span>));           <span class="comment"># 15</span>
+<span class="func">say</span>(<span class="func">trim</span>(<span class="sigil">$s</span>));             <span class="comment"># "Hello World"</span>
+<span class="func">say</span>(<span class="func">substr</span>(<span class="sigil">$s</span>, <span class="number">2</span>, <span class="number">5</span>));    <span class="comment"># "Hello"</span>
+<span class="func">say</span>(<span class="func">uc</span>(<span class="sigil">$s</span>));               <span class="comment"># "  HELLO WORLD  "</span>
+<span class="func">say</span>(<span class="func">index</span>(<span class="sigil">$s</span>, <span class="string">"World"</span>));  <span class="comment"># 8</span>
+
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@parts</span> = <span class="func">split</span>(<span class="string">" "</span>, <span class="func">trim</span>(<span class="sigil">$s</span>));
+<span class="func">say</span>(<span class="func">join</span>(<span class="string">"-"</span>, <span class="sigil">@parts</span>));   <span class="comment"># "Hello-World"</span></code></pre>
+
+            <h2>Array Functions</h2>
+
+            <table>
+                <thead>
+                    <tr><th>Function</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>len(@arr)</code></td><td>Return array length</td></tr>
+                    <tr><td><code>scalar(@arr)</code></td><td>Return array length (alias for len)</td></tr>
+                    <tr><td><code>push(@arr, $val)</code></td><td>Add element to end</td></tr>
+                    <tr><td><code>pop(@arr)</code></td><td>Remove and return last element</td></tr>
+                    <tr><td><code>shift(@arr)</code></td><td>Remove and return first element</td></tr>
+                    <tr><td><code>unshift(@arr, $val)</code></td><td>Add element to beginning</td></tr>
+                    <tr><td><code>reverse(@arr)</code></td><td>Reverse array elements in place</td></tr>
+                    <tr><td><code>sort(@arr)</code></td><td>Return sorted array</td></tr>
+                    <tr><td><code>splice(@arr, $off, $len)</code></td><td>Remove/replace elements</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Array Memory Management</h3>
+            <table>
+                <thead>
+                    <tr><th>Function</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>sys::array_capacity(@arr)</code></td><td>Get current allocated capacity</td></tr>
+                    <tr><td><code>sys::array_reserve(@arr, $n)</code></td><td>Ensure capacity for at least $n elements</td></tr>
+                    <tr><td><code>sys::array_shrink(@arr)</code></td><td>Shrink capacity to match length</td></tr>
+                </tbody>
+            </table>
+
+            <div class="info-box">
+                <h4>Pre-allocating Arrays</h4>
+                <p>For performance, pre-allocate arrays when you know the approximate size:</p>
+                <pre><code><span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@data</span>[<span class="number">1000</span>];  <span class="comment"># Pre-allocate for 1000 elements</span>
+<span class="keyword">for</span> (<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$i</span> = <span class="number">0</span>; <span class="sigil">$i</span> < <span class="number">1000</span>; <span class="sigil">$i</span>++) {
+    <span class="func">push</span>(<span class="sigil">@data</span>, <span class="sigil">$i</span>);  <span class="comment"># No reallocation needed</span>
+}</code></pre>
+            </div>
+
+            <h2>Hash Functions</h2>
+
+            <table>
+                <thead>
+                    <tr><th>Function</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>keys(%hash)</code></td><td>Return array of keys</td></tr>
+                    <tr><td><code>values(%hash)</code></td><td>Return array of values</td></tr>
+                    <tr><td><code>exists(%hash, $key)</code></td><td>Check if key exists (returns 1/0)</td></tr>
+                    <tr><td><code>delete(%hash, $key)</code></td><td>Remove key-value pair</td></tr>
+                    <tr><td><code>each(%hash)</code></td><td>Return next key-value pair</td></tr>
+                    <tr><td><code>sys::hash_default_capacity($n)</code></td><td>Set default capacity for new hashes</td></tr>
+                </tbody>
+            </table>
+
+            <div class="info-box">
+                <h4>Pre-allocating Hashes</h4>
+                <p>Pre-allocate hashes when you know the approximate size:</p>
+                <pre><code><span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%cache</span>[<span class="number">500</span>];  <span class="comment"># Pre-allocate for ~500 entries</span>
+
+<span class="comment"># Or set default for all new hashes:</span>
+<span class="func">sys::hash_default_capacity</span>(<span class="number">1000</span>);</code></pre>
+                <p>Hashes automatically resize for O(1) average lookup time.</p>
+            </div>
+
+            <h2>Type Functions</h2>
+
+            <table>
+                <thead>
+                    <tr><th>Function</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>int($val)</code></td><td>Convert to integer</td></tr>
+                    <tr><td><code>num($val)</code></td><td>Convert to number</td></tr>
+                    <tr><td><code>defined($val)</code></td><td>Check if value is defined</td></tr>
+                    <tr><td><code>ref($val)</code></td><td>Return reference type or empty string</td></tr>
+                    <tr><td><code>typeof($val)</code></td><td>Return type as string</td></tr>
+                    <tr><td><code>bless(\%h, $class)</code></td><td>Associate hash ref with class</td></tr>
+                </tbody>
+            </table>
+
+            <h2>File I/O Functions</h2>
+
+            <table>
+                <thead>
+                    <tr><th>Function</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>slurp($path)</code></td><td>Read entire file as string</td></tr>
+                    <tr><td><code>spew($path, $data)</code></td><td>Write string to file</td></tr>
+                    <tr><td><code>sys::open($path, $mode)</code></td><td>Open file, return fd</td></tr>
+                    <tr><td><code>sys::read($fd, $len)</code></td><td>Read bytes from fd</td></tr>
+                    <tr><td><code>sys::write($fd, $data)</code></td><td>Write bytes to fd</td></tr>
+                    <tr><td><code>sys::close($fd)</code></td><td>Close file descriptor</td></tr>
+                    <tr><td><code>sys::seek($fd, $pos, $whence)</code></td><td>Seek in file</td></tr>
+                    <tr><td><code>sys::tell($fd)</code></td><td>Get current position</td></tr>
+                    <tr><td><code>sys::eof($fd)</code></td><td>Check if at end of file</td></tr>
+                    <tr><td><code>sys::flush($fd)</code></td><td>Flush file buffer</td></tr>
+                </tbody>
+            </table>
+
+            <h2>Math Functions (math::)</h2>
+
+            <table>
+                <thead>
+                    <tr><th>Function</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>math::abs($n)</code></td><td>Absolute value</td></tr>
+                    <tr><td><code>math::floor($n)</code></td><td>Round down</td></tr>
+                    <tr><td><code>math::ceil($n)</code></td><td>Round up</td></tr>
+                    <tr><td><code>math::round($n)</code></td><td>Round to nearest</td></tr>
+                    <tr><td><code>math::sqrt($n)</code></td><td>Square root</td></tr>
+                    <tr><td><code>math::pow($base, $exp)</code></td><td>Power</td></tr>
+                    <tr><td><code>math::sin($n)</code></td><td>Sine</td></tr>
+                    <tr><td><code>math::cos($n)</code></td><td>Cosine</td></tr>
+                    <tr><td><code>math::tan($n)</code></td><td>Tangent</td></tr>
+                    <tr><td><code>math::log($n)</code></td><td>Natural logarithm</td></tr>
+                    <tr><td><code>math::log10($n)</code></td><td>Base-10 logarithm</td></tr>
+                    <tr><td><code>math::exp($n)</code></td><td>e^n</td></tr>
+                    <tr><td><code>math::rand()</code></td><td>Random number 0-1</td></tr>
+                    <tr><td><code>math::srand($seed)</code></td><td>Seed random generator</td></tr>
+                </tbody>
+            </table>
+
+            <h2>System Functions (sys::)</h2>
+
+            <h3>Process Control</h3>
+            <table>
+                <thead>
+                    <tr><th>Function</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>sys::exit($code)</code></td><td>Exit with status code</td></tr>
+                    <tr><td><code>sys::fork()</code></td><td>Fork process</td></tr>
+                    <tr><td><code>sys::exec($cmd, @args)</code></td><td>Execute command</td></tr>
+                    <tr><td><code>sys::system($cmd)</code></td><td>Run shell command</td></tr>
+                    <tr><td><code>sys::wait()</code></td><td>Wait for child process</td></tr>
+                    <tr><td><code>sys::waitpid($pid)</code></td><td>Wait for specific process</td></tr>
+                    <tr><td><code>sys::getpid()</code></td><td>Get process ID</td></tr>
+                    <tr><td><code>sys::getppid()</code></td><td>Get parent process ID</td></tr>
+                    <tr><td><code>sys::kill($pid, $sig)</code></td><td>Send signal to process</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Environment</h3>
+            <table>
+                <thead>
+                    <tr><th>Function</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>sys::getenv($name)</code></td><td>Get environment variable</td></tr>
+                    <tr><td><code>sys::setenv($name, $val)</code></td><td>Set environment variable</td></tr>
+                    <tr><td><code>sys::getcwd()</code></td><td>Get current directory</td></tr>
+                    <tr><td><code>sys::chdir($path)</code></td><td>Change directory</td></tr>
+                </tbody>
+            </table>
+
+            <h3>File System</h3>
+            <table>
+                <thead>
+                    <tr><th>Function</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>sys::stat($path)</code></td><td>Get file info</td></tr>
+                    <tr><td><code>sys::mkdir($path)</code></td><td>Create directory</td></tr>
+                    <tr><td><code>sys::rmdir($path)</code></td><td>Remove directory</td></tr>
+                    <tr><td><code>sys::unlink($path)</code></td><td>Delete file</td></tr>
+                    <tr><td><code>sys::rename($old, $new)</code></td><td>Rename file</td></tr>
+                    <tr><td><code>sys::readdir($path)</code></td><td>List directory</td></tr>
+                    <tr><td><code>sys::is_dir($path)</code></td><td>Check if directory</td></tr>
+                    <tr><td><code>sys::is_file($path)</code></td><td>Check if regular file</td></tr>
+                    <tr><td><code>sys::realpath($path)</code></td><td>Get absolute path</td></tr>
+                    <tr><td><code>sys::dirname($path)</code></td><td>Get directory part</td></tr>
+                    <tr><td><code>sys::basename($path)</code></td><td>Get filename part</td></tr>
+                    <tr><td><code>sys::glob($pattern)</code></td><td>Glob pattern matching</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Time</h3>
+            <table>
+                <thead>
+                    <tr><th>Function</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>sys::time()</code></td><td>Unix timestamp</td></tr>
+                    <tr><td><code>sys::localtime($ts)</code></td><td>Convert to local time hash</td></tr>
+                    <tr><td><code>sys::gmtime($ts)</code></td><td>Convert to GMT hash</td></tr>
+                    <tr><td><code>sys::sleep($secs)</code></td><td>Sleep for seconds</td></tr>
+                    <tr><td><code>sys::usleep($usecs)</code></td><td>Sleep for microseconds</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Networking</h3>
+            <table>
+                <thead>
+                    <tr><th>Function</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>sys::socket_server($port)</code></td><td>Create TCP server</td></tr>
+                    <tr><td><code>sys::socket_accept($fd)</code></td><td>Accept connection</td></tr>
+                    <tr><td><code>sys::socket_connect($host, $port)</code></td><td>Connect to server</td></tr>
+                    <tr><td><code>sys::gethostbyname($host)</code></td><td>Resolve hostname</td></tr>
+                    <tr><td><code>sys::gethostbyname_all($host)</code></td><td>Resolve hostname (all addresses)</td></tr>
+                    <tr><td><code>sys::gethostname()</code></td><td>Get local hostname</td></tr>
+                    <tr><td><code>sys::getaddrinfo($host, $port)</code></td><td>Advanced address resolution</td></tr>
+                </tbody>
+            </table>
+
+            <h3>SSL/TLS (ssl::)</h3>
+            <p>Secure socket connections via OpenSSL. Build with: <code>cd lib/ssl && make</code></p>
+            <table>
+                <thead>
+                    <tr><th>Function</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>ssl::connect($host, $port)</code></td><td>Connect to TLS server</td></tr>
+                    <tr><td><code>ssl::read($conn, $len)</code></td><td>Read from TLS connection</td></tr>
+                    <tr><td><code>ssl::write($conn, $data)</code></td><td>Write to TLS connection</td></tr>
+                    <tr><td><code>ssl::close($conn)</code></td><td>Close TLS connection</td></tr>
+                    <tr><td><code>ssl::http_get($host, $port, $path)</code></td><td>Simple HTTPS GET request</td></tr>
+                </tbody>
+            </table>
+
+            <h4>SSL Example</h4>
+            <pre><code><span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$conn</span> = <span class="func">ssl::connect</span>(<span class="string">"example.com"</span>, <span class="number">443</span>);
+<span class="func">ssl::write</span>(<span class="sigil">$conn</span>, <span class="string">"GET / HTTP/1.1\r\nHost: example.com\r\n\r\n"</span>);
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$response</span> = <span class="func">ssl::read</span>(<span class="sigil">$conn</span>, <span class="number">4096</span>);
+<span class="func">ssl::close</span>(<span class="sigil">$conn</span>);
+
+<span class="comment"># Or use the convenience function:</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$page</span> = <span class="func">ssl::http_get</span>(<span class="string">"example.com"</span>, <span class="number">443</span>, <span class="string">"/"</span>);</code></pre>
+
+            <h3>Signals</h3>
+            <table>
+                <thead>
+                    <tr><th>Function</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>sys::signal($sig, \&handler)</code></td><td>Set signal handler</td></tr>
+                    <tr><td><code>sys::signal($sig, "IGNORE")</code></td><td>Ignore signal</td></tr>
+                    <tr><td><code>sys::signal($sig, "DEFAULT")</code></td><td>Reset to default</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Dynamic Loading (FFI)</h3>
+            <table>
+                <thead>
+                    <tr><th>Function</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>sys::dl_open($lib)</code></td><td>Load shared library</td></tr>
+                    <tr><td><code>sys::dl_sym($handle, $name)</code></td><td>Get symbol address</td></tr>
+                    <tr><td><code>sys::dl_call_sv($fn, @args)</code></td><td>Call Strada function (returns StradaValue)</td></tr>
+                    <tr><td><code>sys::dl_call_int_sv($fn, @args)</code></td><td>Call Strada function (returns int)</td></tr>
+                    <tr><td><code>sys::dl_call_str_sv($fn, @args)</code></td><td>Call Strada function (returns str)</td></tr>
+                    <tr><td><code>sys::dl_call_void_sv($fn, @args)</code></td><td>Call Strada function (void return)</td></tr>
+                    <tr><td><code>sys::dl_call_version($fn)</code></td><td>Get library version string</td></tr>
+                    <tr><td><code>sys::dl_close($handle)</code></td><td>Unload library</td></tr>
+                </tbody>
+            </table>
+
+            <h4>FFI Example</h4>
+            <pre><code><span class="comment"># Load a Strada shared library</span>
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$lib</span> = <span class="func">sys::dl_open</span>(<span class="string">"./mylib.so"</span>);
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$fn</span> = <span class="func">sys::dl_sym</span>(<span class="sigil">$lib</span>, <span class="string">"my_function"</span>);
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$result</span> = <span class="func">sys::dl_call_sv</span>(<span class="sigil">$fn</span>, [<span class="sigil">$arg1</span>, <span class="sigil">$arg2</span>]);</code></pre>
+
+            <h4>import_lib</h4>
+            <p>For cleaner library imports, use <code>import_lib</code>:</p>
+            <pre><code><span class="keyword">use</span> lib <span class="string">"lib"</span>;
+<span class="func">import_lib</span> <span class="string">"JSON"</span>;
+
+<span class="comment"># Functions are now available with namespace syntax:</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$json</span> = <span class="type">JSON</span>::<span class="func">encode</span>(\<span class="sigil">%data</span>);
+<span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%data</span> = <span class="type">JSON</span>::<span class="func">decode</span>(<span class="sigil">$json</span>);</code></pre>
+
+            <h4>Shared Library Compilation</h4>
+            <p>Compile Strada programs as shared libraries:</p>
+            <pre><code>./strada --shared mylib.strada   <span class="comment"># Creates mylib.so</span></code></pre>
+
+            <h2>JSON Functions</h2>
+
+            <table>
+                <thead>
+                    <tr><th>Function</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>json_encode($val)</code></td><td>Convert to JSON string</td></tr>
+                    <tr><td><code>json_decode($str)</code></td><td>Parse JSON string</td></tr>
+                </tbody>
+            </table>
+
+            <h2>Miscellaneous</h2>
+
+            <table>
+                <thead>
+                    <tr><th>Function</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>dump($val)</code></td><td>Debug print value structure</td></tr>
+                    <tr><td><code>caller()</code></td><td>Get caller information</td></tr>
+                    <tr><td><code>eval($code)</code></td><td>Evaluate Strada code string</td></tr>
+                    <tr><td><code>$obj->isa($class)</code></td><td>Check if object is instance of class</td></tr>
+                    <tr><td><code>$obj->can($method)</code></td><td>Check if object has method</td></tr>
+                </tbody>
+            </table>
+
+            <h2>Compiler Flags</h2>
+
+            <p>The Strada compiler (<code>stradac</code>) and wrapper (<code>strada</code>) support these flags:</p>
+
+            <table>
+                <thead>
+                    <tr><th>Flag</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>-r, --run</code></td><td>Compile and run immediately</td></tr>
+                    <tr><td><code>-c, --keep-c</code></td><td>Keep generated .c file</td></tr>
+                    <tr><td><code>-g, --debug</code></td><td>Include debug symbols</td></tr>
+                    <tr><td><code>-p, --profile</code></td><td>Enable function profiling</td></tr>
+                    <tr><td><code>-w, --warnings</code></td><td>Show compiler warnings</td></tr>
+                    <tr><td><code>-t, --timing</code></td><td>Show compilation phase timing</td></tr>
+                    <tr><td><code>--shared</code></td><td>Compile as shared library (.so)</td></tr>
+                    <tr><td><code>-L &lt;path&gt;</code></td><td>Add library search path (high priority)</td></tr>
+                    <tr><td><code>-LL &lt;path&gt;</code></td><td>Add library search path (low priority)</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Examples</h3>
+            <pre><code><span class="comment"># Compile and run</span>
+./strada -r program.strada
+
+<span class="comment"># Compile with debugging</span>
+./strada -g program.strada
+
+<span class="comment"># Compile with profiling</span>
+./strada -p program.strada
+./program  <span class="comment"># Prints profiling report on exit</span>
+
+<span class="comment"># Check for warnings</span>
+./strada -w program.strada
+
+<span class="comment"># Create shared library</span>
+./strada --shared mylib.strada  <span class="comment"># Creates mylib.so</span></code></pre>
+
+            <div class="page-nav">
+                <a href="oop.html">
+                    <span class="label">&larr; Previous</span>
+                    <span class="title">OOP</span>
+                </a>
+                <a href="cannoli.html" class="next">
+                    <span class="label">Next &rarr;</span>
+                    <span class="title">Cannoli Framework</span>
+                </a>
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <p><a href="../index.html">Strada</a> - A strongly-typed language inspired by Perl</p>
+    </footer>
+</body>
+</html>
