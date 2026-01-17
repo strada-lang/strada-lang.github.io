@@ -109,8 +109,8 @@ mv MathLib.so lib/</code></pre>
             <pre><code>./strada --object lib/MathLib.strada
 mv MathLib.o lib/</code></pre>
 
-            <div class="info-box warning">
-                <strong>Keep the .strada file!</strong> Both <code>import_lib</code> and <code>import_object</code> need the original <code>.strada</code> file to read function signatures at compile time.
+            <div class="info-box">
+                <strong>Self-contained metadata:</strong> Function signatures are embedded in the compiled <code>.so</code> and <code>.o</code> files via <code>__strada_export_info()</code>. You don't need to keep the original <code>.strada</code> source file.
             </div>
 
             <h2>Using Shared Libraries (import_lib)</h2>
@@ -142,15 +142,15 @@ mv MathLib.o lib/</code></pre>
                     <tr><th>File</th><th>Purpose</th><th>Required</th></tr>
                 </thead>
                 <tbody>
-                    <tr><td><code>LibName.strada</code></td><td>Function signatures (compile time)</td><td>Yes</td></tr>
-                    <tr><td><code>LibName.so</code></td><td>Compiled code (runtime)</td><td>Yes</td></tr>
+                    <tr><td><code>LibName.so</code></td><td>Compiled code + embedded metadata</td><td>Yes</td></tr>
+                    <tr><td><code>LibName.strada</code></td><td>Source (only needed for recompiling)</td><td>No</td></tr>
                 </tbody>
             </table>
 
             <h3>How It Works</h3>
 
             <ol>
-                <li>At <strong>compile time</strong>: Parser reads <code>MathLib.strada</code> to get function signatures</li>
+                <li>At <strong>compile time</strong>: Compiler loads <code>MathLib.so</code> and calls <code>__strada_export_info()</code> to extract function signatures</li>
                 <li>Compiler generates wrapper functions that call into the shared library</li>
                 <li>At <strong>runtime</strong>: First call to any library function loads <code>MathLib.so</code> via <code>dlopen()</code></li>
                 <li>Subsequent calls use cached function pointers</li>
@@ -179,16 +179,15 @@ mv MathLib.o lib/</code></pre>
                     <tr><th>File</th><th>Purpose</th><th>Required</th></tr>
                 </thead>
                 <tbody>
-                    <tr><td><code>LibName.strada</code></td><td>Function signatures (compile time)</td><td>Yes</td></tr>
-                    <tr><td><code>LibName.o</code></td><td>Compiled code (linked at compile time)</td><td>Yes</td></tr>
+                    <tr><td><code>LibName.o</code></td><td>Compiled code + embedded metadata</td><td>Yes</td></tr>
+                    <tr><td><code>LibName.strada</code></td><td>Source (only needed for recompiling)</td><td>No</td></tr>
                 </tbody>
             </table>
 
             <h3>How It Works</h3>
 
             <ol>
-                <li>At <strong>compile time</strong>: Parser reads <code>MathLib.strada</code> for signatures</li>
-                <li>Extracts metadata from <code>MathLib.o</code> (via <code>__strada_export_info()</code>)</li>
+                <li>At <strong>compile time</strong>: Compiler extracts metadata from <code>MathLib.o</code> by calling <code>__strada_export_info()</code></li>
                 <li>Generates direct function calls (no wrappers needed)</li>
                 <li>Links <code>MathLib.o</code> into the final executable with gcc</li>
             </ol>
@@ -387,9 +386,9 @@ Call examples:
                         <td>Add <code>use lib "path"</code> or move .so to lib/</td>
                     </tr>
                     <tr>
-                        <td><code>cannot find LibName.strada</code></td>
-                        <td>.strada file missing</td>
-                        <td>Keep .strada file alongside .so/.o</td>
+                        <td><code>cannot find LibName.o</code></td>
+                        <td>.o file not in search path</td>
+                        <td>Add <code>use lib "path"</code> or move .o to lib/</td>
                     </tr>
                     <tr>
                         <td><code>undefined symbol</code></td>
