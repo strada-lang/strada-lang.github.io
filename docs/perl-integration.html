@@ -281,15 +281,15 @@ make install  <span class="comment"># optional</span></code></pre>
 <span class="comment"># Load the library</span>
 <span class="keyword">my</span> $lib = Strada::Library->new('./mylib.so');
 
-<span class="comment"># Call functions (package__function naming)</span>
-<span class="keyword">my</span> $sum = $lib->call('mylib__add', 10, 20);
+<span class="comment"># Call functions (package_function naming)</span>
+<span class="keyword">my</span> $sum = $lib->call('mylib_add', 10, 20);
 <span class="keyword">print</span> "10 + 20 = $sum\n";  <span class="comment"># 30</span>
 
-<span class="keyword">my</span> $greeting = $lib->call('mylib__greet', 'Perl');
+<span class="keyword">my</span> $greeting = $lib->call('mylib_greet', 'Perl');
 <span class="keyword">print</span> "$greeting\n";  <span class="comment"># Hello, Perl!</span>
 
 <span class="comment"># Pass arrays</span>
-<span class="keyword">my</span> $total = $lib->call('mylib__sum_list', [1, 2, 3, 4, 5]);
+<span class="keyword">my</span> $total = $lib->call('mylib_sum_list', [1, 2, 3, 4, 5]);
 <span class="keyword">print</span> "Sum: $total\n";  <span class="comment"># 15</span>
 
 <span class="comment"># Unload when done</span>
@@ -297,30 +297,38 @@ $lib->unload();</code></pre>
 
             <h3>Function Naming Convention</h3>
 
-            <p>Strada functions are exported with double underscore naming:</p>
+            <p>Strada functions are exported as <code>package_function</code> (underscore-separated). The Perl module accepts both styles:</p>
 
             <table>
                 <thead>
                     <tr>
                         <th>Strada Declaration</th>
-                        <th>Exported Name</th>
+                        <th>C Name</th>
+                        <th>Perl Call (both work)</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td><code>package foo; func bar()</code></td>
-                        <td><code>foo__bar</code></td>
+                        <td><code>foo_bar</code></td>
+                        <td><code>'foo_bar'</code> or <code>'foo::bar'</code></td>
                     </tr>
                     <tr>
                         <td><code>package utils; func format()</code></td>
-                        <td><code>utils__format</code></td>
+                        <td><code>utils_format</code></td>
+                        <td><code>'utils_format'</code> or <code>'utils::format'</code></td>
                     </tr>
                     <tr>
                         <td><code>package MyLib; func process()</code></td>
-                        <td><code>MyLib__process</code></td>
+                        <td><code>MyLib_process</code></td>
+                        <td><code>'MyLib_process'</code> or <code>'MyLib::process'</code></td>
                     </tr>
                 </tbody>
             </table>
+
+            <div class="info-box">
+                <strong>Namespace syntax supported:</strong> The Perl module automatically converts <code>::</code> to <code>_</code>, so you can use familiar Strada/Perl syntax like <code>$lib->call('mylib::add', 1, 2)</code>.
+            </div>
 
             <h3>Type Conversion</h3>
 
@@ -394,7 +402,7 @@ perl5::shutdown();</code></pre>
 
 <span class="comment"># Strada handles the heavy lifting</span>
 <span class="keyword">for</span> <span class="keyword">my</span> $data (@large_dataset) {
-    <span class="keyword">my</span> $result = $lib->call('compute__process', $data);
+    <span class="keyword">my</span> $result = $lib->call('compute_process', $data);
     <span class="keyword">push</span> @results, $result;
 }
 
