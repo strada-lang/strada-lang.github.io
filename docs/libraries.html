@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Libraries Guide - Strada Documentation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <a href="../index.html" class="logo">Strada<span>Lang</span></a>
+        <ul>
+            <li><a href="quickstart.html">QuickStart</a></li>
+            <li><a href="index.html">Docs</a></li>
+            <li><a href="reference.html">Reference</a></li>
+            <li><a href="https://github.com/strada-lang/strada-lang">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h3>Getting Started</h3>
+            <ul>
+                <li><a href="quickstart.html">QuickStart</a></li>
+                <li><a href="index.html">Documentation</a></li>
+            </ul>
+            <h3>Language Guide</h3>
+            <ul>
+                <li><a href="basics.html">Language Basics</a></li>
+                <li><a href="types.html">Types & Variables</a></li>
+                <li><a href="functions.html">Functions</a></li>
+                <li><a href="control-flow.html">Control Flow</a></li>
+                <li><a href="oop.html">Object-Oriented Programming</a></li>
+            </ul>
+            <h3>Advanced</h3>
+            <ul>
+                <li><a href="c-interop.html">C Interoperability</a></li>
+                <li><a href="libraries.html" class="active">Libraries Guide</a></li>
+            </ul>
+            <h3>Reference</h3>
+            <ul>
+                <li><a href="reference.html">Built-in Functions</a></li>
+                <li><a href="cannoli.html">Cannoli Web Framework</a></li>
+            </ul>
+        </aside>
+
+        <main class="content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a> / <a href="index.html">Docs</a> / Libraries Guide
+            </div>
+
+            <h1>Libraries <span>Guide</span></h1>
+            <p class="subtitle">Create, distribute, and use reusable Strada libraries.</p>
+
+            <h2>Overview</h2>
+
+            <p>Strada supports two types of libraries:</p>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h4>Shared Libraries (.so)</h4>
+                    <p>Dynamically loaded at runtime. Use <code>import_lib</code> to import.</p>
+                    <p><strong>Best for:</strong> Plugins, optional features, reducing executable size</p>
+                </div>
+                <div class="card">
+                    <h4>Object Files (.o)</h4>
+                    <p>Statically linked at compile time. Use <code>import_object</code> to import.</p>
+                    <p><strong>Best for:</strong> Core libraries, single-file distribution, faster startup</p>
+                </div>
+            </div>
+
+            <h2>Creating a Library</h2>
+
+            <h3>Step 1: Write Your Library</h3>
+
+            <p>Create a Strada file with a <code>package</code> declaration and optional <code>version</code>:</p>
+
+            <pre><code><span class="comment"># lib/MathLib.strada</span>
+<span class="keyword">package</span> <span class="type">MathLib</span>;
+<span class="keyword">version</span> <span class="string">"1.0.0"</span>;
+
+<span class="keyword">func</span> <span class="func">add</span>(<span class="type">int</span> <span class="sigil">$a</span>, <span class="type">int</span> <span class="sigil">$b</span>) <span class="type">int</span> {
+    <span class="keyword">return</span> <span class="sigil">$a</span> + <span class="sigil">$b</span>;
+}
+
+<span class="keyword">func</span> <span class="func">multiply</span>(<span class="type">int</span> <span class="sigil">$a</span>, <span class="type">int</span> <span class="sigil">$b</span>) <span class="type">int</span> {
+    <span class="keyword">return</span> <span class="sigil">$a</span> * <span class="sigil">$b</span>;
+}
+
+<span class="keyword">func</span> <span class="func">factorial</span>(<span class="type">int</span> <span class="sigil">$n</span>) <span class="type">int</span> {
+    <span class="keyword">if</span> (<span class="sigil">$n</span> <= <span class="number">1</span>) {
+        <span class="keyword">return</span> <span class="number">1</span>;
+    }
+    <span class="keyword">return</span> <span class="sigil">$n</span> * <span class="func">factorial</span>(<span class="sigil">$n</span> - <span class="number">1</span>);
+}</code></pre>
+
+            <div class="info-box">
+                <strong>Package naming:</strong> Functions are automatically prefixed with the package name. <code>func add()</code> becomes <code>MathLib_add()</code> internally.
+            </div>
+
+            <h3>Step 2: Compile the Library</h3>
+
+            <p><strong>For shared libraries (.so):</strong></p>
+            <pre><code>./strada --shared lib/MathLib.strada
+mv MathLib.so lib/</code></pre>
+
+            <p><strong>For object files (.o):</strong></p>
+            <pre><code>./strada --object lib/MathLib.strada
+mv MathLib.o lib/</code></pre>
+
+            <div class="info-box warning">
+                <strong>Keep the .strada file!</strong> Both <code>import_lib</code> and <code>import_object</code> need the original <code>.strada</code> file to read function signatures at compile time.
+            </div>
+
+            <h2>Using Shared Libraries (import_lib)</h2>
+
+            <p>Shared libraries are loaded at runtime using <code>dlopen()</code>. They're loaded lazily on first function call.</p>
+
+            <h3>Basic Usage</h3>
+
+            <pre><code><span class="keyword">use</span> lib <span class="string">"lib"</span>;          <span class="comment"># Add lib/ to search path</span>
+<span class="keyword">import_lib</span> <span class="string">"MathLib"</span>;    <span class="comment"># Import MathLib.so</span>
+
+<span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
+    <span class="comment"># Call with namespace syntax (recommended)</span>
+    <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$sum</span> = <span class="type">MathLib</span>::<span class="func">add</span>(<span class="number">10</span>, <span class="number">32</span>);
+    <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$product</span> = <span class="type">MathLib</span>::<span class="func">multiply</span>(<span class="number">6</span>, <span class="number">7</span>);
+    <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$fact</span> = <span class="type">MathLib</span>::<span class="func">factorial</span>(<span class="number">5</span>);
+
+    <span class="func">say</span>(<span class="string">"Sum: "</span> . <span class="sigil">$sum</span>);           <span class="comment"># 42</span>
+    <span class="func">say</span>(<span class="string">"Product: "</span> . <span class="sigil">$product</span>);   <span class="comment"># 42</span>
+    <span class="func">say</span>(<span class="string">"Factorial: "</span> . <span class="sigil">$fact</span>);   <span class="comment"># 120</span>
+
+    <span class="keyword">return</span> <span class="number">0</span>;
+}</code></pre>
+
+            <h3>Requirements</h3>
+
+            <table>
+                <thead>
+                    <tr><th>File</th><th>Purpose</th><th>Required</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>LibName.strada</code></td><td>Function signatures (compile time)</td><td>Yes</td></tr>
+                    <tr><td><code>LibName.so</code></td><td>Compiled code (runtime)</td><td>Yes</td></tr>
+                </tbody>
+            </table>
+
+            <h3>How It Works</h3>
+
+            <ol>
+                <li>At <strong>compile time</strong>: Parser reads <code>MathLib.strada</code> to get function signatures</li>
+                <li>Compiler generates wrapper functions that call into the shared library</li>
+                <li>At <strong>runtime</strong>: First call to any library function loads <code>MathLib.so</code> via <code>dlopen()</code></li>
+                <li>Subsequent calls use cached function pointers</li>
+            </ol>
+
+            <h2>Using Object Files (import_object)</h2>
+
+            <p>Object files are linked directly into your executable at compile time. The result is a single, self-contained binary.</p>
+
+            <h3>Basic Usage</h3>
+
+            <pre><code><span class="keyword">use</span> lib <span class="string">"lib"</span>;             <span class="comment"># Add lib/ to search path</span>
+<span class="keyword">import_object</span> <span class="string">"MathLib"</span>;   <span class="comment"># Link MathLib.o statically</span>
+
+<span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
+    <span class="comment"># Same syntax as import_lib</span>
+    <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$sum</span> = <span class="type">MathLib</span>::<span class="func">add</span>(<span class="number">10</span>, <span class="number">32</span>);
+    <span class="func">say</span>(<span class="sigil">$sum</span>);  <span class="comment"># 42</span>
+    <span class="keyword">return</span> <span class="number">0</span>;
+}</code></pre>
+
+            <h3>Requirements</h3>
+
+            <table>
+                <thead>
+                    <tr><th>File</th><th>Purpose</th><th>Required</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>LibName.strada</code></td><td>Function signatures (compile time)</td><td>Yes</td></tr>
+                    <tr><td><code>LibName.o</code></td><td>Compiled code (linked at compile time)</td><td>Yes</td></tr>
+                </tbody>
+            </table>
+
+            <h3>How It Works</h3>
+
+            <ol>
+                <li>At <strong>compile time</strong>: Parser reads <code>MathLib.strada</code> for signatures</li>
+                <li>Extracts metadata from <code>MathLib.o</code> (via <code>__strada_export_info()</code>)</li>
+                <li>Generates direct function calls (no wrappers needed)</li>
+                <li>Links <code>MathLib.o</code> into the final executable with gcc</li>
+            </ol>
+
+            <h2>Shared vs Object: When to Use Which</h2>
+
+            <table>
+                <thead>
+                    <tr><th>Feature</th><th>Shared (.so)</th><th>Object (.o)</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Linking</strong></td><td>Runtime (dlopen)</td><td>Compile time (gcc)</td></tr>
+                    <tr><td><strong>Distribution</strong></td><td>Multiple files</td><td>Single executable</td></tr>
+                    <tr><td><strong>Startup time</strong></td><td>Slightly slower (lazy load)</td><td>Faster</td></tr>
+                    <tr><td><strong>Memory sharing</strong></td><td>Shared between processes</td><td>Per-process</td></tr>
+                    <tr><td><strong>Updates</strong></td><td>Replace .so without recompile</td><td>Requires recompile</td></tr>
+                    <tr><td><strong>Plugins</strong></td><td>Excellent</td><td>Not suitable</td></tr>
+                </tbody>
+            </table>
+
+            <div class="info-box">
+                <strong>Rule of thumb:</strong> Use <code>import_object</code> for core libraries you always need. Use <code>import_lib</code> for optional features or plugins.
+            </div>
+
+            <h2>Library Search Paths</h2>
+
+            <p>The compiler searches for libraries in this order:</p>
+
+            <ol>
+                <li>Current directory</li>
+                <li>Paths added with <code>use lib "path"</code> (in order)</li>
+                <li>Paths added with <code>-L path</code> flag (high priority)</li>
+                <li>Paths added with <code>-LL path</code> flag (low priority)</li>
+            </ol>
+
+            <pre><code><span class="comment"># Multiple search paths</span>
+<span class="keyword">use</span> lib <span class="string">"lib"</span>;
+<span class="keyword">use</span> lib <span class="string">"vendor/lib"</span>;
+<span class="keyword">use</span> lib <span class="string">"/usr/local/strada/lib"</span>;
+
+<span class="keyword">import_lib</span> <span class="string">"JSON"</span>;      <span class="comment"># Searches all paths for JSON.so and JSON.strada</span>
+<span class="keyword">import_object</span> <span class="string">"Utils"</span>;  <span class="comment"># Searches all paths for Utils.o and Utils.strada</span></code></pre>
+
+            <h2>Library Versioning</h2>
+
+            <p>Add a version to your library with the <code>version</code> statement:</p>
+
+            <pre><code><span class="keyword">package</span> <span class="type">JSON</span>;
+<span class="keyword">version</span> <span class="string">"2.1.0"</span>;
+
+<span class="keyword">func</span> <span class="func">encode</span>(<span class="type">scalar</span> <span class="sigil">$data</span>) <span class="type">str</span> {
+    <span class="comment"># ...</span>
+}</code></pre>
+
+            <p>Retrieve the version at runtime:</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$lib</span> = <span class="func">sys::dl_open</span>(<span class="string">"lib/JSON.so"</span>);
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$fn</span> = <span class="func">sys::dl_sym</span>(<span class="sigil">$lib</span>, <span class="string">"__strada_version"</span>);
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$version</span> = <span class="func">sys::dl_call_version</span>(<span class="sigil">$fn</span>);
+<span class="func">say</span>(<span class="string">"JSON version: "</span> . <span class="sigil">$version</span>);  <span class="comment"># "2.1.0"</span></code></pre>
+
+            <h2>Inspecting Libraries</h2>
+
+            <p>Use the <code>soinfo</code> tool to inspect compiled libraries:</p>
+
+            <pre><code><span class="comment"># View library information</span>
+./tools/soinfo lib/JSON.so
+
+<span class="comment"># Show usage examples</span>
+./tools/soinfo --examples lib/JSON.so</code></pre>
+
+            <p>Example output:</p>
+            <pre><code>Library: lib/JSON.so
+Package: JSON
+Version: 2.1.0
+
+Exported functions:
+  JSON_encode(scalar $data) -> str
+  JSON_decode(str $json) -> scalar
+  JSON_pretty(scalar $data) -> str
+
+Call examples:
+  my str $result = JSON::encode($data);
+  my scalar $result = JSON::decode($json);
+  my str $result = JSON::pretty($data);</code></pre>
+
+            <h2>Complete Example: JSON Library</h2>
+
+            <h3>1. Create the Library</h3>
+
+            <pre><code><span class="comment"># lib/JSON.strada</span>
+<span class="keyword">package</span> <span class="type">JSON</span>;
+<span class="keyword">version</span> <span class="string">"1.0.0"</span>;
+
+<span class="keyword">func</span> <span class="func">encode</span>(<span class="type">scalar</span> <span class="sigil">$data</span>) <span class="type">str</span> {
+    <span class="keyword">return</span> <span class="func">json_encode</span>(<span class="sigil">$data</span>);
+}
+
+<span class="keyword">func</span> <span class="func">decode</span>(<span class="type">str</span> <span class="sigil">$json</span>) <span class="type">scalar</span> {
+    <span class="keyword">return</span> <span class="func">json_decode</span>(<span class="sigil">$json</span>);
+}
+
+<span class="keyword">func</span> <span class="func">pretty</span>(<span class="type">scalar</span> <span class="sigil">$data</span>) <span class="type">str</span> {
+    <span class="comment"># Pretty print with indentation</span>
+    <span class="keyword">return</span> <span class="func">json_encode_pretty</span>(<span class="sigil">$data</span>, <span class="number">2</span>);
+}</code></pre>
+
+            <h3>2. Compile</h3>
+
+            <pre><code><span class="comment"># As shared library</span>
+./strada --shared lib/JSON.strada && mv JSON.so lib/
+
+<span class="comment"># Or as object file</span>
+./strada --object lib/JSON.strada && mv JSON.o lib/</code></pre>
+
+            <h3>3. Use in Your Program</h3>
+
+            <pre><code><span class="comment"># app.strada</span>
+<span class="keyword">use</span> lib <span class="string">"lib"</span>;
+<span class="keyword">import_lib</span> <span class="string">"JSON"</span>;  <span class="comment"># or: import_object "JSON"</span>
+
+<span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
+    <span class="comment"># Create some data</span>
+    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%user</span> = {
+        <span class="string">"name"</span> => <span class="string">"Alice"</span>,
+        <span class="string">"age"</span> => <span class="number">30</span>,
+        <span class="string">"roles"</span> => [<span class="string">"admin"</span>, <span class="string">"user"</span>]
+    };
+
+    <span class="comment"># Encode to JSON</span>
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$json</span> = <span class="type">JSON</span>::<span class="func">encode</span>(\<span class="sigil">%user</span>);
+    <span class="func">say</span>(<span class="sigil">$json</span>);
+    <span class="comment"># {"name":"Alice","age":30,"roles":["admin","user"]}</span>
+
+    <span class="comment"># Pretty print</span>
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$pretty</span> = <span class="type">JSON</span>::<span class="func">pretty</span>(\<span class="sigil">%user</span>);
+    <span class="func">say</span>(<span class="sigil">$pretty</span>);
+
+    <span class="comment"># Decode back</span>
+    <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$decoded</span> = <span class="type">JSON</span>::<span class="func">decode</span>(<span class="sigil">$json</span>);
+    <span class="func">say</span>(<span class="sigil">$decoded</span>->{<span class="string">"name"</span>});  <span class="comment"># Alice</span>
+
+    <span class="keyword">return</span> <span class="number">0</span>;
+}</code></pre>
+
+            <h3>4. Compile and Run</h3>
+
+            <pre><code>./strada app.strada
+./app</code></pre>
+
+            <h2>Libraries with C Code</h2>
+
+            <p>Libraries can include embedded C code using <code>__C__</code> blocks:</p>
+
+            <pre><code><span class="comment"># lib/Compress.strada</span>
+<span class="keyword">package</span> <span class="type">Compress</span>;
+<span class="keyword">version</span> <span class="string">"1.0.0"</span>;
+
+<span class="keyword">__C__</span> {
+    #include &lt;zlib.h&gt;
+}
+
+<span class="keyword">func</span> <span class="func">gzip</span>(<span class="type">str</span> <span class="sigil">$data</span>) <span class="type">str</span> {
+    <span class="keyword">__C__</span> {
+        char *input = strada_to_str(data);
+        size_t input_len = strlen(input);
+        size_t output_len = compressBound(input_len);
+        char *output = malloc(output_len);
+
+        compress((Bytef*)output, &amp;output_len,
+                 (Bytef*)input, input_len);
+
+        free(input);
+        StradaValue *result = strada_new_str_len(output, output_len);
+        free(output);
+        return result;
+    }
+}</code></pre>
+
+            <p>Compile with additional libraries:</p>
+
+            <pre><code>./strada --shared lib/Compress.strada -- -lz</code></pre>
+
+            <h2>Troubleshooting</h2>
+
+            <h3>Common Errors</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Error</th><th>Cause</th><th>Solution</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>cannot find LibName.so</code></td>
+                        <td>.so file not in search path</td>
+                        <td>Add <code>use lib "path"</code> or move .so to lib/</td>
+                    </tr>
+                    <tr>
+                        <td><code>cannot find LibName.strada</code></td>
+                        <td>.strada file missing</td>
+                        <td>Keep .strada file alongside .so/.o</td>
+                    </tr>
+                    <tr>
+                        <td><code>undefined symbol</code></td>
+                        <td>Function not exported</td>
+                        <td>Check package name matches function prefix</td>
+                    </tr>
+                    <tr>
+                        <td><code>missing __strada_export_info</code></td>
+                        <td>Old library format</td>
+                        <td>Recompile library with current compiler</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="page-nav">
+                <a href="c-interop.html">
+                    <span class="label">&larr; Previous</span>
+                    <span class="title">C Interoperability</span>
+                </a>
+                <a href="reference.html" class="next">
+                    <span class="label">Next &rarr;</span>
+                    <span class="title">Built-in Functions</span>
+                </a>
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <p><a href="../index.html">Strada</a> - A strongly-typed language inspired by Perl</p>
+    </footer>
+</body>
+</html>
