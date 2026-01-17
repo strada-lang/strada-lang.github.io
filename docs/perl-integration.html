@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perl Integration - Strada</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <a href="../index.html" class="logo">Strada<span>Lang</span></a>
+        <ul>
+            <li><a href="quickstart.html">QuickStart</a></li>
+            <li><a href="index.html">Docs</a></li>
+            <li><a href="reference.html">Reference</a></li>
+            <li><a href="https://github.com/strada-lang/strada-lang">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h3>Getting Started</h3>
+            <ul>
+                <li><a href="quickstart.html">QuickStart</a></li>
+                <li><a href="index.html">Documentation</a></li>
+            </ul>
+            <h3>Language Guide</h3>
+            <ul>
+                <li><a href="basics.html">Language Basics</a></li>
+                <li><a href="types.html">Types & Variables</a></li>
+                <li><a href="functions.html">Functions</a></li>
+                <li><a href="control-flow.html">Control Flow</a></li>
+                <li><a href="oop.html">Object-Oriented Programming</a></li>
+            </ul>
+            <h3>Advanced</h3>
+            <ul>
+                <li><a href="c-interop.html">C Interoperability</a></li>
+                <li><a href="libraries.html">Libraries Guide</a></li>
+                <li><a href="perl-integration.html" class="active">Perl Integration</a></li>
+            </ul>
+            <h3>Reference</h3>
+            <ul>
+                <li><a href="reference.html">Built-in Functions</a></li>
+                <li><a href="cannoli.html">Cannoli Web Framework</a></li>
+            </ul>
+        </aside>
+
+        <main class="content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a> / <a href="index.html">Docs</a> / Perl Integration
+            </div>
+
+            <h1>Perl <span>Integration</span></h1>
+            <p class="subtitle">Bidirectional integration between Strada and Perl 5.</p>
+
+            <p>Strada provides two-way integration with Perl:</p>
+            <ul>
+                <li><strong>Strada calling Perl</strong> - Embed a Perl interpreter in Strada programs</li>
+                <li><strong>Perl calling Strada</strong> - Load Strada shared libraries from Perl</li>
+            </ul>
+
+            <h2>Strada Calling Perl</h2>
+
+            <p>The <code>perl5</code> module allows Strada programs to embed and interact with a Perl 5 interpreter. This gives you access to the entire CPAN ecosystem from Strada.</p>
+
+            <h3>Basic Usage</h3>
+
+            <pre><code><span class="keyword">use</span> lib <span class="string">"lib"</span>;
+<span class="keyword">use</span> perl5;
+
+<span class="keyword">func</span> <span class="function">main</span>() <span class="type">int</span> {
+    <span class="comment"># Initialize Perl (required first)</span>
+    perl5::init();
+
+    <span class="comment"># Evaluate expressions</span>
+    <span class="keyword">my</span> <span class="type">str</span> <span class="variable">$result</span> = perl5::eval(<span class="string">"2 ** 10"</span>);
+    say(<span class="string">"2^10 = "</span> . <span class="variable">$result</span>);  <span class="comment"># 1024</span>
+
+    <span class="comment"># Define and call subroutines</span>
+    perl5::run(<span class="string">"sub double { return $_[0] * 2; }"</span>);
+    <span class="keyword">my</span> <span class="type">str</span> <span class="variable">$doubled</span> = perl5::call(<span class="string">"double"</span>, <span class="string">"21"</span>);
+    say(<span class="string">"21 doubled = "</span> . <span class="variable">$doubled</span>);  <span class="comment"># 42</span>
+
+    <span class="comment"># Use CPAN modules</span>
+    <span class="keyword">if</span> (perl5::use_module(<span class="string">"List::Util"</span>) == <span class="number">1</span>) {
+        perl5::run(<span class="string">"@nums = (1, 5, 3, 9, 2);"</span>);
+        <span class="keyword">my</span> <span class="type">str</span> <span class="variable">$max</span> = perl5::eval(<span class="string">"List::Util::max(@nums)"</span>);
+        say(<span class="string">"Max: "</span> . <span class="variable">$max</span>);  <span class="comment"># 9</span>
+    }
+
+    <span class="comment"># Cleanup</span>
+    perl5::shutdown();
+    <span class="keyword">return</span> <span class="number">0</span>;
+}</code></pre>
+
+            <h3>Compilation</h3>
+
+            <p>You need to link against libperl when compiling:</p>
+
+            <pre><code><span class="comment"># Compile with Perl embedding flags</span>
+./strada myapp.strada $(perl -MExtUtils::Embed -e ccopts -e ldopts)</code></pre>
+
+            <h3>API Reference</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Function</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>perl5::init()</code></td>
+                        <td>Initialize Perl interpreter. Returns 1 on success, 0 on failure.</td>
+                    </tr>
+                    <tr>
+                        <td><code>perl5::shutdown()</code></td>
+                        <td>Shutdown the Perl interpreter and free resources.</td>
+                    </tr>
+                    <tr>
+                        <td><code>perl5::is_init()</code></td>
+                        <td>Check if Perl is initialized. Returns 1 if yes, 0 if no.</td>
+                    </tr>
+                    <tr>
+                        <td><code>perl5::eval($code)</code></td>
+                        <td>Evaluate Perl code and return the result as a string.</td>
+                    </tr>
+                    <tr>
+                        <td><code>perl5::run($code)</code></td>
+                        <td>Execute Perl code without returning a value.</td>
+                    </tr>
+                    <tr>
+                        <td><code>perl5::call($sub, $arg)</code></td>
+                        <td>Call a Perl subroutine with a single string argument.</td>
+                    </tr>
+                    <tr>
+                        <td><code>perl5::call_noargs($sub)</code></td>
+                        <td>Call a Perl subroutine with no arguments.</td>
+                    </tr>
+                    <tr>
+                        <td><code>perl5::call_list($sub, $sep)</code></td>
+                        <td>Call a sub that returns a list, join with separator.</td>
+                    </tr>
+                    <tr>
+                        <td><code>perl5::use_module($mod)</code></td>
+                        <td>Load a Perl module (like <code>use Module;</code>). Returns 1 on success.</td>
+                    </tr>
+                    <tr>
+                        <td><code>perl5::require_module($mod)</code></td>
+                        <td>Require a Perl module. Returns 1 on success.</td>
+                    </tr>
+                    <tr>
+                        <td><code>perl5::set_var($name, $val)</code></td>
+                        <td>Set a Perl scalar variable.</td>
+                    </tr>
+                    <tr>
+                        <td><code>perl5::get_var($name)</code></td>
+                        <td>Get the value of a Perl scalar variable.</td>
+                    </tr>
+                    <tr>
+                        <td><code>perl5::add_inc($path)</code></td>
+                        <td>Add a path to Perl's @INC.</td>
+                    </tr>
+                    <tr>
+                        <td><code>perl5::get_error()</code></td>
+                        <td>Get the last Perl error ($@).</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Working with Variables</h3>
+
+            <pre><code><span class="comment"># Set and get Perl variables</span>
+perl5::set_var(<span class="string">"$name"</span>, <span class="string">"Alice"</span>);
+perl5::set_var(<span class="string">"$age"</span>, <span class="string">"30"</span>);
+
+<span class="keyword">my</span> <span class="type">str</span> <span class="variable">$name</span> = perl5::get_var(<span class="string">"$name"</span>);
+say(<span class="string">"Name: "</span> . <span class="variable">$name</span>);  <span class="comment"># Alice</span>
+
+<span class="comment"># Work with arrays and hashes in Perl</span>
+perl5::run(<span class="string">"@colors = qw(red green blue);"</span>);
+perl5::run(<span class="string">"%person = (name => 'Bob', age => 25);"</span>);
+
+<span class="keyword">my</span> <span class="type">str</span> <span class="variable">$count</span> = perl5::eval(<span class="string">"scalar(@colors)"</span>);
+<span class="keyword">my</span> <span class="type">str</span> <span class="variable">$person_name</span> = perl5::eval(<span class="string">"$person{name}"</span>);</code></pre>
+
+            <h3>Using CPAN Modules</h3>
+
+            <pre><code><span class="comment"># HTTP requests with LWP</span>
+<span class="keyword">if</span> (perl5::use_module(<span class="string">"LWP::Simple"</span>) == <span class="number">1</span>) {
+    <span class="keyword">my</span> <span class="type">str</span> <span class="variable">$html</span> = perl5::eval(<span class="string">"get('http://example.com')"</span>);
+    say(<span class="string">"Got "</span> . length(<span class="variable">$html</span>) . <span class="string">" bytes"</span>);
+}
+
+<span class="comment"># JSON parsing</span>
+<span class="keyword">if</span> (perl5::use_module(<span class="string">"JSON"</span>) == <span class="number">1</span>) {
+    perl5::set_var(<span class="string">"$json_str"</span>, <span class="string">"{\"name\":\"test\"}"</span>);
+    perl5::run(<span class="string">"$data = decode_json($json_str);"</span>);
+    <span class="keyword">my</span> <span class="type">str</span> <span class="variable">$name</span> = perl5::eval(<span class="string">"$data->{name}"</span>);
+}
+
+<span class="comment"># Database access with DBI</span>
+<span class="keyword">if</span> (perl5::use_module(<span class="string">"DBI"</span>) == <span class="number">1</span>) {
+    perl5::run(<span class="string">"$dbh = DBI->connect('dbi:SQLite:test.db');"</span>);
+    perl5::run(<span class="string">"$sth = $dbh->prepare('SELECT * FROM users');"</span>);
+    perl5::run(<span class="string">"$sth->execute();"</span>);
+    <span class="comment"># ... process results</span>
+}</code></pre>
+
+            <h3>XS Module Support</h3>
+
+            <p>XS-based Perl modules (compiled modules like POSIX, JSON::XS, DBI) require the Perl library to be preloaded:</p>
+
+            <pre><code><span class="comment"># Find your libperl path</span>
+perl -MConfig -e 'print $Config{archlib}'
+
+<span class="comment"># Run with LD_PRELOAD</span>
+LD_PRELOAD=/lib/x86_64-linux-gnu/libperl.so.5.38 ./myapp</code></pre>
+
+            <p>Pure Perl modules work without this workaround.</p>
+
+            <h3>Error Handling</h3>
+
+            <pre><code><span class="comment"># Check for errors after eval</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="variable">$result</span> = perl5::eval(<span class="string">"some_code()"</span>);
+<span class="keyword">my</span> <span class="type">str</span> <span class="variable">$error</span> = perl5::get_error();
+
+<span class="keyword">if</span> (length(<span class="variable">$error</span>) > <span class="number">0</span>) {
+    say(<span class="string">"Perl error: "</span> . <span class="variable">$error</span>);
+} <span class="keyword">else</span> {
+    say(<span class="string">"Result: "</span> . <span class="variable">$result</span>);
+}</code></pre>
+
+            <h2>Perl Calling Strada</h2>
+
+            <p>The <code>Strada</code> Perl module allows Perl programs to load and call functions from compiled Strada shared libraries. This lets you write performance-critical code in Strada and use it from Perl.</p>
+
+            <h3>Setup</h3>
+
+            <pre><code><span class="comment"># Build the Perl XS module</span>
+cd perl/Strada
+perl Makefile.PL
+make
+make test
+make install  <span class="comment"># optional</span></code></pre>
+
+            <h3>Creating a Strada Library</h3>
+
+            <p>First, write your Strada code as a library:</p>
+
+            <pre><code><span class="comment"># mylib.strada</span>
+<span class="keyword">package</span> mylib;
+
+<span class="keyword">func</span> <span class="function">add</span>(<span class="type">int</span> <span class="variable">$a</span>, <span class="type">int</span> <span class="variable">$b</span>) <span class="type">int</span> {
+    <span class="keyword">return</span> <span class="variable">$a</span> + <span class="variable">$b</span>;
+}
+
+<span class="keyword">func</span> <span class="function">greet</span>(<span class="type">str</span> <span class="variable">$name</span>) <span class="type">str</span> {
+    <span class="keyword">return</span> <span class="string">"Hello, "</span> . <span class="variable">$name</span> . <span class="string">"!"</span>;
+}
+
+<span class="keyword">func</span> <span class="function">sum_list</span>(<span class="type">scalar</span> <span class="variable">$items</span>) <span class="type">int</span> {
+    <span class="keyword">my</span> <span class="type">int</span> <span class="variable">$sum</span> = <span class="number">0</span>;
+    <span class="keyword">foreach</span> <span class="keyword">my</span> <span class="type">int</span> <span class="variable">$x</span> (<span class="variable">$items</span>) {
+        <span class="variable">$sum</span> = <span class="variable">$sum</span> + <span class="variable">$x</span>;
+    }
+    <span class="keyword">return</span> <span class="variable">$sum</span>;
+}</code></pre>
+
+            <p>Compile it as a shared library:</p>
+
+            <pre><code>./strada --shared mylib.strada
+<span class="comment"># Creates mylib.so</span></code></pre>
+
+            <h3>Using from Perl</h3>
+
+            <pre><code><span class="comment">#!/usr/bin/perl</span>
+<span class="keyword">use</span> Strada;
+
+<span class="comment"># Load the library</span>
+<span class="keyword">my</span> $lib = Strada::Library->new('./mylib.so');
+
+<span class="comment"># Call functions (package__function naming)</span>
+<span class="keyword">my</span> $sum = $lib->call('mylib__add', 10, 20);
+<span class="keyword">print</span> "10 + 20 = $sum\n";  <span class="comment"># 30</span>
+
+<span class="keyword">my</span> $greeting = $lib->call('mylib__greet', 'Perl');
+<span class="keyword">print</span> "$greeting\n";  <span class="comment"># Hello, Perl!</span>
+
+<span class="comment"># Pass arrays</span>
+<span class="keyword">my</span> $total = $lib->call('mylib__sum_list', [1, 2, 3, 4, 5]);
+<span class="keyword">print</span> "Sum: $total\n";  <span class="comment"># 15</span>
+
+<span class="comment"># Unload when done</span>
+$lib->unload();</code></pre>
+
+            <h3>Function Naming Convention</h3>
+
+            <p>Strada functions are exported with double underscore naming:</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Strada Declaration</th>
+                        <th>Exported Name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>package foo; func bar()</code></td>
+                        <td><code>foo__bar</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>package utils; func format()</code></td>
+                        <td><code>utils__format</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>package MyLib; func process()</code></td>
+                        <td><code>MyLib__process</code></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Type Conversion</h3>
+
+            <p>Types are automatically converted between Strada and Perl:</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Strada Type</th>
+                        <th>Perl Type</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>int</code></td>
+                        <td>Integer (IV)</td>
+                    </tr>
+                    <tr>
+                        <td><code>num</code></td>
+                        <td>Float (NV)</td>
+                    </tr>
+                    <tr>
+                        <td><code>str</code></td>
+                        <td>String (PV)</td>
+                    </tr>
+                    <tr>
+                        <td><code>array</code></td>
+                        <td>Array reference</td>
+                    </tr>
+                    <tr>
+                        <td><code>hash</code></td>
+                        <td>Hash reference</td>
+                    </tr>
+                    <tr>
+                        <td><code>undef</code></td>
+                        <td>undef</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Use Cases</h2>
+
+            <h3>Access CPAN from Strada</h3>
+
+            <p>Use any of the thousands of CPAN modules from your Strada programs:</p>
+
+            <pre><code>perl5::init();
+
+<span class="comment"># Parse YAML</span>
+perl5::use_module(<span class="string">"YAML"</span>);
+<span class="keyword">my</span> <span class="type">str</span> <span class="variable">$yaml</span> = perl5::eval(<span class="string">"YAML::Dump({name => 'test'})"</span>);
+
+<span class="comment"># Send email</span>
+perl5::use_module(<span class="string">"Email::Simple"</span>);
+perl5::use_module(<span class="string">"Email::Sender::Simple"</span>);
+
+<span class="comment"># Date handling</span>
+perl5::use_module(<span class="string">"DateTime"</span>);
+<span class="keyword">my</span> <span class="type">str</span> <span class="variable">$now</span> = perl5::eval(<span class="string">"DateTime->now->iso8601"</span>);
+
+perl5::shutdown();</code></pre>
+
+            <h3>High-Performance Code from Perl</h3>
+
+            <p>Write performance-critical code in compiled Strada, call from Perl:</p>
+
+            <pre><code><span class="comment">#!/usr/bin/perl</span>
+<span class="keyword">use</span> Strada;
+
+<span class="keyword">my</span> $lib = Strada::Library->new('./libcompute.so');
+
+<span class="comment"># Strada handles the heavy lifting</span>
+<span class="keyword">for</span> <span class="keyword">my</span> $data (@large_dataset) {
+    <span class="keyword">my</span> $result = $lib->call('compute__process', $data);
+    <span class="keyword">push</span> @results, $result;
+}
+
+$lib->unload();</code></pre>
+
+            <h3>Mixed Language Projects</h3>
+
+            <p>Combine the strengths of both languages:</p>
+            <ul>
+                <li><strong>Strada</strong> - Type-safe, compiled performance, native binaries</li>
+                <li><strong>Perl</strong> - Rapid prototyping, text processing, CPAN ecosystem</li>
+            </ul>
+
+            <h2>Directory Structure</h2>
+
+            <pre><code>lib/
+  perl5.strada           <span class="comment"># Strada module for calling Perl</span>
+
+perl/
+  Strada/
+    Strada.xs            <span class="comment"># XS implementation</span>
+    Strada.pm            <span class="comment"># Perl module</span>
+    Makefile.PL          <span class="comment"># Build configuration</span>
+    t/
+      01_basic.t         <span class="comment"># Test suite</span></code></pre>
+
+            <h2>See Also</h2>
+
+            <ul>
+                <li><a href="c-interop.html">C Interoperability</a> - Working with C code directly</li>
+                <li><a href="libraries.html">Libraries Guide</a> - Creating and using Strada libraries</li>
+                <li><code>examples/test_perl5.strada</code> - Complete example program</li>
+            </ul>
+
+        </main>
+    </div>
+
+    <footer>
+        <p><a href="../index.html">Strada</a> - A strongly-typed language inspired by Perl</p>
+        <p style="margin-top: 0.5rem; font-size: 0.85rem;">Licensed under <a href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html">GPLv2</a> | <a href="https://github.com/strada-lang/strada-lang">GitHub</a></p>
+    </footer>
+</body>
+</html>
