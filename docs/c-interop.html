@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>C Interoperability - Strada Documentation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <a href="../index.html" class="logo">Strada<span>Lang</span></a>
+        <ul>
+            <li><a href="quickstart.html">QuickStart</a></li>
+            <li><a href="index.html">Docs</a></li>
+            <li><a href="reference.html">Reference</a></li>
+            <li><a href="https://github.com/strada-lang/strada-lang">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h3>Getting Started</h3>
+            <ul>
+                <li><a href="quickstart.html">QuickStart</a></li>
+                <li><a href="index.html">Documentation</a></li>
+            </ul>
+            <h3>Language Guide</h3>
+            <ul>
+                <li><a href="basics.html">Language Basics</a></li>
+                <li><a href="types.html">Types & Variables</a></li>
+                <li><a href="functions.html">Functions</a></li>
+                <li><a href="control-flow.html">Control Flow</a></li>
+                <li><a href="oop.html">Object-Oriented Programming</a></li>
+            </ul>
+            <h3>Advanced</h3>
+            <ul>
+                <li><a href="c-interop.html" class="active">C Interoperability</a></li>
+            </ul>
+            <h3>Reference</h3>
+            <ul>
+                <li><a href="reference.html">Built-in Functions</a></li>
+                <li><a href="cannoli.html">Cannoli Web Framework</a></li>
+            </ul>
+        </aside>
+
+        <main class="content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a> / <a href="index.html">Docs</a> / C Interoperability
+            </div>
+
+            <h1>C <span>Interoperability</span></h1>
+            <p class="subtitle">Embed C code directly in Strada programs and interface with C libraries.</p>
+
+            <h2>Overview</h2>
+
+            <p>Strada provides powerful C interoperability through <code>__C__</code> blocks, which let you embed raw C code directly in your Strada programs. This enables:</p>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h4>Direct C Access</h4>
+                    <p>Call any C library function, use C data structures, and leverage existing C code.</p>
+                </div>
+                <div class="card">
+                    <h4>High Performance</h4>
+                    <p>Write performance-critical code in C while keeping the rest of your program in Strada.</p>
+                </div>
+                <div class="card">
+                    <h4>System Integration</h4>
+                    <p>Access operating system APIs, hardware interfaces, and low-level functionality.</p>
+                </div>
+            </div>
+
+            <h2>__C__ Blocks</h2>
+
+            <p>There are two types of <code>__C__</code> blocks:</p>
+
+            <h3>Top-Level Blocks</h3>
+
+            <p>Place at file scope for includes, global variables, and C helper functions:</p>
+
+            <pre><code><span class="keyword">__C__</span> {
+    <span class="comment">#include &lt;stdio.h&gt;</span>
+    <span class="comment">#include &lt;math.h&gt;</span>
+    <span class="comment">#include &lt;openssl/ssl.h&gt;</span>
+
+    <span class="comment">// Global state</span>
+    <span class="keyword">static</span> SSL_CTX *g_ssl_ctx = NULL;
+    <span class="keyword">static</span> <span class="keyword">int</span> g_initialized = 0;
+
+    <span class="comment">// C helper function</span>
+    <span class="keyword">static double</span> fast_distance(<span class="keyword">double</span> x1, <span class="keyword">double</span> y1,
+                                <span class="keyword">double</span> x2, <span class="keyword">double</span> y2) {
+        <span class="keyword">double</span> dx = x2 - x1;
+        <span class="keyword">double</span> dy = y2 - y1;
+        <span class="keyword">return</span> sqrt(dx*dx + dy*dy);
+    }
+}</code></pre>
+
+            <div class="info-box">
+                <strong>Top-level blocks appear at the top of the generated C file</strong>, before any Strada-generated code. This ensures includes and declarations are available throughout the file.
+            </div>
+
+            <h3>Statement-Level Blocks</h3>
+
+            <p>Use inside functions to write inline C code with access to Strada variables:</p>
+
+            <pre><code><span class="keyword">func</span> <span class="func">calculate_sqrt</span>(<span class="type">num</span> <span class="sigil">$x</span>) <span class="type">num</span> {
+    <span class="keyword">__C__</span> {
+        <span class="comment">// Access Strada variable 'x' (it's a StradaValue*)</span>
+        <span class="keyword">double</span> val = strada_to_num(x);
+
+        <span class="comment">// Do the computation in C</span>
+        <span class="keyword">double</span> result = sqrt(val);
+
+        <span class="comment">// Return a new StradaValue</span>
+        <span class="keyword">return</span> strada_new_num(result);
+    }
+}</code></pre>
+
+            <div class="info-box warning">
+                <strong>Variable Naming</strong>: Inside <code>__C__</code> blocks, Strada variables are available by their name <em>without</em> the sigil. So <code>$x</code> becomes just <code>x</code>, and it's a <code>StradaValue*</code>.
+            </div>
+
+            <h2>Runtime Functions</h2>
+
+            <p>The Strada runtime provides functions to convert between C types and <code>StradaValue*</code>:</p>
+
+            <h3>Extracting Values (StradaValue* → C)</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Function</th><th>Returns</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>strada_to_int(sv)</code></td><td><code>int64_t</code></td><td>Extract integer value</td></tr>
+                    <tr><td><code>strada_to_num(sv)</code></td><td><code>double</code></td><td>Extract floating-point value</td></tr>
+                    <tr><td><code>strada_to_str(sv)</code></td><td><code>char*</code></td><td>Extract string (<strong>caller must free!</strong>)</td></tr>
+                    <tr><td><code>strada_to_bool(sv)</code></td><td><code>int</code></td><td>Extract boolean (0 or 1)</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Creating Values (C → StradaValue*)</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Function</th><th>Parameter</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>strada_new_int(i)</code></td><td><code>int64_t</code></td><td>Create integer value</td></tr>
+                    <tr><td><code>strada_new_num(n)</code></td><td><code>double</code></td><td>Create floating-point value</td></tr>
+                    <tr><td><code>strada_new_str(s)</code></td><td><code>const char*</code></td><td>Create string (copies the string)</td></tr>
+                    <tr><td><code>strada_new_str_len(s, len)</code></td><td><code>const char*, size_t</code></td><td>Create string with explicit length</td></tr>
+                    <tr><td><code>&amp;strada_undef</code></td><td>-</td><td>Return undef value</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Reference Counting</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Function</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>strada_incref(sv)</code></td><td>Increment reference count</td></tr>
+                    <tr><td><code>strada_decref(sv)</code></td><td>Decrement reference count (may free)</td></tr>
+                </tbody>
+            </table>
+
+            <div class="info-box danger">
+                <strong>Memory Management</strong>: <code>strada_to_str()</code> allocates a new string that you must <code>free()</code>. Forgetting to free causes memory leaks!
+            </div>
+
+            <h2>Opaque Handle Pattern</h2>
+
+            <p>C pointers can be stored in Strada <code>int</code> variables (which are 64-bit). This "opaque handle" pattern is the standard way to manage C resources:</p>
+
+            <pre><code><span class="keyword">__C__</span> {
+    <span class="comment">#include &lt;openssl/ssl.h&gt;</span>
+
+    <span class="keyword">static</span> SSL_CTX *g_ctx = NULL;
+
+    <span class="keyword">static void</span> ensure_ssl_init() {
+        <span class="keyword">if</span> (!g_ctx) {
+            SSL_library_init();
+            g_ctx = SSL_CTX_new(TLS_client_method());
+        }
+    }
+}
+
+<span class="keyword">func</span> <span class="func">ssl_connect</span>(<span class="type">str</span> <span class="sigil">$host</span>, <span class="type">int</span> <span class="sigil">$port</span>) <span class="type">int</span> {
+    <span class="keyword">__C__</span> {
+        ensure_ssl_init();
+
+        <span class="keyword">char</span> *h = strada_to_str(host);
+        <span class="keyword">int</span> p = (<span class="keyword">int</span>)strada_to_int(port);
+
+        <span class="comment">// Create connection...</span>
+        SSL *ssl = SSL_new(g_ctx);
+        <span class="comment">// ... connect to host:port ...</span>
+
+        free(h);
+
+        <span class="comment">// Store pointer as int64_t</span>
+        <span class="keyword">return</span> strada_new_int((<span class="keyword">int64_t</span>)(<span class="keyword">intptr_t</span>)ssl);
+    }
+}
+
+<span class="keyword">func</span> <span class="func">ssl_write</span>(<span class="type">int</span> <span class="sigil">$handle</span>, <span class="type">str</span> <span class="sigil">$data</span>) <span class="type">int</span> {
+    <span class="keyword">__C__</span> {
+        <span class="comment">// Retrieve pointer from int</span>
+        SSL *ssl = (SSL*)(<span class="keyword">intptr_t</span>)strada_to_int(handle);
+
+        <span class="keyword">char</span> *d = strada_to_str(data);
+        <span class="keyword">int</span> written = SSL_write(ssl, d, strlen(d));
+        free(d);
+
+        <span class="keyword">return</span> strada_new_int(written);
+    }
+}
+
+<span class="keyword">func</span> <span class="func">ssl_close</span>(<span class="type">int</span> <span class="sigil">$handle</span>) <span class="type">void</span> {
+    <span class="keyword">__C__</span> {
+        SSL *ssl = (SSL*)(<span class="keyword">intptr_t</span>)strada_to_int(handle);
+        SSL_shutdown(ssl);
+        SSL_free(ssl);
+        <span class="keyword">return</span> &amp;strada_undef;
+    }
+}</code></pre>
+
+            <h3>Usage</h3>
+
+            <pre><code><span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$conn</span> = <span class="func">ssl_connect</span>(<span class="string">"example.com"</span>, <span class="number">443</span>);
+<span class="func">ssl_write</span>(<span class="sigil">$conn</span>, <span class="string">"GET / HTTP/1.1\r\nHost: example.com\r\n\r\n"</span>);
+<span class="comment"># ... read response ...</span>
+<span class="func">ssl_close</span>(<span class="sigil">$conn</span>);</code></pre>
+
+            <div class="info-box">
+                <strong>Why int?</strong> Strada's <code>int</code> is 64-bit, large enough to hold any pointer on modern systems. The cast pattern <code>(int64_t)(intptr_t)ptr</code> is portable and safe.
+            </div>
+
+            <h2>Working with Strings</h2>
+
+            <p>String handling requires careful memory management:</p>
+
+            <pre><code><span class="keyword">func</span> <span class="func">uppercase</span>(<span class="type">str</span> <span class="sigil">$s</span>) <span class="type">str</span> {
+    <span class="keyword">__C__</span> {
+        <span class="comment">// Extract string (allocates memory!)</span>
+        <span class="keyword">char</span> *str = strada_to_str(s);
+
+        <span class="comment">// Modify in place</span>
+        <span class="keyword">for</span> (<span class="keyword">char</span> *p = str; *p; p++) {
+            <span class="keyword">if</span> (*p >= 'a' && *p <= 'z') {
+                *p = *p - 32;
+            }
+        }
+
+        <span class="comment">// Create new StradaValue (copies the string)</span>
+        StradaValue *result = strada_new_str(str);
+
+        <span class="comment">// Free the temporary string</span>
+        free(str);
+
+        <span class="keyword">return</span> result;
+    }
+}</code></pre>
+
+            <h3>Binary Data</h3>
+
+            <p>For binary data that may contain null bytes, use <code>strada_new_str_len()</code>:</p>
+
+            <pre><code><span class="keyword">func</span> <span class="func">read_binary</span>(<span class="type">int</span> <span class="sigil">$fd</span>, <span class="type">int</span> <span class="sigil">$len</span>) <span class="type">str</span> {
+    <span class="keyword">__C__</span> {
+        <span class="keyword">int</span> fd = (<span class="keyword">int</span>)strada_to_int(fd_arg);
+        <span class="keyword">size_t</span> len = (<span class="keyword">size_t</span>)strada_to_int(len_arg);
+
+        <span class="keyword">char</span> *buf = malloc(len);
+        <span class="keyword">ssize_t</span> n = read(fd, buf, len);
+
+        <span class="keyword">if</span> (n <= 0) {
+            free(buf);
+            <span class="keyword">return</span> &amp;strada_undef;
+        }
+
+        <span class="comment">// Preserve binary data including null bytes</span>
+        StradaValue *result = strada_new_str_len(buf, n);
+        free(buf);
+        <span class="keyword">return</span> result;
+    }
+}</code></pre>
+
+            <h2>Shared Libraries</h2>
+
+            <h3>Creating a Shared Library</h3>
+
+            <p>Compile your Strada code as a shared library:</p>
+
+            <pre><code><span class="comment"># Create mylib.so from mylib.strada</span>
+./strada --shared mylib.strada</code></pre>
+
+            <p>Your library can export functions that other Strada programs can call:</p>
+
+            <pre><code><span class="comment"># lib/MathLib.strada</span>
+<span class="keyword">package</span> <span class="type">MathLib</span>;
+<span class="keyword">version</span> <span class="string">"1.0.0"</span>;
+
+<span class="keyword">func</span> <span class="func">add</span>(<span class="type">int</span> <span class="sigil">$a</span>, <span class="type">int</span> <span class="sigil">$b</span>) <span class="type">int</span> {
+    <span class="keyword">return</span> <span class="sigil">$a</span> + <span class="sigil">$b</span>;
+}
+
+<span class="keyword">func</span> <span class="func">multiply</span>(<span class="type">int</span> <span class="sigil">$a</span>, <span class="type">int</span> <span class="sigil">$b</span>) <span class="type">int</span> {
+    <span class="keyword">return</span> <span class="sigil">$a</span> * <span class="sigil">$b</span>;
+}</code></pre>
+
+            <pre><code><span class="comment"># Compile to shared library</span>
+./strada --shared lib/MathLib.strada
+mv MathLib.so lib/</code></pre>
+
+            <h3>Using import_lib</h3>
+
+            <p>Import shared libraries with <code>import_lib</code> for clean namespace access:</p>
+
+            <pre><code><span class="keyword">use</span> lib <span class="string">"lib"</span>;
+<span class="keyword">import_lib</span> <span class="string">"MathLib"</span>;
+
+<span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
+    <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$sum</span> = <span class="type">MathLib</span>::<span class="func">add</span>(<span class="number">10</span>, <span class="number">32</span>);
+    <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$product</span> = <span class="type">MathLib</span>::<span class="func">multiply</span>(<span class="number">6</span>, <span class="number">7</span>);
+
+    <span class="func">say</span>(<span class="string">"Sum: "</span> . <span class="sigil">$sum</span>);        <span class="comment"># 42</span>
+    <span class="func">say</span>(<span class="string">"Product: "</span> . <span class="sigil">$product</span>); <span class="comment"># 42</span>
+
+    <span class="keyword">return</span> <span class="number">0</span>;
+}</code></pre>
+
+            <div class="info-box">
+                <strong>import_lib requirements</strong>: Both <code>LibName.strada</code> (for function signatures) and <code>LibName.so</code> (compiled library) must be in your library search path.
+            </div>
+
+            <h3>Manual FFI</h3>
+
+            <p>For more control, use the <code>sys::dl_*</code> functions directly:</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$lib</span> = <span class="func">sys::dl_open</span>(<span class="string">"./mylib.so"</span>);
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$fn</span> = <span class="func">sys::dl_sym</span>(<span class="sigil">$lib</span>, <span class="string">"MathLib_add"</span>);
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$result</span> = <span class="func">sys::dl_call_sv</span>(<span class="sigil">$fn</span>, [<span class="number">10</span>, <span class="number">32</span>]);
+<span class="func">say</span>(<span class="sigil">$result</span>);  <span class="comment"># 42</span>
+<span class="func">sys::dl_close</span>(<span class="sigil">$lib</span>);</code></pre>
+
+            <h2>Complete Example: Compression Library</h2>
+
+            <p>Here's a complete example wrapping zlib for compression:</p>
+
+            <pre><code><span class="keyword">package</span> <span class="type">Compress</span>;
+
+<span class="keyword">__C__</span> {
+    <span class="comment">#include &lt;zlib.h&gt;</span>
+    <span class="comment">#include &lt;stdlib.h&gt;</span>
+    <span class="comment">#include &lt;string.h&gt;</span>
+}
+
+<span class="keyword">func</span> <span class="func">gzip</span>(<span class="type">str</span> <span class="sigil">$data</span>) <span class="type">str</span> {
+    <span class="keyword">__C__</span> {
+        <span class="keyword">char</span> *input = strada_to_str(data);
+        <span class="keyword">size_t</span> input_len = strlen(input);
+
+        <span class="comment">// Allocate output buffer (worst case: slightly larger than input)</span>
+        <span class="keyword">size_t</span> output_len = compressBound(input_len);
+        <span class="keyword">char</span> *output = malloc(output_len);
+
+        <span class="comment">// Compress</span>
+        <span class="keyword">int</span> ret = compress((<span class="keyword">Bytef</span>*)output, &amp;output_len,
+                          (<span class="keyword">Bytef</span>*)input, input_len);
+
+        free(input);
+
+        <span class="keyword">if</span> (ret != Z_OK) {
+            free(output);
+            <span class="keyword">return</span> &amp;strada_undef;
+        }
+
+        StradaValue *result = strada_new_str_len(output, output_len);
+        free(output);
+        <span class="keyword">return</span> result;
+    }
+}
+
+<span class="keyword">func</span> <span class="func">gunzip</span>(<span class="type">str</span> <span class="sigil">$data</span>, <span class="type">int</span> <span class="sigil">$max_size</span>) <span class="type">str</span> {
+    <span class="keyword">__C__</span> {
+        <span class="keyword">char</span> *input = strada_to_str(data);
+        <span class="keyword">size_t</span> input_len = strlen(input);
+        <span class="keyword">size_t</span> output_len = (<span class="keyword">size_t</span>)strada_to_int(max_size);
+
+        <span class="keyword">char</span> *output = malloc(output_len);
+
+        <span class="keyword">int</span> ret = uncompress((<span class="keyword">Bytef</span>*)output, &amp;output_len,
+                             (<span class="keyword">Bytef</span>*)input, input_len);
+
+        free(input);
+
+        <span class="keyword">if</span> (ret != Z_OK) {
+            free(output);
+            <span class="keyword">return</span> &amp;strada_undef;
+        }
+
+        StradaValue *result = strada_new_str_len(output, output_len);
+        free(output);
+        <span class="keyword">return</span> result;
+    }
+}</code></pre>
+
+            <p>Compile with the zlib library:</p>
+
+            <pre><code>./strada --shared compress.strada -- -lz</code></pre>
+
+            <h2>Best Practices</h2>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h4>Always Free Strings</h4>
+                    <p><code>strada_to_str()</code> allocates memory. Always <code>free()</code> the result when done.</p>
+                </div>
+                <div class="card">
+                    <h4>Check for NULL</h4>
+                    <p>Strada values can be undef. Check before extracting to avoid crashes.</p>
+                </div>
+                <div class="card">
+                    <h4>Use Static Helpers</h4>
+                    <p>Put complex C logic in static helper functions in top-level blocks for cleaner code.</p>
+                </div>
+                <div class="card">
+                    <h4>Document Handle Types</h4>
+                    <p>When using the opaque handle pattern, document what type of pointer each <code>int</code> handle represents.</p>
+                </div>
+            </div>
+
+            <h2>Debugging Tips</h2>
+
+            <ul>
+                <li>Compile with <code>-g</code> flag for debug symbols: <code>./strada -g program.strada</code></li>
+                <li>Use <code>-c</code> to keep the generated C file for inspection: <code>./strada -c program.strada</code></li>
+                <li>Add <code>printf()</code> statements in your <code>__C__</code> blocks for debugging</li>
+                <li>Use GDB to debug the compiled executable</li>
+            </ul>
+
+            <pre><code><span class="comment"># Compile with debug info</span>
+./strada -g -c myprogram.strada
+
+<span class="comment"># Debug with GDB</span>
+gdb ./myprogram</code></pre>
+
+            <div class="page-nav">
+                <a href="oop.html">
+                    <span class="label">&larr; Previous</span>
+                    <span class="title">Object-Oriented Programming</span>
+                </a>
+                <a href="reference.html" class="next">
+                    <span class="label">Next &rarr;</span>
+                    <span class="title">Built-in Functions</span>
+                </a>
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <p><a href="../index.html">Strada</a> - A strongly-typed language inspired by Perl</p>
+    </footer>
+</body>
+</html>

@@ -32,6 +32,10 @@
                 <li><a href="control-flow.html">Control Flow</a></li>
                 <li><a href="oop.html">Object-Oriented Programming</a></li>
             </ul>
+            <h3>Advanced</h3>
+            <ul>
+                <li><a href="c-interop.html">C Interoperability</a></li>
+            </ul>
             <h3>Reference</h3>
             <ul>
                 <li><a href="reference.html" class="active">Built-in Functions</a></li>
@@ -378,6 +382,69 @@
             <h4>Shared Library Compilation</h4>
             <p>Compile Strada programs as shared libraries:</p>
             <pre><code>./strada --shared mylib.strada   <span class="comment"># Creates mylib.so</span></code></pre>
+
+            <h2>C Interop (__C__ Blocks)</h2>
+
+            <p>Embed raw C code directly in Strada programs using <code>__C__</code> blocks:</p>
+
+            <h3>Top-Level Blocks</h3>
+            <p>For includes, globals, and C helper functions:</p>
+            <pre><code><span class="keyword">__C__</span> {
+    <span class="comment">#include &lt;math.h&gt;</span>
+    <span class="comment">#include &lt;openssl/ssl.h&gt;</span>
+
+    <span class="keyword">static</span> SSL_CTX *g_ctx = NULL;
+
+    <span class="keyword">static int</span> helper(int a, int b) {
+        <span class="keyword">return</span> a + b;
+    }
+}</code></pre>
+
+            <h3>Statement-Level Blocks</h3>
+            <p>Inline C code inside functions with access to Strada variables:</p>
+            <pre><code><span class="keyword">func</span> <span class="func">my_sqrt</span>(<span class="type">num</span> <span class="sigil">$x</span>) <span class="type">num</span> {
+    <span class="keyword">__C__</span> {
+        <span class="keyword">double</span> val = strada_to_num(x);
+        <span class="keyword">return</span> strada_new_num(sqrt(val));
+    }
+}</code></pre>
+
+            <h3>Key C Functions</h3>
+            <table>
+                <thead>
+                    <tr><th>Function</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>strada_to_int(sv)</code></td><td>Extract int64_t from StradaValue*</td></tr>
+                    <tr><td><code>strada_to_num(sv)</code></td><td>Extract double from StradaValue*</td></tr>
+                    <tr><td><code>strada_to_str(sv)</code></td><td>Extract string (caller must free!)</td></tr>
+                    <tr><td><code>strada_new_int(i)</code></td><td>Create StradaValue* from int64_t</td></tr>
+                    <tr><td><code>strada_new_num(n)</code></td><td>Create StradaValue* from double</td></tr>
+                    <tr><td><code>strada_new_str(s)</code></td><td>Create StradaValue* from string</td></tr>
+                    <tr><td><code>&amp;strada_undef</code></td><td>Return undef value</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Opaque Handle Pattern</h3>
+            <p>Store C pointers in Strada <code>int</code> variables (64-bit):</p>
+            <pre><code><span class="keyword">func</span> <span class="func">open_connection</span>(<span class="type">str</span> <span class="sigil">$host</span>) <span class="type">int</span> {
+    <span class="keyword">__C__</span> {
+        <span class="keyword">char</span> *h = strada_to_str(host);
+        SSL *conn = connect_ssl(h);
+        free(h);
+        <span class="comment">// Store pointer as int</span>
+        <span class="keyword">return</span> strada_new_int((int64_t)(intptr_t)conn);
+    }
+}
+
+<span class="keyword">func</span> <span class="func">close_connection</span>(<span class="type">int</span> <span class="sigil">$handle</span>) <span class="type">void</span> {
+    <span class="keyword">__C__</span> {
+        <span class="comment">// Retrieve pointer from int</span>
+        SSL *conn = (SSL*)(intptr_t)strada_to_int(handle);
+        SSL_free(conn);
+        <span class="keyword">return</span> &amp;strada_undef;
+    }
+}</code></pre>
 
             <h2>JSON Functions</h2>
 

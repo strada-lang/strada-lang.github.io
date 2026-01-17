@@ -479,7 +479,7 @@
             <div class="feature">
                 <div class="feature-icon">🔗</div>
                 <h3>C Interoperability</h3>
-                <p>Easy FFI with sys::dl_* functions. Create and import shared libraries (.so) directly.</p>
+                <p>Embed C code directly with __C__ blocks. Create and import shared libraries (.so) with import_lib.</p>
             </div>
             <div class="feature">
                 <div class="feature-icon">📦</div>
@@ -645,6 +645,22 @@
 
     <span class="keyword">return</span> <span class="sigil">$c</span>-><span class="func">not_found</span>();
 }</pre>
+            </div>
+
+            <div class="example">
+                <div class="example-header">C Interop (__C__ Blocks)</div>
+                <pre><span class="keyword">__C__</span> {
+    <span class="comment">#include &lt;math.h&gt;</span>
+}
+
+<span class="keyword">func</span> <span class="func">fast_sqrt</span>(<span class="type">num</span> <span class="sigil">$x</span>) <span class="type">num</span> {
+    <span class="keyword">__C__</span> {
+        <span class="keyword">double</span> val = strada_to_num(x);
+        <span class="keyword">return</span> strada_new_num(sqrt(val));
+    }
+}
+
+<span class="func">say</span>(<span class="func">fast_sqrt</span>(<span class="number">16.0</span>)); <span class="comment"># 4.0</span></pre>
             </div>
         </div>
     </section>
