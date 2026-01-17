@@ -335,7 +335,7 @@ mv MathLib.so lib/</code></pre>
 }</code></pre>
 
             <div class="info-box">
-                <strong>import_lib requirements</strong>: Both <code>LibName.strada</code> (for function signatures) and <code>LibName.so</code> (compiled library) must be in your library search path.
+                <strong>import_lib</strong>: Only <code>LibName.so</code> is required. Function signatures are embedded in the library via <code>__strada_export_info()</code>.
             </div>
 
             <h3>Manual FFI</h3>
@@ -347,6 +347,107 @@ mv MathLib.so lib/</code></pre>
 <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$result</span> = <span class="func">sys::dl_call_sv</span>(<span class="sigil">$fn</span>, [<span class="number">10</span>, <span class="number">32</span>]);
 <span class="func">say</span>(<span class="sigil">$result</span>);  <span class="comment"># 42</span>
 <span class="func">sys::dl_close</span>(<span class="sigil">$lib</span>);</code></pre>
+
+            <h2>Extern Functions (C-Callable)</h2>
+
+            <p>Use the <code>extern</code> keyword to create functions with C-compatible calling conventions. These functions can be called directly from C code without wrappers or type conversions.</p>
+
+            <h3>Defining Extern Functions</h3>
+
+            <pre><code><span class="comment"># extern_lib.strada - Functions callable from C</span>
+<span class="keyword">package</span> <span class="type">MathExtern</span>;
+
+<span class="comment"># C signature: int64_t add_integers(int64_t a, int64_t b)</span>
+<span class="keyword">extern func</span> <span class="func">add_integers</span>(<span class="type">int</span> <span class="sigil">$a</span>, <span class="type">int</span> <span class="sigil">$b</span>) <span class="type">int</span> {
+    <span class="keyword">return</span> <span class="sigil">$a</span> + <span class="sigil">$b</span>;
+}
+
+<span class="comment"># C signature: double add_floats(double a, double b)</span>
+<span class="keyword">extern func</span> <span class="func">add_floats</span>(<span class="type">num</span> <span class="sigil">$a</span>, <span class="type">num</span> <span class="sigil">$b</span>) <span class="type">num</span> {
+    <span class="keyword">return</span> <span class="sigil">$a</span> + <span class="sigil">$b</span>;
+}
+
+<span class="comment"># C signature: int64_t multiply(int64_t a, int64_t b)</span>
+<span class="keyword">extern func</span> <span class="func">multiply</span>(<span class="type">int</span> <span class="sigil">$a</span>, <span class="type">int</span> <span class="sigil">$b</span>) <span class="type">int</span> {
+    <span class="keyword">return</span> <span class="sigil">$a</span> * <span class="sigil">$b</span>;
+}</code></pre>
+
+            <h3>Compiling as Shared Library</h3>
+
+            <pre><code><span class="comment"># Create shared library</span>
+./strada --shared extern_lib.strada
+
+<span class="comment"># Creates extern_lib.so with C-callable functions</span></code></pre>
+
+            <h3>Calling from C</h3>
+
+            <p>The extern functions can be called directly from C without any Strada-specific wrappers:</p>
+
+            <pre><code><span class="comment">/* main.c - C program that calls Strada extern functions */</span>
+<span class="comment">#include &lt;stdio.h&gt;</span>
+<span class="comment">#include &lt;stdint.h&gt;</span>
+<span class="comment">#include &lt;dlfcn.h&gt;</span>
+
+<span class="keyword">int</span> main() {
+    <span class="comment">// Load the Strada shared library</span>
+    <span class="keyword">void</span> *lib = dlopen(<span class="string">"./extern_lib.so"</span>, RTLD_NOW);
+    <span class="keyword">if</span> (!lib) {
+        fprintf(stderr, <span class="string">"Failed to load: %s\n"</span>, dlerror());
+        <span class="keyword">return</span> <span class="number">1</span>;
+    }
+
+    <span class="comment">// Get function pointers</span>
+    int64_t (*add_integers)(int64_t, int64_t) = dlsym(lib, <span class="string">"add_integers"</span>);
+    <span class="keyword">double</span> (*add_floats)(<span class="keyword">double</span>, <span class="keyword">double</span>) = dlsym(lib, <span class="string">"add_floats"</span>);
+    int64_t (*multiply)(int64_t, int64_t) = dlsym(lib, <span class="string">"multiply"</span>);
+
+    <span class="comment">// Call them directly - no StradaValue* wrappers needed!</span>
+    printf(<span class="string">"add_integers(10, 32) = %ld\n"</span>, add_integers(<span class="number">10</span>, <span class="number">32</span>));   <span class="comment">// 42</span>
+    printf(<span class="string">"add_floats(3.14, 2.86) = %f\n"</span>, add_floats(<span class="number">3.14</span>, <span class="number">2.86</span>)); <span class="comment">// 6.0</span>
+    printf(<span class="string">"multiply(6, 7) = %ld\n"</span>, multiply(<span class="number">6</span>, <span class="number">7</span>));                <span class="comment">// 42</span>
+
+    dlclose(lib);
+    <span class="keyword">return</span> <span class="number">0</span>;
+}</code></pre>
+
+            <p>Compile and run the C program:</p>
+
+            <pre><code>gcc -o main main.c -ldl
+./main</code></pre>
+
+            <h3>Type Mapping</h3>
+
+            <p>Extern functions use raw C types, not <code>StradaValue*</code>:</p>
+
+            <table>
+                <thead>
+                    <tr><th>Strada Type</th><th>C Type</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>int</code></td><td><code>int64_t</code></td></tr>
+                    <tr><td><code>num</code></td><td><code>double</code></td></tr>
+                    <tr><td><code>str</code></td><td><code>char*</code></td></tr>
+                    <tr><td><code>void</code></td><td><code>void</code></td></tr>
+                </tbody>
+            </table>
+
+            <div class="info-box">
+                <strong>When to use extern:</strong> Use <code>extern func</code> when you need to call Strada code from C programs, embedded systems, or other languages with C FFI capabilities. For Strada-to-Strada library calls, regular functions with <code>import_lib</code> are preferred.
+            </div>
+
+            <h3>Extern vs Regular Functions</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Feature</th><th>Regular Function</th><th>Extern Function</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>Calling convention</td><td>StradaValue* parameters</td><td>Raw C types</td></tr>
+                    <tr><td>Callable from C</td><td>Needs wrappers</td><td>Direct calls</td></tr>
+                    <tr><td>Type safety</td><td>Runtime type checking</td><td>Compile-time only</td></tr>
+                    <tr><td>Use case</td><td>Strada libraries</td><td>C interoperability</td></tr>
+                </tbody>
+            </table>
 
             <h2>Complete Example: Compression Library</h2>
 
