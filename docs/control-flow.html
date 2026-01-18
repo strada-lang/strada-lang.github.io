@@ -181,7 +181,7 @@
     <span class="keyword">return</span> <span class="sigil">$a</span> / <span class="sigil">$b</span>;
 }
 
-<span class="keyword">func</span> <span class="func">main</span>() <span class="type">void</span> {
+<span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
     <span class="keyword">try</span> {
         <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$result</span> = <span class="func">divide</span>(<span class="number">10</span>, <span class="number">0</span>);
         <span class="func">say</span>(<span class="string">"Result: "</span> . <span class="sigil">$result</span>);
@@ -189,6 +189,7 @@
         <span class="func">say</span>(<span class="string">"Error: "</span> . <span class="sigil">$e</span>);
     }
     <span class="func">say</span>(<span class="string">"Program continues..."</span>);
+    <span class="keyword">return</span> <span class="number">0</span>;
 }</code></pre>
 
             <div class="info-box">
@@ -214,7 +215,7 @@
 
             <p>For exceptional control flow (use sparingly):</p>
 
-            <pre><code><span class="keyword">func</span> <span class="func">main</span>() <span class="type">void</span> {
+            <pre><code><span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
     <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$i</span> = <span class="number">0</span>;
 
 <span class="keyword">start:</span>
@@ -225,6 +226,7 @@
     }
 
     <span class="func">say</span>(<span class="string">"Done"</span>);
+    <span class="keyword">return</span> <span class="number">0</span>;
 }</code></pre>
 
             <div class="info-box warning">

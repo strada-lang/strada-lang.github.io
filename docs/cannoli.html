@@ -112,8 +112,9 @@
     <span class="keyword">return</span> <span class="sigil">$c</span>-><span class="func">not_found</span>();
 }
 
-<span class="keyword">func</span> <span class="func">main</span>() <span class="type">void</span> {
+<span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
     <span class="func">Cannoli::run</span>(<span class="number">8080</span>, \&<span class="func">handle</span>);
+    <span class="keyword">return</span> <span class="number">0</span>;
 }</code></pre>
 
             <p>Run with:</p>
@@ -376,7 +377,7 @@
 
             <p>Or programmatically:</p>
 
-            <pre><code><span class="keyword">func</span> <span class="func">main</span>() <span class="type">void</span> {
+            <pre><code><span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
     <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%opts</span> = {
         <span class="string">"port"</span> => <span class="number">8443</span>,
         <span class="string">"ssl"</span> => <span class="number">1</span>,
@@ -384,6 +385,7 @@
         <span class="string">"key"</span> => <span class="string">"/path/to/key.pem"</span>
     };
     <span class="func">Cannoli::run_with_opts</span>(<span class="sigil">%opts</span>, \&<span class="func">handle</span>);
+    <span class="keyword">return</span> <span class="number">0</span>;
 }</code></pre>
 
             <h2>Static File Server</h2>
@@ -432,9 +434,10 @@
     <span class="keyword">return</span> <span class="sigil">$c</span>-><span class="func">not_found</span>();
 }
 
-<span class="keyword">func</span> <span class="func">main</span>() <span class="type">void</span> {
+<span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
     <span class="func">say</span>(<span class="string">"Starting server on http://localhost:8080"</span>);
     <span class="func">Cannoli::run</span>(<span class="number">8080</span>, \&<span class="func">handle</span>);
+    <span class="keyword">return</span> <span class="number">0</span>;
 }</code></pre>
 
             <div class="page-nav">

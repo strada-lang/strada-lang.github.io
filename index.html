@@ -555,8 +555,9 @@
         <div class="examples-grid">
             <div class="example">
                 <div class="example-header">Hello World</div>
-                <pre><span class="keyword">func</span> <span class="func">main</span>() <span class="type">void</span> {
+                <pre><span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
     <span class="func">say</span>(<span class="string">"Hello, World!"</span>);
+    <span class="keyword">return</span> <span class="number">0</span>;
 }</pre>
             </div>
 
@@ -648,6 +649,18 @@
             </div>
 
             <div class="example">
+                <div class="example-header">Command-Line Arguments</div>
+                <pre><span class="keyword">func</span> <span class="func">main</span>(<span class="type">int</span> <span class="sigil">$argc</span>, <span class="type">array</span> <span class="sigil">@argv</span>) <span class="type">int</span> {
+    <span class="keyword">if</span> (<span class="sigil">$argc</span> < <span class="number">2</span>) {
+        <span class="func">say</span>(<span class="string">"Usage: "</span> . <span class="sigil">$argv</span>[<span class="number">0</span>] . <span class="string">" &lt;name&gt;"</span>);
+        <span class="keyword">return</span> <span class="number">1</span>;
+    }
+    <span class="func">say</span>(<span class="string">"Hello, "</span> . <span class="sigil">$argv</span>[<span class="number">1</span>] . <span class="string">"!"</span>);
+    <span class="keyword">return</span> <span class="number">0</span>;
+}</pre>
+            </div>
+
+            <div class="example">
                 <div class="example-header">C Interop (__C__ Blocks)</div>
                 <pre><span class="keyword">__C__</span> {
     <span class="comment">#include &lt;math.h&gt;</span>
@@ -722,8 +735,9 @@
                 <div class="step-content">
                     <h3>Write your first program</h3>
                     <p>Create hello.strada with your favorite editor.</p>
-                    <code>func main() void {
+                    <code>func main() int {
     say("Hello, Strada!");
+    return 0;
 }</code>
                 </div>
             </div>

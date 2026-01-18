@@ -93,7 +93,7 @@
 
             <h2>Creating and Using Objects</h2>
 
-            <pre><code><span class="keyword">func</span> <span class="func">main</span>() <span class="type">void</span> {
+            <pre><code><span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
     <span class="comment"># Create object using constructor</span>
     <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$dog</span> = <span class="type">Dog</span>::<span class="func">new</span>(<span class="string">"Rex"</span>, <span class="number">3</span>);
 
@@ -106,6 +106,7 @@
 
     <span class="comment"># Modify properties</span>
     <span class="sigil">$dog</span>-><span class="func">set_age</span>(<span class="number">4</span>);
+    <span class="keyword">return</span> <span class="number">0</span>;
 }</code></pre>
 
             <h2>The bless() Function</h2>
@@ -220,7 +221,7 @@
     <span class="sigil">$animal</span>-><span class="func">speak</span>();
 }
 
-<span class="keyword">func</span> <span class="func">main</span>() <span class="type">void</span> {
+<span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
     <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$dog</span> = <span class="type">Dog</span>::<span class="func">new</span>(<span class="string">"Rex"</span>, <span class="string">"Lab"</span>);
     <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$cat</span> = <span class="type">Cat</span>::<span class="func">new</span>(<span class="string">"Whiskers"</span>);
 
@@ -233,6 +234,7 @@
     <span class="keyword">foreach</span> <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$animal</span> (<span class="sigil">@animals</span>) {
         <span class="sigil">$animal</span>-><span class="func">speak</span>();
     }
+    <span class="keyword">return</span> <span class="number">0</span>;
 }</code></pre>
 
             <h2>Function Pointers in Objects</h2>
@@ -255,12 +257,13 @@
 }
 
 <span class="comment"># Usage</span>
-<span class="keyword">func</span> <span class="func">main</span>() <span class="type">void</span> {
+<span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
     <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$btn</span> = <span class="type">Button</span>::<span class="func">new</span>(<span class="string">"Submit"</span>, <span class="keyword">func</span> () {
         <span class="func">say</span>(<span class="string">"Button clicked!"</span>);
     });
 
     <span class="sigil">$btn</span>-><span class="func">click</span>();  <span class="comment"># "Button clicked!"</span>
+    <span class="keyword">return</span> <span class="number">0</span>;
 }</code></pre>
 
             <h2>Method Chaining</h2>
@@ -284,7 +287,7 @@
 }
 
 <span class="comment"># Usage with chaining</span>
-<span class="keyword">func</span> <span class="func">main</span>() <span class="type">void</span> {
+<span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
     <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$result</span> = <span class="type">Builder</span>::<span class="func">new</span>()
         -><span class="func">add</span>(<span class="string">"header"</span>)
         -><span class="func">add</span>(<span class="string">"body"</span>)
@@ -292,6 +295,7 @@
         -><span class="func">build</span>();
 
     <span class="func">say</span>(<span class="sigil">$result</span>);  <span class="comment"># "header, body, footer"</span>
+    <span class="keyword">return</span> <span class="number">0</span>;
 }</code></pre>
 
             <h2>Best Practices</h2>

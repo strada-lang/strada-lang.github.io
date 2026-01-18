@@ -88,8 +88,9 @@ cd strada-lang</code></pre>
 
             <pre><code><span class="comment"># hello.strada - Your first Strada program</span>
 
-<span class="keyword">func</span> <span class="func">main</span>() <span class="type">void</span> {
+<span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
     <span class="func">say</span>(<span class="string">"Hello, World!"</span>);
+    <span class="keyword">return</span> <span class="number">0</span>;
 }</code></pre>
 
             <p>Compile and run it:</p>
@@ -106,8 +107,9 @@ cd strada-lang</code></pre>
             <p>Let's break down what we wrote:</p>
 
             <ul>
-                <li><code>func main() void</code> - Defines a function named <code>main</code> that returns nothing (<code>void</code>)</li>
+                <li><code>func main() int</code> - Defines a function named <code>main</code> that returns an integer (exit code)</li>
                 <li><code>say("Hello, World!")</code> - Prints the string with a newline</li>
+                <li><code>return 0</code> - Returns exit code 0 (success) to the operating system</li>
                 <li>Comments start with <code>#</code></li>
             </ul>
 
@@ -115,7 +117,7 @@ cd strada-lang</code></pre>
 
             <p>Strada is strongly typed. Here are the basic types:</p>
 
-            <pre><code><span class="keyword">func</span> <span class="func">main</span>() <span class="type">void</span> {
+            <pre><code><span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
     <span class="comment"># Integers</span>
     <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$count</span> = <span class="number">42</span>;
 
@@ -137,6 +139,7 @@ cd strada-lang</code></pre>
     <span class="func">say</span>(<span class="string">"Count: "</span> . <span class="sigil">$count</span>);
     <span class="func">say</span>(<span class="string">"First number: "</span> . <span class="sigil">$numbers</span>[<span class="number">0</span>]);
     <span class="func">say</span>(<span class="string">"Host: "</span> . <span class="sigil">$config</span>{<span class="string">"host"</span>});
+    <span class="keyword">return</span> <span class="number">0</span>;
 }</code></pre>
 
             <div class="info-box">
@@ -157,9 +160,10 @@ cd strada-lang</code></pre>
     <span class="keyword">return</span> <span class="sigil">$a</span> + <span class="sigil">$b</span>;
 }
 
-<span class="keyword">func</span> <span class="func">main</span>() <span class="type">void</span> {
+<span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
     <span class="func">say</span>(<span class="func">greet</span>(<span class="string">"World"</span>));  <span class="comment"># Hello, World!</span>
     <span class="func">say</span>(<span class="func">add</span>(<span class="number">10</span>, <span class="number">20</span>));       <span class="comment"># 30</span>
+    <span class="keyword">return</span> <span class="number">0</span>;
 }</code></pre>
 
             <h2>Control Flow</h2>
@@ -262,6 +266,32 @@ cd strada-lang</code></pre>
 
 <span class="comment"># Concatenation</span>
 <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$full</span> = <span class="string">"Hello"</span> . <span class="string">" "</span> . <span class="string">"World"</span>;</code></pre>
+
+            <h2>Command-Line Arguments</h2>
+
+            <p>Access command-line arguments with <code>argc</code> and <code>argv</code> parameters in main:</p>
+
+            <pre><code><span class="keyword">func</span> <span class="func">main</span>(<span class="type">int</span> <span class="sigil">$argc</span>, <span class="type">array</span> <span class="sigil">@argv</span>) <span class="type">int</span> {
+    <span class="func">say</span>(<span class="string">"Argument count: "</span> . <span class="sigil">$argc</span>);
+    <span class="func">say</span>(<span class="string">"Program name: "</span> . <span class="sigil">$argv</span>[<span class="number">0</span>]);
+
+    <span class="keyword">if</span> (<span class="sigil">$argc</span> < <span class="number">2</span>) {
+        <span class="func">say</span>(<span class="string">"Usage: "</span> . <span class="sigil">$argv</span>[<span class="number">0</span>] . <span class="string">" &lt;name&gt;"</span>);
+        <span class="keyword">return</span> <span class="number">1</span>;
+    }
+
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$name</span> = <span class="sigil">$argv</span>[<span class="number">1</span>];
+    <span class="func">say</span>(<span class="string">"Hello, "</span> . <span class="sigil">$name</span> . <span class="string">"!"</span>);
+    <span class="keyword">return</span> <span class="number">0</span>;
+}</code></pre>
+
+            <p>Run it with arguments:</p>
+
+            <pre><code>./strada -r greet.strada Alice
+<span class="comment"># Output:</span>
+<span class="comment"># Argument count: 2</span>
+<span class="comment"># Program name: greet</span>
+<span class="comment"># Hello, Alice!</span></code></pre>
 
             <h2>Next Steps</h2>
 
