@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debugging - Strada Documentation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <a href="../index.html" class="logo">Strada<span>Lang</span></a>
+        <ul>
+            <li><a href="quickstart.html">QuickStart</a></li>
+            <li><a href="index.html">Docs</a></li>
+            <li><a href="reference.html">Reference</a></li>
+            <li><a href="https://github.com/strada-lang/strada-lang">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h3>Getting Started</h3>
+            <ul>
+                <li><a href="quickstart.html">QuickStart</a></li>
+                <li><a href="index.html">Documentation</a></li>
+            </ul>
+            <h3>Language Guide</h3>
+            <ul>
+                <li><a href="basics.html">Language Basics</a></li>
+                <li><a href="types.html">Types & Variables</a></li>
+                <li><a href="functions.html">Functions</a></li>
+                <li><a href="control-flow.html">Control Flow</a></li>
+                <li><a href="oop.html">Object-Oriented Programming</a></li>
+            </ul>
+            <h3>Advanced</h3>
+            <ul>
+                <li><a href="memory.html">Memory Management</a></li>
+                <li><a href="debugging.html" class="active">Debugging</a></li>
+                <li><a href="c-interop.html">C Interoperability</a></li>
+                <li><a href="libraries.html">Libraries Guide</a></li>
+                <li><a href="perl-integration.html">Perl Integration</a></li>
+            </ul>
+            <h3>Reference</h3>
+            <ul>
+                <li><a href="reference.html">Built-in Functions</a></li>
+                <li><a href="cannoli.html">Cannoli Web Framework</a></li>
+            </ul>
+        </aside>
+
+        <main class="content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a> / <a href="index.html">Docs</a> / Debugging
+            </div>
+
+            <h1>Debug<span>ging</span></h1>
+            <p class="subtitle">Tools for inspecting variables, tracing execution, and profiling performance.</p>
+
+            <h2>Inspecting Variables</h2>
+
+            <h3>dumper() - Pretty Print Any Value</h3>
+
+            <p>The <code>dumper()</code> function prints a human-readable representation of any value to stderr:</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%user</span> = {
+    <span class="string">"name"</span> => <span class="string">"Alice"</span>,
+    <span class="string">"age"</span> => <span class="number">30</span>,
+    <span class="string">"tags"</span> => [<span class="string">"admin"</span>, <span class="string">"developer"</span>]
+};
+
+<span class="func">dumper</span>(\<span class="sigil">%user</span>);
+<span class="comment"># Output:</span>
+<span class="comment"># {</span>
+<span class="comment">#   "name" => "Alice",</span>
+<span class="comment">#   "age" => 30,</span>
+<span class="comment">#   "tags" => [</span>
+<span class="comment">#     "admin",</span>
+<span class="comment">#     "developer"</span>
+<span class="comment">#   ]</span>
+<span class="comment"># }</span></code></pre>
+
+            <p>Works with all types:</p>
+
+            <pre><code><span class="func">dumper</span>(<span class="number">42</span>);              <span class="comment"># 42</span>
+<span class="func">dumper</span>(<span class="string">"hello"</span>);         <span class="comment"># "hello"</span>
+<span class="func">dumper</span>([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]);       <span class="comment"># [1, 2, 3]</span>
+<span class="func">dumper</span>(<span class="func">undef</span>);           <span class="comment"># undef</span></code></pre>
+
+            <h3>dumper_str() - Get Dump as String</h3>
+
+            <p>Returns the dump as a string instead of printing:</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$debug</span> = <span class="func">dumper_str</span>(\<span class="sigil">%data</span>);
+<span class="func">Log::debug</span>(<span class="string">"Request data: "</span> . <span class="sigil">$debug</span>);</code></pre>
+
+            <h3>dump() - Compact Output</h3>
+
+            <p>Similar to <code>dumper()</code> but with an indent parameter for nested output:</p>
+
+            <pre><code><span class="func">dump</span>(\<span class="sigil">%user</span>, <span class="number">0</span>);   <span class="comment"># Start at indent level 0</span>
+<span class="func">dump</span>(\<span class="sigil">%user</span>, <span class="number">2</span>);   <span class="comment"># Start at indent level 2</span></code></pre>
+
+            <h3>typeof() - Get Type Name</h3>
+
+            <p>Returns the type of a value as a string:</p>
+
+            <pre><code><span class="func">say</span>(<span class="func">typeof</span>(<span class="number">42</span>));           <span class="comment"># "int"</span>
+<span class="func">say</span>(<span class="func">typeof</span>(<span class="number">3.14</span>));         <span class="comment"># "num"</span>
+<span class="func">say</span>(<span class="func">typeof</span>(<span class="string">"hello"</span>));      <span class="comment"># "str"</span>
+<span class="func">say</span>(<span class="func">typeof</span>([<span class="number">1</span>, <span class="number">2</span>]));       <span class="comment"># "array"</span>
+<span class="func">say</span>(<span class="func">typeof</span>({<span class="string">"a"</span> => <span class="number">1</span>}));   <span class="comment"># "hash"</span>
+<span class="func">say</span>(<span class="func">typeof</span>(\<span class="sigil">$x</span>));          <span class="comment"># "ref"</span>
+<span class="func">say</span>(<span class="func">typeof</span>(<span class="func">undef</span>));        <span class="comment"># "undef"</span></code></pre>
+
+            <h3>refcount() - Check Reference Count</h3>
+
+            <p>Useful for debugging memory issues:</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@arr</span> = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>];
+<span class="func">say</span>(<span class="func">refcount</span>(\<span class="sigil">@arr</span>));  <span class="comment"># 1</span>
+
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$ref</span> = \<span class="sigil">@arr</span>;
+<span class="func">say</span>(<span class="func">refcount</span>(\<span class="sigil">@arr</span>));  <span class="comment"># 2</span></code></pre>
+
+            <h2>Stack Traces</h2>
+
+            <h3>stacktrace() - Print Call Stack</h3>
+
+            <p>Prints the current call stack to stderr:</p>
+
+            <pre><code><span class="keyword">func</span> <span class="func">deep_function</span>() <span class="type">void</span> {
+    <span class="func">stacktrace</span>();
+}
+
+<span class="keyword">func</span> <span class="func">middle_function</span>() <span class="type">void</span> {
+    <span class="func">deep_function</span>();
+}
+
+<span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
+    <span class="func">middle_function</span>();
+    <span class="keyword">return</span> <span class="number">0</span>;
+}
+
+<span class="comment"># Output:</span>
+<span class="comment"># Stack trace:</span>
+<span class="comment">#   deep_function (test.strada:2)</span>
+<span class="comment">#   middle_function (test.strada:6)</span>
+<span class="comment">#   main (test.strada:10)</span></code></pre>
+
+            <h3>backtrace() - Alias for stacktrace()</h3>
+
+            <pre><code><span class="func">backtrace</span>();  <span class="comment"># Same as stacktrace()</span></code></pre>
+
+            <h3>stacktrace_str() - Get Stack as String</h3>
+
+            <p>Returns the stack trace as a string for logging:</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$trace</span> = <span class="func">stacktrace_str</span>();
+<span class="func">Log::error</span>(<span class="string">"Error occurred at:\n"</span> . <span class="sigil">$trace</span>);</code></pre>
+
+            <h3>caller() - Get Caller Information</h3>
+
+            <p>Returns the name of the calling function at a given stack level:</p>
+
+            <pre><code><span class="keyword">func</span> <span class="func">log_message</span>(<span class="type">str</span> <span class="sigil">$msg</span>) <span class="type">void</span> {
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$from</span> = <span class="func">caller</span>(<span class="number">1</span>);  <span class="comment"># Who called me?</span>
+    <span class="func">say</span>(<span class="string">"["</span> . <span class="sigil">$from</span> . <span class="string">"] "</span> . <span class="sigil">$msg</span>);
+}
+
+<span class="keyword">func</span> <span class="func">process_data</span>() <span class="type">void</span> {
+    <span class="func">log_message</span>(<span class="string">"Processing started"</span>);
+    <span class="comment"># Output: [process_data] Processing started</span>
+}</code></pre>
+
+            <p>Stack levels:</p>
+            <ul>
+                <li><code>caller(0)</code> - Current function</li>
+                <li><code>caller(1)</code> - Direct caller</li>
+                <li><code>caller(2)</code> - Caller's caller</li>
+            </ul>
+
+            <h2>Compile with Debug Symbols</h2>
+
+            <p>For better stack traces and GDB debugging, compile with the <code>-g</code> flag:</p>
+
+            <pre><code><span class="comment"># Include debug symbols</span>
+./strada -g myprogram.strada
+
+<span class="comment"># Run with GDB</span>
+gdb ./myprogram</code></pre>
+
+            <h2>Function Profiling</h2>
+
+            <p>Strada includes a built-in profiler to measure function execution time and call counts.</p>
+
+            <h3>Enabling the Profiler</h3>
+
+            <pre><code><span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
+    <span class="func">sys::profile_init</span>();  <span class="comment"># Initialize profiler</span>
+
+    <span class="comment"># Your code here...</span>
+    <span class="func">do_work</span>();
+
+    <span class="func">sys::profile_report</span>();  <span class="comment"># Print profiling report</span>
+    <span class="keyword">return</span> <span class="number">0</span>;
+}</code></pre>
+
+            <h3>Manual Function Instrumentation</h3>
+
+            <p>For fine-grained control, manually instrument functions:</p>
+
+            <pre><code><span class="keyword">func</span> <span class="func">expensive_operation</span>() <span class="type">void</span> {
+    <span class="func">sys::profile_enter</span>(<span class="string">"expensive_operation"</span>);
+
+    <span class="comment"># ... do work ...</span>
+
+    <span class="func">sys::profile_exit</span>(<span class="string">"expensive_operation"</span>);
+}</code></pre>
+
+            <h3>Profiler Output</h3>
+
+            <p>The profiler report shows:</p>
+
+            <pre><code><span class="comment"># === Function Profile ===</span>
+<span class="comment"># Function                  Calls    Total(ms)    Avg(ms)</span>
+<span class="comment"># process_items             1000     2450.32      2.45</span>
+<span class="comment"># parse_line                50000    1203.45      0.02</span>
+<span class="comment"># write_output              1000     890.12       0.89</span></code></pre>
+
+            <h3>Compiler Timing</h3>
+
+            <p>To profile the compiler itself, use the <code>-t</code> flag:</p>
+
+            <pre><code>./stradac -t input.strada output.c
+
+<span class="comment"># Output:</span>
+<span class="comment"># Lexing:     12.3ms</span>
+<span class="comment"># Parsing:    45.6ms</span>
+<span class="comment"># CodeGen:    23.4ms</span>
+<span class="comment"># Total:      81.3ms</span></code></pre>
+
+            <h2>Memory Profiling</h2>
+
+            <p>Track memory allocations by type:</p>
+
+            <pre><code><span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
+    <span class="func">sys::memprof_enable</span>();
+
+    <span class="comment"># Your code here...</span>
+    <span class="func">process_data</span>();
+
+    <span class="func">sys::memprof_report</span>();  <span class="comment"># Print memory stats</span>
+    <span class="keyword">return</span> <span class="number">0</span>;
+}</code></pre>
+
+            <h3>Memory Profiler Functions</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Function</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>sys::memprof_enable()</code></td><td>Start tracking allocations</td></tr>
+                    <tr><td><code>sys::memprof_disable()</code></td><td>Stop tracking allocations</td></tr>
+                    <tr><td><code>sys::memprof_report()</code></td><td>Print allocation statistics</td></tr>
+                    <tr><td><code>sys::memprof_reset()</code></td><td>Clear all counters</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Memory Profile Output</h3>
+
+            <pre><code><span class="comment"># === Memory Profile ===</span>
+<span class="comment"># Type       Allocs    Frees     Current    Bytes</span>
+<span class="comment"># int        15000     14950     50         400</span>
+<span class="comment"># str        8500      8400      100        12800</span>
+<span class="comment"># array      200       195       5          240</span>
+<span class="comment"># hash       150       148       2          128</span></code></pre>
+
+            <h2>Assertions</h2>
+
+            <p>Use <code>die()</code> for assertion-style checks:</p>
+
+            <pre><code><span class="keyword">func</span> <span class="func">divide</span>(<span class="type">int</span> <span class="sigil">$a</span>, <span class="type">int</span> <span class="sigil">$b</span>) <span class="type">int</span> {
+    <span class="keyword">if</span> (<span class="sigil">$b</span> == <span class="number">0</span>) {
+        <span class="func">die</span>(<span class="string">"Assertion failed: divisor cannot be zero"</span>);
+    }
+    <span class="keyword">return</span> <span class="sigil">$a</span> / <span class="sigil">$b</span>;
+}</code></pre>
+
+            <h3>Custom Assert Function</h3>
+
+            <pre><code><span class="keyword">func</span> <span class="func">assert</span>(<span class="type">int</span> <span class="sigil">$condition</span>, <span class="type">str</span> <span class="sigil">$msg</span>) <span class="type">void</span> {
+    <span class="keyword">if</span> (<span class="sigil">$condition</span> == <span class="number">0</span>) {
+        <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$trace</span> = <span class="func">stacktrace_str</span>();
+        <span class="func">die</span>(<span class="string">"Assertion failed: "</span> . <span class="sigil">$msg</span> . <span class="string">"\n"</span> . <span class="sigil">$trace</span>);
+    }
+}
+
+<span class="comment"># Usage</span>
+<span class="func">assert</span>(<span class="func">len</span>(<span class="sigil">@items</span>) > <span class="number">0</span>, <span class="string">"items array must not be empty"</span>);</code></pre>
+
+            <h2>Logging Patterns</h2>
+
+            <h3>Simple Debug Logger</h3>
+
+            <pre><code><span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$DEBUG</span> = <span class="number">1</span>;  <span class="comment"># Set to 0 in production</span>
+
+<span class="keyword">func</span> <span class="func">debug</span>(<span class="type">str</span> <span class="sigil">$msg</span>) <span class="type">void</span> {
+    <span class="keyword">if</span> (<span class="sigil">$DEBUG</span>) {
+        <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$caller</span> = <span class="func">caller</span>(<span class="number">1</span>);
+        <span class="func">warn</span>(<span class="string">"[DEBUG] ["</span> . <span class="sigil">$caller</span> . <span class="string">"] "</span> . <span class="sigil">$msg</span>);
+    }
+}
+
+<span class="keyword">func</span> <span class="func">process</span>() <span class="type">void</span> {
+    <span class="func">debug</span>(<span class="string">"Starting process"</span>);
+    <span class="comment"># [DEBUG] [process] Starting process</span>
+}</code></pre>
+
+            <h3>Conditional Dumping</h3>
+
+            <pre><code><span class="keyword">func</span> <span class="func">debug_dump</span>(<span class="type">str</span> <span class="sigil">$label</span>, <span class="type">scalar</span> <span class="sigil">$value</span>) <span class="type">void</span> {
+    <span class="keyword">if</span> (<span class="sigil">$DEBUG</span>) {
+        <span class="func">warn</span>(<span class="sigil">$label</span> . <span class="string">":"</span>);
+        <span class="func">dumper</span>(<span class="sigil">$value</span>);
+    }
+}
+
+<span class="func">debug_dump</span>(<span class="string">"Request"</span>, \<span class="sigil">%request</span>);</code></pre>
+
+            <h2>Using GDB</h2>
+
+            <p>For low-level debugging, use GDB with debug symbols:</p>
+
+            <pre><code><span class="comment"># Compile with debug info</span>
+./strada -g myprogram.strada
+
+<span class="comment"># Start GDB</span>
+gdb ./myprogram
+
+<span class="comment"># Common GDB commands:</span>
+(gdb) break main          <span class="comment"># Set breakpoint at main</span>
+(gdb) run                 <span class="comment"># Start execution</span>
+(gdb) bt                  <span class="comment"># Show backtrace</span>
+(gdb) print variable      <span class="comment"># Print variable value</span>
+(gdb) next                <span class="comment"># Step over</span>
+(gdb) step                <span class="comment"># Step into</span>
+(gdb) continue            <span class="comment"># Continue execution</span></code></pre>
+
+            <div class="info-box">
+                <strong>GDB Tip</strong>
+                Strada values are <code>StradaValue*</code> pointers. Use <code>print *variable</code> to see the struct contents, or call <code>strada_to_str(variable)</code> to get the string representation.
+            </div>
+
+            <h2>Quick Reference</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Function</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>dumper($val)</code></td><td>Pretty-print value to stderr</td></tr>
+                    <tr><td><code>dumper_str($val)</code></td><td>Return dump as string</td></tr>
+                    <tr><td><code>dump($val, $indent)</code></td><td>Dump with indent level</td></tr>
+                    <tr><td><code>typeof($val)</code></td><td>Get type name as string</td></tr>
+                    <tr><td><code>refcount($ref)</code></td><td>Get reference count</td></tr>
+                    <tr><td><code>stacktrace()</code></td><td>Print call stack</td></tr>
+                    <tr><td><code>stacktrace_str()</code></td><td>Return call stack as string</td></tr>
+                    <tr><td><code>caller($level)</code></td><td>Get caller function name</td></tr>
+                    <tr><td><code>warn($msg)</code></td><td>Print warning to stderr</td></tr>
+                    <tr><td><code>die($msg)</code></td><td>Print error and exit</td></tr>
+                </tbody>
+            </table>
+
+            <div class="page-nav">
+                <a href="memory.html">
+                    <span class="label">&larr; Previous</span>
+                    <span class="title">Memory Management</span>
+                </a>
+                <a href="c-interop.html" class="next">
+                    <span class="label">Next &rarr;</span>
+                    <span class="title">C Interoperability</span>
+                </a>
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <p><a href="../index.html">Strada</a> - A strongly-typed language inspired by Perl</p>
+    </footer>
+</body>
+</html>
