@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Management - Strada Documentation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <a href="../index.html" class="logo">Strada<span>Lang</span></a>
+        <ul>
+            <li><a href="quickstart.html">QuickStart</a></li>
+            <li><a href="index.html">Docs</a></li>
+            <li><a href="reference.html">Reference</a></li>
+            <li><a href="https://github.com/strada-lang/strada-lang">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h3>Getting Started</h3>
+            <ul>
+                <li><a href="quickstart.html">QuickStart</a></li>
+                <li><a href="index.html">Documentation</a></li>
+            </ul>
+            <h3>Language Guide</h3>
+            <ul>
+                <li><a href="basics.html">Language Basics</a></li>
+                <li><a href="types.html">Types & Variables</a></li>
+                <li><a href="functions.html">Functions</a></li>
+                <li><a href="control-flow.html">Control Flow</a></li>
+                <li><a href="oop.html">Object-Oriented Programming</a></li>
+            </ul>
+            <h3>Advanced</h3>
+            <ul>
+                <li><a href="memory.html" class="active">Memory Management</a></li>
+                <li><a href="c-interop.html">C Interoperability</a></li>
+                <li><a href="libraries.html">Libraries Guide</a></li>
+                <li><a href="perl-integration.html">Perl Integration</a></li>
+            </ul>
+            <h3>Reference</h3>
+            <ul>
+                <li><a href="reference.html">Built-in Functions</a></li>
+                <li><a href="cannoli.html">Cannoli Web Framework</a></li>
+            </ul>
+        </aside>
+
+        <main class="content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a> / <a href="index.html">Docs</a> / Memory Management
+            </div>
+
+            <h1>Memory <span>Management</span></h1>
+            <p class="subtitle">How Strada handles memory allocation, references, and cleanup.</p>
+
+            <div class="info-box success">
+                <strong>Key Concept</strong>
+                Strada uses automatic reference counting. Memory is freed when no references remain.
+                You rarely need to think about memory, but understanding the model helps write efficient code.
+            </div>
+
+            <h2>Automatic Reference Counting</h2>
+
+            <p>Every value in Strada has a reference count. When a value is assigned to a variable or passed to a function, the count increases. When a variable goes out of scope, the count decreases. When the count reaches zero, the memory is freed.</p>
+
+            <pre><code><span class="keyword">func</span> <span class="func">example</span>() <span class="type">void</span> {
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$s</span> = <span class="string">"hello"</span>;   <span class="comment"># refcount = 1</span>
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$t</span> = <span class="sigil">$s</span>;         <span class="comment"># refcount = 2 (shared)</span>
+
+    <span class="comment"># When function returns:</span>
+    <span class="comment"># $t goes out of scope: refcount = 1</span>
+    <span class="comment"># $s goes out of scope: refcount = 0 -&gt; freed</span>
+}</code></pre>
+
+            <h3>Inspecting Reference Counts</h3>
+
+            <p>Use <code>refcount()</code> to see how many references exist to a value:</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@arr</span> = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>];
+<span class="func">say</span>(<span class="func">refcount</span>(\<span class="sigil">@arr</span>));  <span class="comment"># 1</span>
+
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$ref</span> = \<span class="sigil">@arr</span>;
+<span class="func">say</span>(<span class="func">refcount</span>(\<span class="sigil">@arr</span>));  <span class="comment"># 2</span></code></pre>
+
+            <h2>Scope and Lifetime</h2>
+
+            <p>Variables are scoped to the block where they're declared:</p>
+
+            <pre><code><span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$outer</span> = <span class="string">"outer"</span>;
+
+    <span class="keyword">if</span> (<span class="number">1</span>) {
+        <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$inner</span> = <span class="string">"inner"</span>;
+        <span class="func">say</span>(<span class="sigil">$outer</span>);  <span class="comment"># OK: outer is visible</span>
+        <span class="func">say</span>(<span class="sigil">$inner</span>);  <span class="comment"># OK: inner is visible</span>
+    }
+    <span class="comment"># $inner is freed here</span>
+
+    <span class="func">say</span>(<span class="sigil">$outer</span>);  <span class="comment"># OK</span>
+    <span class="comment"># say($inner);  # Error: $inner not in scope</span>
+
+    <span class="keyword">return</span> <span class="number">0</span>;
+}</code></pre>
+
+            <h3>Loop Variable Scope</h3>
+
+            <pre><code><span class="keyword">for</span> (<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$i</span> = <span class="number">0</span>; <span class="sigil">$i</span> < <span class="number">10</span>; <span class="sigil">$i</span>++) {
+    <span class="comment"># $i exists here</span>
+}
+<span class="comment"># $i is freed here</span>
+
+<span class="keyword">foreach</span> <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$item</span> (<span class="sigil">@items</span>) {
+    <span class="comment"># $item exists here</span>
+}
+<span class="comment"># $item is freed here</span></code></pre>
+
+            <h2>References</h2>
+
+            <p>References allow multiple variables to point to the same data. Creating a reference increases the refcount:</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@data</span> = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>];
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$ref</span> = \<span class="sigil">@data</span>;    <span class="comment"># Reference to @data</span>
+
+<span class="comment"># Both point to the same array</span>
+<span class="func">push</span>(<span class="sigil">@data</span>, <span class="number">4</span>);
+<span class="func">say</span>(<span class="sigil">$ref</span>->[<span class="number">3</span>]);  <span class="comment"># 4</span>
+
+<span class="comment"># Array freed only when BOTH go out of scope</span></code></pre>
+
+            <h3>Anonymous References</h3>
+
+            <p>Anonymous arrays and hashes are created with refcount 1:</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$arr</span> = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>];       <span class="comment"># Anonymous array ref</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$hash</span> = { <span class="string">"a"</span> => <span class="number">1</span> };  <span class="comment"># Anonymous hash ref</span>
+
+<span class="comment"># Freed when $arr and $hash go out of scope</span></code></pre>
+
+            <h2>Object Destruction (DESTROY)</h2>
+
+            <p>When an object's refcount reaches zero, Strada automatically calls its <code>DESTROY</code> method if one exists:</p>
+
+            <pre><code><span class="keyword">package</span> <span class="type">Connection</span>;
+
+<span class="keyword">func</span> <span class="func">new</span>(<span class="type">str</span> <span class="sigil">$host</span>) <span class="type">scalar</span> {
+    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%self</span> = {
+        <span class="string">"host"</span> => <span class="sigil">$host</span>,
+        <span class="string">"socket"</span> => <span class="func">sys::socket_client</span>(<span class="sigil">$host</span>, <span class="number">80</span>)
+    };
+    <span class="keyword">return</span> <span class="func">bless</span>(\<span class="sigil">%self</span>, <span class="string">"Connection"</span>);
+}
+
+<span class="keyword">func</span> <span class="func">DESTROY</span>(<span class="type">scalar</span> <span class="sigil">$self</span>) <span class="type">void</span> {
+    <span class="comment"># Called automatically when object is freed</span>
+    <span class="func">say</span>(<span class="string">"Closing connection to "</span> . <span class="sigil">$self</span>->{<span class="string">"host"</span>});
+    <span class="func">sys::close_fd</span>(<span class="sigil">$self</span>->{<span class="string">"socket"</span>});
+}
+
+<span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
+    {
+        <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$conn</span> = <span class="type">Connection</span>::<span class="func">new</span>(<span class="string">"example.com"</span>);
+        <span class="comment"># Use connection...</span>
+    }
+    <span class="comment"># DESTROY called here automatically</span>
+    <span class="keyword">return</span> <span class="number">0</span>;
+}</code></pre>
+
+            <div class="info-box">
+                <strong>DESTROY Order</strong>
+                With inheritance, DESTROY methods are called from child to parent.
+                Use <code>$self->SUPER::DESTROY()</code> to call parent destructors.
+            </div>
+
+            <h2>Manual Memory Control</h2>
+
+            <p>Sometimes you need explicit control over when memory is freed:</p>
+
+            <h3>undef() - Clear a Variable</h3>
+
+            <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$big_string</span> = <span class="func">slurp</span>(<span class="string">"huge_file.txt"</span>);
+<span class="comment"># Process the string...</span>
+
+<span class="func">undef</span>(<span class="sigil">$big_string</span>);  <span class="comment"># Free memory now, don't wait for scope end</span></code></pre>
+
+            <h3>release() - Free via Reference</h3>
+
+            <pre><code><span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$ref</span> = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>];
+<span class="func">release</span>(<span class="sigil">$ref</span>);  <span class="comment"># Decrements refcount, $ref becomes undef</span></code></pre>
+
+            <h2>Performance Optimization</h2>
+
+            <h3>Pre-allocating Arrays</h3>
+
+            <p>If you know an array's size in advance, pre-allocate to avoid reallocations:</p>
+
+            <pre><code><span class="comment"># Method 1: Declaration with capacity</span>
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@data</span>[<span class="number">10000</span>];  <span class="comment"># Pre-allocate for 10,000 elements</span>
+
+<span class="comment"># Method 2: Reserve after creation</span>
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@items</span> = [];
+<span class="func">sys::array_reserve</span>(<span class="sigil">@items</span>, <span class="number">5000</span>);
+
+<span class="comment"># Now push() won't need to reallocate</span>
+<span class="keyword">for</span> (<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$i</span> = <span class="number">0</span>; <span class="sigil">$i</span> < <span class="number">5000</span>; <span class="sigil">$i</span>++) {
+    <span class="func">push</span>(<span class="sigil">@items</span>, <span class="sigil">$i</span>);
+}</code></pre>
+
+            <h3>Pre-allocating Hashes</h3>
+
+            <pre><code><span class="comment"># Declaration with capacity</span>
+<span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%cache</span>[<span class="number">1000</span>];  <span class="comment"># Pre-allocate buckets for ~1000 keys</span>
+
+<span class="comment"># Or set default for all new hashes</span>
+<span class="func">sys::hash_default_capacity</span>(<span class="number">500</span>);</code></pre>
+
+            <h3>StringBuilder for String Building</h3>
+
+            <p>String concatenation creates new strings each time. For building large strings, use StringBuilder:</p>
+
+            <pre><code><span class="comment"># Inefficient: O(n²) - creates many intermediate strings</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$result</span> = <span class="string">""</span>;
+<span class="keyword">for</span> (<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$i</span> = <span class="number">0</span>; <span class="sigil">$i</span> < <span class="number">10000</span>; <span class="sigil">$i</span>++) {
+    <span class="sigil">$result</span> = <span class="sigil">$result</span> . <span class="string">"line "</span> . <span class="sigil">$i</span> . <span class="string">"\n"</span>;
+}
+
+<span class="comment"># Efficient: O(n) - appends to buffer</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$sb</span> = <span class="func">sb::new</span>();
+<span class="keyword">for</span> (<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$i</span> = <span class="number">0</span>; <span class="sigil">$i</span> < <span class="number">10000</span>; <span class="sigil">$i</span>++) {
+    <span class="func">sb::append</span>(<span class="sigil">$sb</span>, <span class="string">"line "</span> . <span class="sigil">$i</span> . <span class="string">"\n"</span>);
+}
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$result</span> = <span class="func">sb::to_string</span>(<span class="sigil">$sb</span>);</code></pre>
+
+            <h3>Array Capacity Functions</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Function</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>sys::array_capacity(@arr)</code></td><td>Get current allocated capacity</td></tr>
+                    <tr><td><code>sys::array_reserve(@arr, $n)</code></td><td>Ensure capacity for at least $n elements</td></tr>
+                    <tr><td><code>sys::array_shrink(@arr)</code></td><td>Shrink capacity to match current length</td></tr>
+                </tbody>
+            </table>
+
+            <h2>Memory and Closures</h2>
+
+            <p>Closures capture variables by reference. The captured variables stay alive as long as the closure exists:</p>
+
+            <pre><code><span class="keyword">func</span> <span class="func">make_counter</span>() <span class="type">scalar</span> {
+    <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$count</span> = <span class="number">0</span>;
+
+    <span class="keyword">return</span> <span class="keyword">func</span> () {
+        <span class="sigil">$count</span>++;  <span class="comment"># Captures $count by reference</span>
+        <span class="keyword">return</span> <span class="sigil">$count</span>;
+    };
+}
+
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$counter</span> = <span class="func">make_counter</span>();
+<span class="comment"># $count from make_counter() is kept alive by the closure</span>
+
+<span class="func">say</span>(<span class="sigil">$counter</span>->());  <span class="comment"># 1</span>
+<span class="func">say</span>(<span class="sigil">$counter</span>->());  <span class="comment"># 2</span>
+
+<span class="func">undef</span>(<span class="sigil">$counter</span>);
+<span class="comment"># Now $count is finally freed</span></code></pre>
+
+            <div class="info-box warning">
+                <strong>Watch for Cycles</strong>
+                If a closure captures a variable that references the closure itself, you create a cycle that won't be freed automatically. Break cycles manually with <code>undef()</code>.
+            </div>
+
+            <h2>Circular References</h2>
+
+            <p>Reference counting cannot automatically free circular references:</p>
+
+            <pre><code><span class="comment"># This creates a cycle that won't be freed!</span>
+<span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%a</span> = ();
+<span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%b</span> = ();
+<span class="sigil">$a</span>{<span class="string">"other"</span>} = \<span class="sigil">%b</span>;
+<span class="sigil">$b</span>{<span class="string">"other"</span>} = \<span class="sigil">%a</span>;
+<span class="comment"># Both have refcount 2, won't reach 0</span>
+
+<span class="comment"># Fix: Break the cycle before scope exit</span>
+<span class="func">delete</span>(<span class="sigil">%a</span>, <span class="string">"other"</span>);
+<span class="comment"># Now %b refcount = 1, %a refcount = 1</span>
+<span class="comment"># Both freed when scope exits</span></code></pre>
+
+            <h3>Weak References (Pattern)</h3>
+
+            <p>For parent-child relationships, have children reference parents weakly:</p>
+
+            <pre><code><span class="keyword">package</span> <span class="type">TreeNode</span>;
+
+<span class="keyword">func</span> <span class="func">new</span>(<span class="type">str</span> <span class="sigil">$value</span>) <span class="type">scalar</span> {
+    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%self</span> = {
+        <span class="string">"value"</span> => <span class="sigil">$value</span>,
+        <span class="string">"children"</span> => [],
+        <span class="string">"parent"</span> => <span class="func">undef</span>  <span class="comment"># Don't store ref to parent</span>
+    };
+    <span class="keyword">return</span> <span class="func">bless</span>(\<span class="sigil">%self</span>, <span class="string">"TreeNode"</span>);
+}
+
+<span class="keyword">func</span> <span class="func">add_child</span>(<span class="type">scalar</span> <span class="sigil">$self</span>, <span class="type">scalar</span> <span class="sigil">$child</span>) <span class="type">void</span> {
+    <span class="func">push</span>(<span class="sigil">$self</span>->{<span class="string">"children"</span>}, <span class="sigil">$child</span>);
+    <span class="comment"># Don't: $child->{"parent"} = $self;  # Creates cycle!</span>
+}</code></pre>
+
+            <h2>Memory Profiling</h2>
+
+            <p>Enable memory profiling to track allocations:</p>
+
+            <pre><code><span class="func">sys::memprof_enable</span>();
+
+<span class="comment"># ... your code ...</span>
+
+<span class="func">sys::memprof_report</span>();  <span class="comment"># Print allocation stats</span>
+<span class="func">sys::memprof_reset</span>();   <span class="comment"># Clear counters</span>
+<span class="func">sys::memprof_disable</span>();</code></pre>
+
+            <h2>C Interop Memory</h2>
+
+            <p>When working with C code, you may need manual memory management:</p>
+
+            <pre><code><span class="comment"># Allocate C memory</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$ptr</span> = <span class="func">c::alloc</span>(<span class="number">1024</span>);
+
+<span class="comment"># Use the memory...</span>
+<span class="func">c::write_int32</span>(<span class="sigil">$ptr</span>, <span class="number">42</span>);
+
+<span class="comment"># Free when done</span>
+<span class="func">c::free</span>(<span class="sigil">$ptr</span>);</code></pre>
+
+            <p>See <a href="c-interop.html">C Interoperability</a> for more details on working with C memory.</p>
+
+            <h2>Best Practices</h2>
+
+            <div class="info-box">
+                <strong>Memory Tips</strong>
+                <ul>
+                    <li>Let automatic cleanup handle most cases - don't over-optimize</li>
+                    <li>Use <code>undef()</code> for large objects you're done with early</li>
+                    <li>Pre-allocate arrays/hashes when you know the size</li>
+                    <li>Use StringBuilder for building large strings</li>
+                    <li>Implement DESTROY for objects that hold external resources</li>
+                    <li>Avoid circular references, or break them explicitly</li>
+                    <li>Use memory profiling to find leaks in long-running programs</li>
+                </ul>
+            </div>
+
+            <div class="page-nav">
+                <a href="oop.html">
+                    <span class="label">&larr; Previous</span>
+                    <span class="title">Object-Oriented Programming</span>
+                </a>
+                <a href="c-interop.html" class="next">
+                    <span class="label">Next &rarr;</span>
+                    <span class="title">C Interoperability</span>
+                </a>
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <p><a href="../index.html">Strada</a> - A strongly-typed language inspired by Perl</p>
+    </footer>
+</body>
+</html>
