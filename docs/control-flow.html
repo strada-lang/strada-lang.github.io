@@ -257,30 +257,63 @@
     <span class="func">say</span>(<span class="string">"Found hello (case-insensitive)"</span>);
 }</code></pre>
 
-            <h2>Switch-like Patterns</h2>
+            <h2>Switch Statement</h2>
 
-            <p>Strada doesn't have a switch statement, but you can use if/elsif chains or hashes:</p>
+            <p>Use <code>switch</code> for multi-way branching:</p>
 
-            <pre><code><span class="comment"># Using if/elsif</span>
-<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$day</span> = <span class="string">"Mon"</span>;
+            <pre><code><span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$day</span> = <span class="number">3</span>;
 
-<span class="keyword">if</span> (<span class="sigil">$day</span> eq <span class="string">"Mon"</span>) {
-    <span class="func">say</span>(<span class="string">"Monday"</span>);
-} <span class="keyword">elsif</span> (<span class="sigil">$day</span> eq <span class="string">"Tue"</span>) {
-    <span class="func">say</span>(<span class="string">"Tuesday"</span>);
-} <span class="keyword">elsif</span> (<span class="sigil">$day</span> eq <span class="string">"Wed"</span>) {
-    <span class="func">say</span>(<span class="string">"Wednesday"</span>);
-} <span class="keyword">else</span> {
-    <span class="func">say</span>(<span class="string">"Other day"</span>);
-}
+<span class="keyword">switch</span> (<span class="sigil">$day</span>) {
+    <span class="keyword">case</span> <span class="number">1</span> {
+        <span class="func">say</span>(<span class="string">"Monday"</span>);
+    }
+    <span class="keyword">case</span> <span class="number">2</span> {
+        <span class="func">say</span>(<span class="string">"Tuesday"</span>);
+    }
+    <span class="keyword">case</span> <span class="number">3</span> {
+        <span class="func">say</span>(<span class="string">"Wednesday"</span>);
+    }
+    <span class="keyword">default</span> {
+        <span class="func">say</span>(<span class="string">"Other day"</span>);
+    }
+}</code></pre>
 
-<span class="comment"># Using a hash (dispatch table)</span>
-<span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%day_names</span> = {
+            <div class="info-box">
+                <strong>No Fall-Through</strong>
+                Unlike C/Java, each <code>case</code> is self-contained with braces.
+                There's no fall-through behavior and no <code>break</code> statement needed.
+            </div>
+
+            <h3>Switch with Strings</h3>
+
+            <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$color</span> = <span class="string">"red"</span>;
+
+<span class="keyword">switch</span> (<span class="sigil">$color</span>) {
+    <span class="keyword">case</span> <span class="string">"red"</span> {
+        <span class="func">say</span>(<span class="string">"Stop"</span>);
+    }
+    <span class="keyword">case</span> <span class="string">"yellow"</span> {
+        <span class="func">say</span>(<span class="string">"Caution"</span>);
+    }
+    <span class="keyword">case</span> <span class="string">"green"</span> {
+        <span class="func">say</span>(<span class="string">"Go"</span>);
+    }
+    <span class="keyword">default</span> {
+        <span class="func">say</span>(<span class="string">"Unknown signal"</span>);
+    }
+}</code></pre>
+
+            <h3>Alternative: Hash Dispatch</h3>
+
+            <p>For dynamic dispatch or function tables, hashes work well:</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%day_names</span> = {
     <span class="string">"Mon"</span> => <span class="string">"Monday"</span>,
     <span class="string">"Tue"</span> => <span class="string">"Tuesday"</span>,
     <span class="string">"Wed"</span> => <span class="string">"Wednesday"</span>
 };
 
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$day</span> = <span class="string">"Mon"</span>;
 <span class="keyword">if</span> (<span class="func">exists</span>(<span class="sigil">%day_names</span>, <span class="sigil">$day</span>)) {
     <span class="func">say</span>(<span class="sigil">$day_names</span>{<span class="sigil">$day</span>});
 } <span class="keyword">else</span> {
