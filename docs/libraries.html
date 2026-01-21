@@ -122,7 +122,7 @@ mv MathLib.o lib/</code></pre>
             <h3>Basic Usage</h3>
 
             <pre><code><span class="keyword">use</span> lib <span class="string">"lib"</span>;          <span class="comment"># Add lib/ to search path</span>
-<span class="keyword">import_lib</span> <span class="string">"MathLib"</span>;    <span class="comment"># Import MathLib.so</span>
+<span class="keyword">import_lib</span> <span class="string">"MathLib.so"</span>;  <span class="comment"># Import MathLib.so</span>
 
 <span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
     <span class="comment"># Call with namespace syntax (recommended)</span>
@@ -165,7 +165,7 @@ mv MathLib.o lib/</code></pre>
             <h3>Basic Usage</h3>
 
             <pre><code><span class="keyword">use</span> lib <span class="string">"lib"</span>;             <span class="comment"># Add lib/ to search path</span>
-<span class="keyword">import_object</span> <span class="string">"MathLib"</span>;   <span class="comment"># Link MathLib.o statically</span>
+<span class="keyword">import_object</span> <span class="string">"MathLib.o"</span>;  <span class="comment"># Link MathLib.o statically</span>
 
 <span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
     <span class="comment"># Same syntax as import_lib</span>
@@ -230,8 +230,8 @@ mv MathLib.o lib/</code></pre>
 <span class="keyword">use</span> lib <span class="string">"vendor/lib"</span>;
 <span class="keyword">use</span> lib <span class="string">"/usr/local/strada/lib"</span>;
 
-<span class="keyword">import_lib</span> <span class="string">"JSON"</span>;      <span class="comment"># Searches all paths for JSON.so and JSON.strada</span>
-<span class="keyword">import_object</span> <span class="string">"Utils"</span>;  <span class="comment"># Searches all paths for Utils.o and Utils.strada</span></code></pre>
+<span class="keyword">import_lib</span> <span class="string">"JSON.so"</span>;     <span class="comment"># Searches all paths for JSON.so</span>
+<span class="keyword">import_object</span> <span class="string">"Utils.o"</span>;  <span class="comment"># Searches all paths for Utils.o</span></code></pre>
 
             <h2>Library Versioning</h2>
 
@@ -309,7 +309,7 @@ Call examples:
 
             <pre><code><span class="comment"># app.strada</span>
 <span class="keyword">use</span> lib <span class="string">"lib"</span>;
-<span class="keyword">import_lib</span> <span class="string">"JSON"</span>;  <span class="comment"># or: import_object "JSON"</span>
+<span class="keyword">import_lib</span> <span class="string">"JSON.so"</span>;  <span class="comment"># or: import_object "JSON.o"</span>
 
 <span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
     <span class="comment"># Create some data</span>

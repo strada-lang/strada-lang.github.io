@@ -324,7 +324,7 @@ mv MathLib.so lib/</code></pre>
             <p>Import shared libraries with <code>import_lib</code> for clean namespace access:</p>
 
             <pre><code><span class="keyword">use</span> lib <span class="string">"lib"</span>;
-<span class="keyword">import_lib</span> <span class="string">"MathLib"</span>;
+<span class="keyword">import_lib</span> <span class="string">"MathLib.so"</span>;
 
 <span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
     <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$sum</span> = <span class="type">MathLib</span>::<span class="func">add</span>(<span class="number">10</span>, <span class="number">32</span>);
