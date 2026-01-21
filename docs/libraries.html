@@ -57,7 +57,7 @@
 
             <h2>Overview</h2>
 
-            <p>Strada supports two types of libraries:</p>
+            <p>Strada supports three types of libraries:</p>
 
             <div class="card-grid">
                 <div class="card">
@@ -69,6 +69,11 @@
                     <h4>Object Files (.o)</h4>
                     <p>Statically linked at compile time. Use <code>import_object</code> to import.</p>
                     <p><strong>Best for:</strong> Core libraries, single-file distribution, faster startup</p>
+                </div>
+                <div class="card">
+                    <h4>Archive Files (.a)</h4>
+                    <p>Static archive with bundled runtime. Use <code>import_archive</code> to import.</p>
+                    <p><strong>Best for:</strong> Self-contained libraries, distribution without runtime dependency</p>
                 </div>
             </div>
 
@@ -111,8 +116,16 @@ mv MathLib.so lib/</code></pre>
             <pre><code>./strada --object lib/MathLib.strada
 mv MathLib.o lib/</code></pre>
 
+            <p><strong>For archive files (.a):</strong></p>
+            <pre><code>./strada --static-lib lib/MathLib.strada
+mv MathLib.a lib/</code></pre>
+
             <div class="info-box">
-                <strong>Self-contained metadata:</strong> Function signatures are embedded in the compiled <code>.so</code> and <code>.o</code> files via <code>__strada_export_info()</code>. You don't need to keep the original <code>.strada</code> source file.
+                <strong>Self-contained metadata:</strong> Function signatures are embedded in the compiled <code>.so</code>, <code>.o</code>, and <code>.a</code> files via <code>__strada_export_info()</code>. You don't need to keep the original <code>.strada</code> source file.
+            </div>
+
+            <div class="info-box">
+                <strong>Archive includes runtime:</strong> Archives created with <code>--static-lib</code> include the Strada runtime, making them fully self-contained. The compiler automatically skips the runtime when linking against archives to avoid duplicate symbols.
             </div>
 
             <h2>Using Shared Libraries (import_lib)</h2>
@@ -194,24 +207,78 @@ mv MathLib.o lib/</code></pre>
                 <li>Links <code>MathLib.o</code> into the final executable with gcc</li>
             </ol>
 
-            <h2>Shared vs Object: When to Use Which</h2>
+            <h2>Using Archive Files (import_archive)</h2>
+
+            <p>Archive files are self-contained static libraries that include the Strada runtime. They're ideal for distributing libraries without requiring the runtime separately.</p>
+
+            <h3>Basic Usage</h3>
+
+            <pre><code><span class="keyword">use</span> lib <span class="string">"lib"</span>;                <span class="comment"># Add lib/ to search path</span>
+<span class="keyword">import_archive</span> <span class="string">"MathLib.a"</span>;   <span class="comment"># Link MathLib.a statically</span>
+
+<span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
+    <span class="comment"># Same syntax as import_lib and import_object</span>
+    <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$sum</span> = <span class="type">MathLib</span>::<span class="func">add</span>(<span class="number">10</span>, <span class="number">32</span>);
+    <span class="func">say</span>(<span class="sigil">$sum</span>);  <span class="comment"># 42</span>
+    <span class="keyword">return</span> <span class="number">0</span>;
+}</code></pre>
+
+            <h3>Requirements</h3>
 
             <table>
                 <thead>
-                    <tr><th>Feature</th><th>Shared (.so)</th><th>Object (.o)</th></tr>
+                    <tr><th>File</th><th>Purpose</th><th>Required</th></tr>
                 </thead>
                 <tbody>
-                    <tr><td><strong>Linking</strong></td><td>Runtime (dlopen)</td><td>Compile time (gcc)</td></tr>
-                    <tr><td><strong>Distribution</strong></td><td>Multiple files</td><td>Single executable</td></tr>
-                    <tr><td><strong>Startup time</strong></td><td>Slightly slower (lazy load)</td><td>Faster</td></tr>
-                    <tr><td><strong>Memory sharing</strong></td><td>Shared between processes</td><td>Per-process</td></tr>
-                    <tr><td><strong>Updates</strong></td><td>Replace .so without recompile</td><td>Requires recompile</td></tr>
-                    <tr><td><strong>Plugins</strong></td><td>Excellent</td><td>Not suitable</td></tr>
+                    <tr><td><code>LibName.a</code></td><td>Compiled code + runtime + embedded metadata</td><td>Yes</td></tr>
+                    <tr><td><code>LibName.strada</code></td><td>Source (only needed for recompiling)</td><td>No</td></tr>
+                </tbody>
+            </table>
+
+            <h3>How It Works</h3>
+
+            <ol>
+                <li>At <strong>compile time</strong>: Compiler extracts metadata from <code>MathLib.a</code> by calling <code>__strada_export_info()</code></li>
+                <li>Generates direct function calls (no wrappers needed)</li>
+                <li>Links <code>MathLib.a</code> into the final executable</li>
+                <li><strong>Skips runtime linking</strong> since the archive includes it</li>
+            </ol>
+
+            <h3>Creating Archive Files</h3>
+
+            <pre><code><span class="comment"># Create archive with bundled runtime</span>
+./strada --static-lib lib/MathLib.strada
+mv MathLib.a lib/</code></pre>
+
+            <div class="info-box">
+                <strong>Runtime bundling:</strong> Archives created with <code>--static-lib</code> include the Strada runtime (<code>strada_runtime.o</code>). When you import an archive, the compiler automatically skips linking the runtime separately to avoid duplicate symbols.
+            </div>
+
+            <h2>Comparing Library Types</h2>
+
+            <table>
+                <thead>
+                    <tr><th>Feature</th><th>Shared (.so)</th><th>Object (.o)</th><th>Archive (.a)</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Linking</strong></td><td>Runtime (dlopen)</td><td>Compile time</td><td>Compile time</td></tr>
+                    <tr><td><strong>Distribution</strong></td><td>Multiple files</td><td>Single executable</td><td>Single executable</td></tr>
+                    <tr><td><strong>Includes runtime</strong></td><td>No</td><td>No</td><td>Yes</td></tr>
+                    <tr><td><strong>Startup time</strong></td><td>Slightly slower (lazy load)</td><td>Faster</td><td>Faster</td></tr>
+                    <tr><td><strong>Memory sharing</strong></td><td>Shared between processes</td><td>Per-process</td><td>Per-process</td></tr>
+                    <tr><td><strong>Updates</strong></td><td>Replace .so without recompile</td><td>Requires recompile</td><td>Requires recompile</td></tr>
+                    <tr><td><strong>Plugins</strong></td><td>Excellent</td><td>Not suitable</td><td>Not suitable</td></tr>
+                    <tr><td><strong>Self-contained</strong></td><td>No (needs runtime)</td><td>No (needs runtime)</td><td>Yes</td></tr>
                 </tbody>
             </table>
 
             <div class="info-box">
-                <strong>Rule of thumb:</strong> Use <code>import_object</code> for core libraries you always need. Use <code>import_lib</code> for optional features or plugins.
+                <strong>Rule of thumb:</strong>
+                <ul>
+                    <li>Use <code>import_lib</code> for optional features or plugins</li>
+                    <li>Use <code>import_object</code> for core libraries you always need</li>
+                    <li>Use <code>import_archive</code> for distributing self-contained libraries to users who don't have the Strada runtime</li>
+                </ul>
             </div>
 
             <h2>Library Search Paths</h2>
@@ -230,8 +297,9 @@ mv MathLib.o lib/</code></pre>
 <span class="keyword">use</span> lib <span class="string">"vendor/lib"</span>;
 <span class="keyword">use</span> lib <span class="string">"/usr/local/strada/lib"</span>;
 
-<span class="keyword">import_lib</span> <span class="string">"JSON.so"</span>;     <span class="comment"># Searches all paths for JSON.so</span>
-<span class="keyword">import_object</span> <span class="string">"Utils.o"</span>;  <span class="comment"># Searches all paths for Utils.o</span></code></pre>
+<span class="keyword">import_lib</span> <span class="string">"JSON.so"</span>;        <span class="comment"># Searches all paths for JSON.so</span>
+<span class="keyword">import_object</span> <span class="string">"Utils.o"</span>;     <span class="comment"># Searches all paths for Utils.o</span>
+<span class="keyword">import_archive</span> <span class="string">"DataLib.a"</span>; <span class="comment"># Searches all paths for DataLib.a</span></code></pre>
 
             <h2>Library Versioning</h2>
 
@@ -299,17 +367,20 @@ Call examples:
 
             <h3>2. Compile</h3>
 
-            <pre><code><span class="comment"># As shared library</span>
+            <pre><code><span class="comment"># As shared library (runtime loading)</span>
 ./strada --shared lib/JSON.strada && mv JSON.so lib/
 
-<span class="comment"># Or as object file</span>
-./strada --object lib/JSON.strada && mv JSON.o lib/</code></pre>
+<span class="comment"># Or as object file (static linking)</span>
+./strada --object lib/JSON.strada && mv JSON.o lib/
+
+<span class="comment"># Or as archive file (static linking with bundled runtime)</span>
+./strada --static-lib lib/JSON.strada && mv JSON.a lib/</code></pre>
 
             <h3>3. Use in Your Program</h3>
 
             <pre><code><span class="comment"># app.strada</span>
 <span class="keyword">use</span> lib <span class="string">"lib"</span>;
-<span class="keyword">import_lib</span> <span class="string">"JSON.so"</span>;  <span class="comment"># or: import_object "JSON.o"</span>
+<span class="keyword">import_lib</span> <span class="string">"JSON.so"</span>;  <span class="comment"># or: import_object "JSON.o" or import_archive "JSON.a"</span>
 
 <span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
     <span class="comment"># Create some data</span>
@@ -393,6 +464,11 @@ Call examples:
                         <td>Add <code>use lib "path"</code> or move .o to lib/</td>
                     </tr>
                     <tr>
+                        <td><code>cannot find LibName.a</code></td>
+                        <td>.a file not in search path</td>
+                        <td>Add <code>use lib "path"</code> or move .a to lib/</td>
+                    </tr>
+                    <tr>
                         <td><code>undefined symbol</code></td>
                         <td>Function not exported</td>
                         <td>Check package name matches function prefix</td>
@@ -401,6 +477,11 @@ Call examples:
                         <td><code>missing __strada_export_info</code></td>
                         <td>Old library format</td>
                         <td>Recompile library with current compiler</td>
+                    </tr>
+                    <tr>
+                        <td><code>multiple definition</code></td>
+                        <td>Runtime linked twice with archive</td>
+                        <td>This shouldn't happen - compiler auto-skips runtime for archives</td>
                     </tr>
                 </tbody>
             </table>

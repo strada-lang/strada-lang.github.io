@@ -374,18 +374,22 @@
 <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$fn</span> = <span class="func">sys::dl_sym</span>(<span class="sigil">$lib</span>, <span class="string">"my_function"</span>);
 <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$result</span> = <span class="func">sys::dl_call_sv</span>(<span class="sigil">$fn</span>, [<span class="sigil">$arg1</span>, <span class="sigil">$arg2</span>]);</code></pre>
 
-            <h4>import_lib</h4>
-            <p>For cleaner library imports, use <code>import_lib</code>:</p>
+            <h4>Library Imports</h4>
+            <p>For cleaner library imports, use <code>import_lib</code>, <code>import_object</code>, or <code>import_archive</code>:</p>
             <pre><code><span class="keyword">use</span> lib <span class="string">"lib"</span>;
-<span class="func">import_lib</span> <span class="string">"JSON.so"</span>;
+<span class="func">import_lib</span> <span class="string">"JSON.so"</span>;         <span class="comment"># Runtime loading (dlopen)</span>
+<span class="func">import_object</span> <span class="string">"Utils.o"</span>;      <span class="comment"># Static linking</span>
+<span class="func">import_archive</span> <span class="string">"DataLib.a"</span>;  <span class="comment"># Static linking with bundled runtime</span>
 
 <span class="comment"># Functions are now available with namespace syntax:</span>
 <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$json</span> = <span class="type">JSON</span>::<span class="func">encode</span>(\<span class="sigil">%data</span>);
 <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%data</span> = <span class="type">JSON</span>::<span class="func">decode</span>(<span class="sigil">$json</span>);</code></pre>
 
-            <h4>Shared Library Compilation</h4>
-            <p>Compile Strada programs as shared libraries:</p>
-            <pre><code>./strada --shared mylib.strada   <span class="comment"># Creates mylib.so</span></code></pre>
+            <h4>Library Compilation</h4>
+            <p>Compile Strada programs as libraries:</p>
+            <pre><code>./strada --shared mylib.strada      <span class="comment"># Creates mylib.so</span>
+./strada --object mylib.strada      <span class="comment"># Creates mylib.o</span>
+./strada --static-lib mylib.strada  <span class="comment"># Creates mylib.a (includes runtime)</span></code></pre>
 
             <h2>C Interop (__C__ Blocks)</h2>
 

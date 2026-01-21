@@ -319,12 +319,14 @@
 ./strada --shared lib/MathLib.strada
 mv MathLib.so lib/</code></pre>
 
-            <h3>Using import_lib</h3>
+            <h3>Using Library Imports</h3>
 
-            <p>Import shared libraries with <code>import_lib</code> for clean namespace access:</p>
+            <p>Import libraries with namespace access using any of the import methods:</p>
 
             <pre><code><span class="keyword">use</span> lib <span class="string">"lib"</span>;
-<span class="keyword">import_lib</span> <span class="string">"MathLib.so"</span>;
+<span class="keyword">import_lib</span> <span class="string">"MathLib.so"</span>;       <span class="comment"># Runtime loading (dlopen)</span>
+<span class="comment"># Or: import_object "MathLib.o"   Static linking</span>
+<span class="comment"># Or: import_archive "MathLib.a"  Static linking with bundled runtime</span>
 
 <span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
     <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$sum</span> = <span class="type">MathLib</span>::<span class="func">add</span>(<span class="number">10</span>, <span class="number">32</span>);
@@ -337,7 +339,7 @@ mv MathLib.so lib/</code></pre>
 }</code></pre>
 
             <div class="info-box">
-                <strong>import_lib</strong>: Only <code>LibName.so</code> is required. Function signatures are embedded in the library via <code>__strada_export_info()</code>.
+                <strong>Library imports</strong>: Only the compiled file (<code>.so</code>, <code>.o</code>, or <code>.a</code>) is required. Function signatures are embedded via <code>__strada_export_info()</code>. See the <a href="libraries.html">Libraries Guide</a> for details on each format.
             </div>
 
             <h3>Manual FFI</h3>
