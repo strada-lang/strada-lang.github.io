@@ -23,6 +23,7 @@
             <ul>
                 <li><a href="quickstart.html">QuickStart</a></li>
                 <li><a href="index.html">Documentation</a></li>
+                <li><a href="repl.html">REPL & Scripting</a></li>
             </ul>
             <h3>Language Guide</h3>
             <ul>
@@ -36,6 +37,7 @@
             <ul>
                 <li><a href="memory.html">Memory Management</a></li>
                 <li><a href="debugging.html">Debugging</a></li>
+                <li><a href="async.html">Async/Await</a></li>
                 <li><a href="c-interop.html">C Interoperability</a></li>
                 <li><a href="libraries.html">Libraries Guide</a></li>
                 <li><a href="perl-integration.html">Perl Integration</a></li>
@@ -321,9 +323,47 @@
 <span class="func">spew</span>(<span class="string">"output.txt"</span>, <span class="sigil">$content</span>);
 
 <span class="comment"># Low-level file operations</span>
-<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$fd</span> = <span class="func">sys::open</span>(<span class="string">"file.txt"</span>, <span class="string">"r"</span>);
-<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$data</span> = <span class="func">sys::read</span>(<span class="sigil">$fd</span>, <span class="number">1024</span>);
-<span class="func">sys::close</span>(<span class="sigil">$fd</span>);</code></pre>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$fh</span> = <span class="func">sys::open</span>(<span class="string">"file.txt"</span>, <span class="string">"r"</span>);
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$data</span> = <span class="func">sys::readline</span>(<span class="sigil">$fh</span>);
+<span class="func">sys::close</span>(<span class="sigil">$fh</span>);</code></pre>
+
+            <h3>Diamond Operator &lt;$fh&gt;</h3>
+
+            <p>Read lines from filehandles using the Perl-style diamond operator:</p>
+
+            <pre><code><span class="comment"># Scalar context: read one line at a time</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$fh</span> = <span class="func">sys::open</span>(<span class="string">"input.txt"</span>, <span class="string">"r"</span>);
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$line</span> = &lt;<span class="sigil">$fh</span>&gt;;
+<span class="keyword">while</span> (<span class="func">defined</span>(<span class="sigil">$line</span>)) {
+    <span class="func">say</span>(<span class="sigil">$line</span>);
+    <span class="sigil">$line</span> = &lt;<span class="sigil">$fh</span>&gt;;
+}
+<span class="func">sys::close</span>(<span class="sigil">$fh</span>);
+
+<span class="comment"># Array context: read ALL lines at once</span>
+<span class="sigil">$fh</span> = <span class="func">sys::open</span>(<span class="string">"input.txt"</span>, <span class="string">"r"</span>);
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@lines</span> = &lt;<span class="sigil">$fh</span>&gt;;    <span class="comment"># Reads entire file!</span>
+<span class="func">sys::close</span>(<span class="sigil">$fh</span>);
+
+<span class="keyword">foreach</span> <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$line</span> (<span class="sigil">@lines</span>) {
+    <span class="func">say</span>(<span class="sigil">$line</span>);
+}</code></pre>
+
+            <h3>Print/Say to Filehandle</h3>
+
+            <p>Write to files or sockets using say/print with a filehandle as the first argument:</p>
+
+            <pre><code><span class="comment"># Write to file</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$out</span> = <span class="func">sys::open</span>(<span class="string">"output.txt"</span>, <span class="string">"w"</span>);
+<span class="func">say</span>(<span class="sigil">$out</span>, <span class="string">"Line with newline"</span>);    <span class="comment"># Adds \n</span>
+<span class="func">print</span>(<span class="sigil">$out</span>, <span class="string">"No newline"</span>);          <span class="comment"># No \n</span>
+<span class="func">sys::close</span>(<span class="sigil">$out</span>);
+
+<span class="comment"># Also works with sockets!</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$sock</span> = <span class="func">sys::socket_client</span>(<span class="string">"localhost"</span>, <span class="number">80</span>);
+<span class="func">say</span>(<span class="sigil">$sock</span>, <span class="string">"GET / HTTP/1.0"</span>);
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$response</span> = &lt;<span class="sigil">$sock</span>&gt;;    <span class="comment"># Read response</span>
+<span class="func">sys::socket_close</span>(<span class="sigil">$sock</span>);</code></pre>
 
             <div class="page-nav">
                 <a href="quickstart.html">

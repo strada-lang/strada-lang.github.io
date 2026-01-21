@@ -23,6 +23,7 @@
             <ul>
                 <li><a href="quickstart.html">QuickStart</a></li>
                 <li><a href="index.html">Documentation</a></li>
+                <li><a href="repl.html">REPL & Scripting</a></li>
             </ul>
             <h3>Language Guide</h3>
             <ul>
@@ -36,6 +37,7 @@
             <ul>
                 <li><a href="memory.html">Memory Management</a></li>
                 <li><a href="debugging.html">Debugging</a></li>
+                <li><a href="async.html">Async/Await</a></li>
                 <li><a href="c-interop.html">C Interoperability</a></li>
                 <li><a href="libraries.html">Libraries Guide</a></li>
                 <li><a href="perl-integration.html">Perl Integration</a></li>
@@ -196,7 +198,8 @@
                 <tbody>
                     <tr><td><code>slurp($path)</code></td><td>Read entire file as string</td></tr>
                     <tr><td><code>spew($path, $data)</code></td><td>Write string to file</td></tr>
-                    <tr><td><code>sys::open($path, $mode)</code></td><td>Open file, return fd</td></tr>
+                    <tr><td><code>sys::open($path, $mode)</code></td><td>Open file, return filehandle</td></tr>
+                    <tr><td><code>sys::readline($fh)</code></td><td>Read line from filehandle</td></tr>
                     <tr><td><code>sys::read($fd, $len)</code></td><td>Read bytes from fd</td></tr>
                     <tr><td><code>sys::write($fd, $data)</code></td><td>Write bytes to fd</td></tr>
                     <tr><td><code>sys::close($fd)</code></td><td>Close file descriptor</td></tr>
@@ -204,6 +207,36 @@
                     <tr><td><code>sys::tell($fd)</code></td><td>Get current position</td></tr>
                     <tr><td><code>sys::eof($fd)</code></td><td>Check if at end of file</td></tr>
                     <tr><td><code>sys::flush($fd)</code></td><td>Flush file buffer</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Diamond Operator &lt;$fh&gt;</h3>
+
+            <p>The diamond operator reads lines from a filehandle or socket. Context determines behavior:</p>
+
+            <table>
+                <thead>
+                    <tr><th>Syntax</th><th>Context</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>my str $line = &lt;$fh&gt;</code></td><td>Scalar</td><td>Read one line (strips newline)</td></tr>
+                    <tr><td><code>my array @lines = &lt;$fh&gt;</code></td><td>Array</td><td>Read ALL lines into array</td></tr>
+                    <tr><td><code>@lines = &lt;$fh&gt;</code></td><td>Array</td><td>Read ALL lines (assignment)</td></tr>
+                    <tr><td><code>&lt;$sock&gt;</code></td><td>Any</td><td>Works with sockets too (strips \r\n)</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Filehandle I/O</h3>
+
+            <p>Say and print work with filehandles as the first argument:</p>
+
+            <table>
+                <thead>
+                    <tr><th>Syntax</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>say($fh, $text)</code></td><td>Write text with newline to filehandle/socket</td></tr>
+                    <tr><td><code>print($fh, $text)</code></td><td>Write text without newline to filehandle/socket</td></tr>
                 </tbody>
             </table>
 

@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Async/Await - Strada Documentation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <a href="../index.html" class="logo">Strada<span>Lang</span></a>
+        <ul>
+            <li><a href="quickstart.html">QuickStart</a></li>
+            <li><a href="index.html">Docs</a></li>
+            <li><a href="reference.html">Reference</a></li>
+            <li><a href="https://github.com/strada-lang/strada-lang">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h3>Getting Started</h3>
+            <ul>
+                <li><a href="quickstart.html">QuickStart</a></li>
+                <li><a href="index.html">Documentation</a></li>
+            </ul>
+            <h3>Language Guide</h3>
+            <ul>
+                <li><a href="basics.html">Language Basics</a></li>
+                <li><a href="types.html">Types & Variables</a></li>
+                <li><a href="functions.html">Functions</a></li>
+                <li><a href="control-flow.html">Control Flow</a></li>
+                <li><a href="oop.html">Object-Oriented Programming</a></li>
+            </ul>
+            <h3>Advanced</h3>
+            <ul>
+                <li><a href="async.html" class="active">Async/Await</a></li>
+                <li><a href="memory.html">Memory Management</a></li>
+                <li><a href="debugging.html">Debugging</a></li>
+                <li><a href="c-interop.html">C Interoperability</a></li>
+                <li><a href="libraries.html">Libraries Guide</a></li>
+                <li><a href="perl-integration.html">Perl Integration</a></li>
+            </ul>
+            <h3>Reference</h3>
+            <ul>
+                <li><a href="reference.html">Built-in Functions</a></li>
+                <li><a href="cannoli.html">Cannoli Web Framework</a></li>
+            </ul>
+        </aside>
+
+        <main class="content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a> / <a href="index.html">Docs</a> / Async/Await
+            </div>
+
+            <h1><span>Async/Await</span></h1>
+            <p class="subtitle">Concurrent programming with a thread pool backend.</p>
+
+            <h2>Overview</h2>
+
+            <p>Strada provides first-class async/await support, allowing you to write concurrent code that's easy to read and maintain. Async functions execute on a thread pool, enabling parallel operations without the complexity of manual thread management.</p>
+
+            <h2>Defining Async Functions</h2>
+
+            <p>Use <code>async func</code> to define functions that run asynchronously:</p>
+
+            <pre><code><span class="keyword">async func</span> <span class="func">fetch_data</span>(<span class="type">str</span> <span class="sigil">$url</span>) <span class="type">str</span> {
+    <span class="comment"># This runs in the thread pool</span>
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$response</span> = <span class="func">http_get</span>(<span class="sigil">$url</span>);
+    <span class="keyword">return</span> <span class="sigil">$response</span>;
+}
+
+<span class="keyword">async func</span> <span class="func">compute</span>(<span class="type">int</span> <span class="sigil">$n</span>) <span class="type">int</span> {
+    <span class="func">sys::usleep</span>(<span class="number">50000</span>);  <span class="comment"># 50ms work</span>
+    <span class="keyword">return</span> <span class="sigil">$n</span> * <span class="number">2</span>;
+}</code></pre>
+
+            <p>When called, async functions immediately return a <strong>Future</strong> while the actual work executes on a background thread.</p>
+
+            <h2>Awaiting Futures</h2>
+
+            <p>Use <code>await</code> to block until a Future completes and get its result:</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$future</span> = <span class="func">compute</span>(<span class="number">21</span>);
+<span class="func">say</span>(<span class="string">"Future created, working..."</span>);
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$result</span> = <span class="keyword">await</span> <span class="sigil">$future</span>;
+<span class="func">say</span>(<span class="string">"Result: "</span> . <span class="sigil">$result</span>);  <span class="comment"># Result: 42</span></code></pre>
+
+            <h2>Parallel Execution</h2>
+
+            <p>Launch multiple async operations concurrently by calling async functions before awaiting:</p>
+
+            <pre><code><span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
+    <span class="comment"># Start three operations in parallel</span>
+    <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$a</span> = <span class="func">compute</span>(<span class="number">10</span>);
+    <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$b</span> = <span class="func">compute</span>(<span class="number">20</span>);
+    <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$c</span> = <span class="func">compute</span>(<span class="number">30</span>);
+
+    <span class="comment"># Wait for all results</span>
+    <span class="comment"># Total time ~50ms, not 150ms!</span>
+    <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$r1</span> = <span class="keyword">await</span> <span class="sigil">$a</span>;  <span class="comment"># 20</span>
+    <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$r2</span> = <span class="keyword">await</span> <span class="sigil">$b</span>;  <span class="comment"># 40</span>
+    <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$r3</span> = <span class="keyword">await</span> <span class="sigil">$c</span>;  <span class="comment"># 60</span>
+
+    <span class="keyword">return</span> <span class="number">0</span>;
+}</code></pre>
+
+            <h2>async:: Namespace Functions</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Function</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>async::all(\@futures)</code></td>
+                        <td>Wait for all futures, return array of results</td>
+                    </tr>
+                    <tr>
+                        <td><code>async::race(\@futures)</code></td>
+                        <td>Wait for first to complete, cancel others</td>
+                    </tr>
+                    <tr>
+                        <td><code>async::timeout($f, $ms)</code></td>
+                        <td>Await with timeout (throws on timeout)</td>
+                    </tr>
+                    <tr>
+                        <td><code>async::cancel($f)</code></td>
+                        <td>Request cancellation of a future</td>
+                    </tr>
+                    <tr>
+                        <td><code>async::is_done($f)</code></td>
+                        <td>Non-blocking completion check</td>
+                    </tr>
+                    <tr>
+                        <td><code>async::is_cancelled($f)</code></td>
+                        <td>Check if future was cancelled</td>
+                    </tr>
+                    <tr>
+                        <td><code>async::pool_init($n)</code></td>
+                        <td>Initialize thread pool with N workers</td>
+                    </tr>
+                    <tr>
+                        <td><code>async::pool_shutdown()</code></td>
+                        <td>Shutdown thread pool</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Wait for All (async::all)</h2>
+
+            <p>Wait for multiple futures to complete and get all results as an array:</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@futures</span> = (<span class="func">compute</span>(<span class="number">1</span>), <span class="func">compute</span>(<span class="number">2</span>), <span class="func">compute</span>(<span class="number">3</span>));
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@results</span> = <span class="func">async::all</span>(\<span class="sigil">@futures</span>);
+<span class="comment"># @results is [2, 4, 6]</span></code></pre>
+
+            <h2>Race (async::race)</h2>
+
+            <p>Wait for the first future to complete, automatically cancelling the others:</p>
+
+            <pre><code><span class="keyword">async func</span> <span class="func">slow_task</span>(<span class="type">int</span> <span class="sigil">$id</span>, <span class="type">int</span> <span class="sigil">$delay_ms</span>) <span class="type">str</span> {
+    <span class="func">sys::usleep</span>(<span class="sigil">$delay_ms</span> * <span class="number">1000</span>);
+    <span class="keyword">return</span> <span class="string">"task "</span> . <span class="sigil">$id</span>;
+}
+
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@futures</span> = (
+    <span class="func">slow_task</span>(<span class="number">1</span>, <span class="number">100</span>),   <span class="comment"># 100ms</span>
+    <span class="func">slow_task</span>(<span class="number">2</span>, <span class="number">50</span>),    <span class="comment"># 50ms - wins!</span>
+    <span class="func">slow_task</span>(<span class="number">3</span>, <span class="number">150</span>)    <span class="comment"># 150ms</span>
+);
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$winner</span> = <span class="func">async::race</span>(\<span class="sigil">@futures</span>);
+<span class="func">say</span>(<span class="sigil">$winner</span>);  <span class="comment"># "task 2"</span></code></pre>
+
+            <h2>Timeout</h2>
+
+            <p>Set a deadline for an operation:</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$slow</span> = <span class="func">slow_task</span>(<span class="number">99</span>, <span class="number">500</span>);  <span class="comment"># 500ms</span>
+<span class="keyword">try</span> {
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$r</span> = <span class="func">async::timeout</span>(<span class="sigil">$slow</span>, <span class="number">100</span>);  <span class="comment"># 100ms timeout</span>
+    <span class="func">say</span>(<span class="string">"Got: "</span> . <span class="sigil">$r</span>);
+} <span class="keyword">catch</span> (<span class="sigil">$e</span>) {
+    <span class="func">say</span>(<span class="string">"Timed out: "</span> . <span class="sigil">$e</span>);
+}</code></pre>
+
+            <h2>Cancellation</h2>
+
+            <p>Request cancellation of a running future:</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$future</span> = <span class="func">slow_task</span>(<span class="number">1</span>, <span class="number">1000</span>);
+<span class="func">async::cancel</span>(<span class="sigil">$future</span>);
+
+<span class="keyword">if</span> (<span class="func">async::is_cancelled</span>(<span class="sigil">$future</span>)) {
+    <span class="func">say</span>(<span class="string">"Cancelled!"</span>);
+}
+
+<span class="keyword">try</span> {
+    <span class="keyword">await</span> <span class="sigil">$future</span>;  <span class="comment"># Throws "Future was cancelled"</span>
+} <span class="keyword">catch</span> (<span class="sigil">$e</span>) {
+    <span class="func">say</span>(<span class="string">"Caught: "</span> . <span class="sigil">$e</span>);
+}</code></pre>
+
+            <h2>Error Propagation</h2>
+
+            <p>Exceptions thrown in async functions propagate through await:</p>
+
+            <pre><code><span class="keyword">async func</span> <span class="func">fail_async</span>() <span class="type">int</span> {
+    <span class="keyword">throw</span> <span class="string">"async error"</span>;
+}
+
+<span class="keyword">try</span> {
+    <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$x</span> = <span class="keyword">await</span> <span class="func">fail_async</span>();
+} <span class="keyword">catch</span> (<span class="sigil">$e</span>) {
+    <span class="func">say</span>(<span class="string">"Caught: "</span> . <span class="sigil">$e</span>);  <span class="comment"># "Caught: async error"</span>
+}</code></pre>
+
+            <h2>Thread Pool Configuration</h2>
+
+            <p>The thread pool auto-initializes with 4 workers on first async call. For custom configuration:</p>
+
+            <pre><code><span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
+    <span class="func">async::pool_init</span>(<span class="number">8</span>);  <span class="comment"># 8 worker threads</span>
+
+    <span class="comment"># ... async operations ...</span>
+
+    <span class="func">async::pool_shutdown</span>();  <span class="comment"># Optional cleanup</span>
+    <span class="keyword">return</span> <span class="number">0</span>;
+}</code></pre>
+
+            <h2>Non-Blocking Check</h2>
+
+            <p>Check if a future is complete without blocking:</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$future</span> = <span class="func">compute</span>(<span class="number">42</span>);
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$polls</span> = <span class="number">0</span>;
+
+<span class="keyword">while</span> (<span class="func">async::is_done</span>(<span class="sigil">$future</span>) == <span class="number">0</span>) {
+    <span class="sigil">$polls</span>++;
+    <span class="func">sys::usleep</span>(<span class="number">1000</span>);  <span class="comment"># 1ms</span>
+}
+
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$result</span> = <span class="keyword">await</span> <span class="sigil">$future</span>;
+<span class="func">say</span>(<span class="string">"Polled "</span> . <span class="sigil">$polls</span> . <span class="string">" times, result: "</span> . <span class="sigil">$result</span>);</code></pre>
+
+            <h2>Complete Example</h2>
+
+            <pre><code><span class="keyword">async func</span> <span class="func">compute</span>(<span class="type">int</span> <span class="sigil">$n</span>) <span class="type">int</span> {
+    <span class="func">sys::usleep</span>(<span class="number">50000</span>);
+    <span class="keyword">return</span> <span class="sigil">$n</span> * <span class="number">2</span>;
+}
+
+<span class="keyword">async func</span> <span class="func">slow_task</span>(<span class="type">int</span> <span class="sigil">$id</span>, <span class="type">int</span> <span class="sigil">$delay_ms</span>) <span class="type">str</span> {
+    <span class="func">sys::usleep</span>(<span class="sigil">$delay_ms</span> * <span class="number">1000</span>);
+    <span class="keyword">return</span> <span class="string">"task "</span> . <span class="sigil">$id</span> . <span class="string">" done"</span>;
+}
+
+<span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
+    <span class="func">say</span>(<span class="string">"=== Async Test ==="</span>);
+
+    <span class="comment"># Basic await</span>
+    <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$f</span> = <span class="func">compute</span>(<span class="number">21</span>);
+    <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$r</span> = <span class="keyword">await</span> <span class="sigil">$f</span>;
+    <span class="func">say</span>(<span class="string">"Result: "</span> . <span class="sigil">$r</span>);  <span class="comment"># 42</span>
+
+    <span class="comment"># Parallel execution</span>
+    <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$a</span> = <span class="func">compute</span>(<span class="number">10</span>);
+    <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$b</span> = <span class="func">compute</span>(<span class="number">20</span>);
+    <span class="func">say</span>(<span class="string">"Results: "</span> . <span class="keyword">await</span> <span class="sigil">$a</span> . <span class="string">", "</span> . <span class="keyword">await</span> <span class="sigil">$b</span>);
+
+    <span class="comment"># Wait for all</span>
+    <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@futures</span> = (<span class="func">compute</span>(<span class="number">1</span>), <span class="func">compute</span>(<span class="number">2</span>));
+    <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@results</span> = <span class="func">async::all</span>(\<span class="sigil">@futures</span>);
+    <span class="func">say</span>(<span class="string">"All: "</span> . <span class="func">join</span>(<span class="string">", "</span>, <span class="sigil">@results</span>));
+
+    <span class="comment"># Race</span>
+    <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@race</span> = (<span class="func">slow_task</span>(<span class="number">1</span>, <span class="number">100</span>), <span class="func">slow_task</span>(<span class="number">2</span>, <span class="number">50</span>));
+    <span class="func">say</span>(<span class="string">"Winner: "</span> . <span class="func">async::race</span>(\<span class="sigil">@race</span>));
+
+    <span class="keyword">return</span> <span class="number">0</span>;
+}</code></pre>
+
+            <h2>Channels</h2>
+
+            <p>Channels provide thread-safe message passing between async tasks.</p>
+
+            <pre><code><span class="comment"># Create channels</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$ch</span> = <span class="func">async::channel</span>();       <span class="comment"># Unbounded</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$ch</span> = <span class="func">async::channel</span>(<span class="number">10</span>);    <span class="comment"># Bounded (capacity 10)</span>
+
+<span class="comment"># Send and receive</span>
+<span class="func">async::send</span>(<span class="sigil">$ch</span>, <span class="sigil">$value</span>);              <span class="comment"># Blocks if full</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$v</span> = <span class="func">async::recv</span>(<span class="sigil">$ch</span>);       <span class="comment"># Blocks if empty</span>
+
+<span class="comment"># Non-blocking variants</span>
+<span class="func">async::try_send</span>(<span class="sigil">$ch</span>, <span class="sigil">$value</span>);          <span class="comment"># Returns 0/1</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$v</span> = <span class="func">async::try_recv</span>(<span class="sigil">$ch</span>);   <span class="comment"># Returns undef if empty</span>
+
+<span class="comment"># Close and check</span>
+<span class="func">async::close</span>(<span class="sigil">$ch</span>);
+<span class="func">async::is_closed</span>(<span class="sigil">$ch</span>);
+<span class="func">async::len</span>(<span class="sigil">$ch</span>);                        <span class="comment"># Items in queue</span></code></pre>
+
+            <p><strong>Channel Functions:</strong></p>
+            <table>
+                <thead><tr><th>Function</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>async::channel()</code></td><td>Create unbounded channel</td></tr>
+                    <tr><td><code>async::channel($n)</code></td><td>Create bounded channel</td></tr>
+                    <tr><td><code>async::send($ch, $v)</code></td><td>Send (blocks if full)</td></tr>
+                    <tr><td><code>async::recv($ch)</code></td><td>Receive (blocks if empty)</td></tr>
+                    <tr><td><code>async::try_send($ch, $v)</code></td><td>Non-blocking send</td></tr>
+                    <tr><td><code>async::try_recv($ch)</code></td><td>Non-blocking receive</td></tr>
+                    <tr><td><code>async::close($ch)</code></td><td>Close channel</td></tr>
+                    <tr><td><code>async::is_closed($ch)</code></td><td>Check if closed</td></tr>
+                    <tr><td><code>async::len($ch)</code></td><td>Get queue length</td></tr>
+                </tbody>
+            </table>
+
+            <h2>Mutexes</h2>
+
+            <p>Mutexes protect critical sections from concurrent access.</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$m</span> = <span class="func">async::mutex</span>();
+<span class="func">async::lock</span>(<span class="sigil">$m</span>);           <span class="comment"># Acquire (blocking)</span>
+<span class="comment"># ... critical section ...</span>
+<span class="func">async::unlock</span>(<span class="sigil">$m</span>);         <span class="comment"># Release</span>
+
+<span class="func">async::try_lock</span>(<span class="sigil">$m</span>);       <span class="comment"># Non-blocking (0=success)</span>
+<span class="func">async::mutex_destroy</span>(<span class="sigil">$m</span>);  <span class="comment"># Clean up</span></code></pre>
+
+            <p><strong>Mutex Functions:</strong></p>
+            <table>
+                <thead><tr><th>Function</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>async::mutex()</code></td><td>Create mutex</td></tr>
+                    <tr><td><code>async::lock($m)</code></td><td>Acquire lock</td></tr>
+                    <tr><td><code>async::unlock($m)</code></td><td>Release lock</td></tr>
+                    <tr><td><code>async::try_lock($m)</code></td><td>Non-blocking lock</td></tr>
+                    <tr><td><code>async::mutex_destroy($m)</code></td><td>Destroy mutex</td></tr>
+                </tbody>
+            </table>
+
+            <h2>Atomics</h2>
+
+            <p>Lock-free integer operations for counters and flags.</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$a</span> = <span class="func">async::atomic</span>(<span class="number">0</span>);       <span class="comment"># Create</span>
+<span class="func">async::atomic_load</span>(<span class="sigil">$a</span>);                <span class="comment"># Read</span>
+<span class="func">async::atomic_store</span>(<span class="sigil">$a</span>, <span class="number">100</span>);          <span class="comment"># Write</span>
+<span class="func">async::atomic_add</span>(<span class="sigil">$a</span>, <span class="number">10</span>);             <span class="comment"># Add, returns OLD</span>
+<span class="func">async::atomic_sub</span>(<span class="sigil">$a</span>, <span class="number">5</span>);              <span class="comment"># Sub, returns OLD</span>
+<span class="func">async::atomic_inc</span>(<span class="sigil">$a</span>);                 <span class="comment"># Inc, returns NEW</span>
+<span class="func">async::atomic_dec</span>(<span class="sigil">$a</span>);                 <span class="comment"># Dec, returns NEW</span>
+<span class="func">async::atomic_cas</span>(<span class="sigil">$a</span>, <span class="sigil">$exp</span>, <span class="sigil">$new</span>);    <span class="comment"># CAS (returns 1 if swapped)</span></code></pre>
+
+            <p><strong>Atomic Functions:</strong></p>
+            <table>
+                <thead><tr><th>Function</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>async::atomic($n)</code></td><td>Create atomic</td></tr>
+                    <tr><td><code>async::atomic_load($a)</code></td><td>Read value</td></tr>
+                    <tr><td><code>async::atomic_store($a, $v)</code></td><td>Write value</td></tr>
+                    <tr><td><code>async::atomic_add($a, $d)</code></td><td>Add, return OLD</td></tr>
+                    <tr><td><code>async::atomic_sub($a, $d)</code></td><td>Subtract, return OLD</td></tr>
+                    <tr><td><code>async::atomic_inc($a)</code></td><td>Increment, return NEW</td></tr>
+                    <tr><td><code>async::atomic_dec($a)</code></td><td>Decrement, return NEW</td></tr>
+                    <tr><td><code>async::atomic_cas($a, $e, $n)</code></td><td>Compare-and-swap</td></tr>
+                </tbody>
+            </table>
+
+            <div class="nav-buttons">
+                <a href="memory.html" class="btn btn-secondary">&larr; Memory Management</a>
+                <a href="debugging.html" class="btn btn-primary">Debugging &rarr;</a>
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <p>Strada Programming Language &copy; 2026</p>
+        <p><a href="https://github.com/strada-lang/strada-lang">GitHub</a></p>
+    </footer>
+</body>
+</html>

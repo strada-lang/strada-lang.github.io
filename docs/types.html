@@ -23,6 +23,7 @@
             <ul>
                 <li><a href="quickstart.html">QuickStart</a></li>
                 <li><a href="index.html">Documentation</a></li>
+                <li><a href="repl.html">REPL & Scripting</a></li>
             </ul>
             <h3>Language Guide</h3>
             <ul>
@@ -36,6 +37,7 @@
             <ul>
                 <li><a href="memory.html">Memory Management</a></li>
                 <li><a href="debugging.html">Debugging</a></li>
+                <li><a href="async.html">Async/Await</a></li>
                 <li><a href="c-interop.html">C Interoperability</a></li>
                 <li><a href="libraries.html">Libraries Guide</a></li>
                 <li><a href="perl-integration.html">Perl Integration</a></li>
@@ -198,7 +200,12 @@
 <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$length</span> = <span class="func">len</span>(<span class="sigil">@nums</span>);    <span class="comment"># Get length</span>
 <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$joined</span> = <span class="func">join</span>(<span class="string">","</span>, <span class="sigil">@nums</span>); <span class="comment"># Join to string</span>
 <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@sorted</span> = <span class="func">sort</span>(<span class="sigil">@nums</span>);  <span class="comment"># Sort array</span>
-<span class="func">reverse</span>(<span class="sigil">@nums</span>);                  <span class="comment"># Reverse in place</span></code></pre>
+<span class="func">reverse</span>(<span class="sigil">@nums</span>);                  <span class="comment"># Reverse in place</span>
+
+<span class="comment"># Destructuring - unpack array into variables</span>
+<span class="keyword">my</span> (<span class="sigil">$a</span>, <span class="sigil">$b</span>, <span class="sigil">$c</span>) = <span class="sigil">@nums</span>;           <span class="comment"># Basic destructuring</span>
+<span class="keyword">my</span> (<span class="type">int</span> <span class="sigil">$x</span>, <span class="type">str</span> <span class="sigil">$y</span>) = <span class="sigil">@mixed</span>;    <span class="comment"># With explicit types</span>
+<span class="keyword">my</span> (<span class="sigil">$first</span>, <span class="sigil">$second</span>) = <span class="func">get_pair</span>();  <span class="comment"># From function return</span></code></pre>
 
             <div class="info-box warning">
                 <strong>Array Access Sigil</strong>

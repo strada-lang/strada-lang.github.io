@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REPL - Strada</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <a href="../index.html" class="logo">Strada<span>Lang</span></a>
+        <ul>
+            <li><a href="quickstart.html">QuickStart</a></li>
+            <li><a href="index.html">Docs</a></li>
+            <li><a href="reference.html">Reference</a></li>
+            <li><a href="https://github.com/strada-lang/strada-lang">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h3>Getting Started</h3>
+            <ul>
+                <li><a href="quickstart.html">QuickStart</a></li>
+                <li><a href="index.html">Documentation</a></li>
+                <li><a href="repl.html" class="active">REPL</a></li>
+            </ul>
+            <h3>Language Guide</h3>
+            <ul>
+                <li><a href="basics.html">Language Basics</a></li>
+                <li><a href="types.html">Types & Variables</a></li>
+                <li><a href="functions.html">Functions</a></li>
+                <li><a href="control-flow.html">Control Flow</a></li>
+                <li><a href="oop.html">Object-Oriented Programming</a></li>
+            </ul>
+            <h3>Advanced</h3>
+            <ul>
+                <li><a href="memory.html">Memory Management</a></li>
+                <li><a href="debugging.html">Debugging</a></li>
+                <li><a href="async.html">Async/Await</a></li>
+                <li><a href="c-interop.html">C Interoperability</a></li>
+                <li><a href="libraries.html">Libraries Guide</a></li>
+                <li><a href="perl-integration.html">Perl Integration</a></li>
+            </ul>
+            <h3>Reference</h3>
+            <ul>
+                <li><a href="reference.html">Built-in Functions</a></li>
+                <li><a href="cannoli.html">Cannoli Web Framework</a></li>
+            </ul>
+        </aside>
+
+        <main class="content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a> / <a href="index.html">Documentation</a> / REPL
+            </div>
+
+            <h1>Strada <span>REPL</span></h1>
+            <p class="subtitle">An interactive shell for experimenting with Strada code without creating files.</p>
+
+            <h2>Starting the REPL</h2>
+
+            <pre><code><span class="comment"># Start interactive REPL</span>
+./tools/strada-repl
+
+<span class="comment"># Run a script file</span>
+./tools/strada-repl script.st
+
+<span class="comment"># Use via the strada command</span>
+./strada --repl
+./strada --script script.st</code></pre>
+
+            <h2>Basic Usage</h2>
+
+            <p>Enter Strada code at the prompt and see results immediately:</p>
+
+            <pre><code>strada> <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$x</span> = <span class="number">42</span>;
+strada> <span class="sigil">$x</span> * <span class="number">2</span>
+=> <span class="number">84</span>
+strada> <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@nums</span> = (<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>);
+strada> <span class="func">push</span>(<span class="sigil">@nums</span>, <span class="number">4</span>);
+strada> <span class="sigil">@nums</span>
+=> (<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>)</code></pre>
+
+            <h2>REPL Commands</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Command</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>.help</code></td>
+                        <td>Show help message</td>
+                    </tr>
+                    <tr>
+                        <td><code>.vars</code></td>
+                        <td>List declared variables with their types and values</td>
+                    </tr>
+                    <tr>
+                        <td><code>.funcs</code></td>
+                        <td>List defined functions with signatures</td>
+                    </tr>
+                    <tr>
+                        <td><code>.load FILE</code></td>
+                        <td>Load and execute code from a file</td>
+                    </tr>
+                    <tr>
+                        <td><code>.clear</code></td>
+                        <td>Clear all state (variables and functions)</td>
+                    </tr>
+                    <tr>
+                        <td><code>.debug</code></td>
+                        <td>Toggle debug mode (shows generated code)</td>
+                    </tr>
+                    <tr>
+                        <td><code>.compiler</code></td>
+                        <td>Show current compiler backend</td>
+                    </tr>
+                    <tr>
+                        <td><code>.set compiler=X</code></td>
+                        <td>Change compiler (libtcc, tcc, gcc)</td>
+                    </tr>
+                    <tr>
+                        <td><code>.memprof</code></td>
+                        <td>Toggle memory profiling</td>
+                    </tr>
+                    <tr>
+                        <td><code>.memstats</code></td>
+                        <td>Show memory statistics</td>
+                    </tr>
+                    <tr>
+                        <td><code>.funcprof</code></td>
+                        <td>Toggle function profiling</td>
+                    </tr>
+                    <tr>
+                        <td><code>.profile</code></td>
+                        <td>Show function profile report</td>
+                    </tr>
+                    <tr>
+                        <td><code>.quit</code></td>
+                        <td>Exit the REPL</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Defining Functions</h2>
+
+            <p>Functions can span multiple lines. The REPL detects incomplete input and prompts for continuation:</p>
+
+            <pre><code>strada> <span class="keyword">func</span> <span class="func">greet</span>(<span class="type">str</span> <span class="sigil">$name</span>) <span class="type">void</span> {
+...        <span class="func">say</span>(<span class="string">"Hello, "</span> . <span class="sigil">$name</span> . <span class="string">"!"</span>);
+...    }
+Function defined
+strada> <span class="func">greet</span>(<span class="string">"World"</span>)
+Hello, World!</code></pre>
+
+            <h2>Multi-line Input</h2>
+
+            <p>The REPL automatically detects incomplete input (unbalanced braces, parentheses, or brackets) and prompts for continuation:</p>
+
+            <pre><code>strada> <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%person</span> = (
+...        name => <span class="string">"Alice"</span>,
+...        age => <span class="number">30</span>
+...    );
+strada> <span class="sigil">$person</span>{<span class="string">"name"</span>}
+=> Alice</code></pre>
+
+            <h2>Compiler Backends</h2>
+
+            <p>The REPL supports three compiler backends, in order of preference:</p>
+
+            <ol>
+                <li><strong>libtcc</strong> (fastest) - In-process compilation using TCC library</li>
+                <li><strong>tcc</strong> - External TCC compiler</li>
+                <li><strong>gcc</strong> - Standard GCC compiler (slowest but most compatible)</li>
+            </ol>
+
+            <pre><code>strada> .compiler
+Compiler: tcc
+
+strada> .set compiler=gcc
+Compiler set to: gcc</code></pre>
+
+            <h2>Memory Profiling</h2>
+
+            <p>Track memory allocations:</p>
+
+            <pre><code>strada> .memprof
+Memory profiling enabled
+strada> <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@big</span> = ();
+strada> <span class="keyword">for</span> (<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$i</span> = <span class="number">0</span>; <span class="sigil">$i</span> < <span class="number">1000</span>; <span class="sigil">$i</span>++) { <span class="func">push</span>(<span class="sigil">@big</span>, <span class="sigil">$i</span>); }
+strada> .memstats</code></pre>
+
+            <h2>Function Profiling</h2>
+
+            <p>Profile function execution times:</p>
+
+            <pre><code>strada> .funcprof
+Function profiling enabled (code will be compiled with -p)
+strada> <span class="keyword">func</span> <span class="func">fib</span>(<span class="type">int</span> <span class="sigil">$n</span>) <span class="type">int</span> {
+...        <span class="keyword">if</span> (<span class="sigil">$n</span> <= <span class="number">1</span>) { <span class="keyword">return</span> <span class="sigil">$n</span>; }
+...        <span class="keyword">return</span> <span class="func">fib</span>(<span class="sigil">$n</span> - <span class="number">1</span>) + <span class="func">fib</span>(<span class="sigil">$n</span> - <span class="number">2</span>);
+...    }
+Function defined
+strada> <span class="func">fib</span>(<span class="number">20</span>)
+=> <span class="number">6765</span>
+strada> .profile</code></pre>
+
+            <h2>Scripting</h2>
+
+            <p>Beyond interactive use, the REPL also serves as a scripting engine for quick tasks without the full compilation step. Scripts run directly through the REPL interpreter.</p>
+
+            <h3>Running Scripts</h3>
+
+            <pre><code><span class="comment"># Run a script file</span>
+./tools/strada-repl myscript.st
+
+<span class="comment"># Or via the strada command</span>
+./strada --script myscript.st</code></pre>
+
+            <h3>Shebang Scripts</h3>
+
+            <p>Create executable scripts with a shebang for direct execution:</p>
+
+            <pre><code><span class="comment">#!/usr/bin/env strada-repl</span>
+
+<span class="func">say</span>(<span class="string">"Hello from script!"</span>);
+
+<span class="keyword">func</span> <span class="func">double</span>(<span class="type">int</span> <span class="sigil">$x</span>) <span class="type">int</span> {
+    <span class="keyword">return</span> <span class="sigil">$x</span> * <span class="number">2</span>;
+}
+
+<span class="func">say</span>(<span class="string">"Double of 21 is "</span> . <span class="func">double</span>(<span class="number">21</span>));</code></pre>
+
+            <p>Make executable and run:</p>
+
+            <pre><code>chmod +x myscript.st
+./myscript.st</code></pre>
+
+            <h3>Scripts vs Compiled Programs</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>REPL Script</th>
+                        <th>Compiled Program</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Startup</td>
+                        <td>Faster for small scripts</td>
+                        <td>Compilation step required</td>
+                    </tr>
+                    <tr>
+                        <td>Execution</td>
+                        <td>Interpreted via TCC</td>
+                        <td>Native machine code</td>
+                    </tr>
+                    <tr>
+                        <td>Best for</td>
+                        <td>Quick tasks, prototyping</td>
+                        <td>Production, performance</td>
+                    </tr>
+                    <tr>
+                        <td>No main() needed</td>
+                        <td>Yes - top-level code runs</td>
+                        <td>No - requires func main()</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p>Scripts are ideal for one-off tasks, automation, and rapid prototyping where you don't need the full compilation step.</p>
+
+            <h2>Error Display</h2>
+
+            <p>The REPL provides helpful error messages with source context:</p>
+
+            <pre><code>strada> <span class="keyword">my</span> <span class="type">int</span> $ = <span class="number">5</span>;
+
+<span class="error">Error: expected variable name, got ASSIGN</span>
+
+> <span class="number">1</span> | <span class="keyword">my</span> <span class="type">int</span> $ = <span class="number">5</span>;</code></pre>
+
+            <p>For multi-line input, the error shows context around the problematic line.</p>
+
+            <h2>Tips</h2>
+
+            <ul>
+                <li>Use <code>.vars</code> to see all current variables and their values</li>
+                <li>Use <code>.funcs</code> to review function signatures</li>
+                <li>Use <code>.clear</code> to start fresh without restarting the REPL</li>
+                <li>Use <code>.debug</code> to see the generated Strada code (helpful for understanding issues)</li>
+                <li>Variables and functions persist across evaluations until <code>.clear</code> or exit</li>
+            </ul>
+
+            <h2>Limitations</h2>
+
+            <ul>
+                <li>Package declarations are ignored (all code is in the default namespace)</li>
+                <li><code>use</code> and <code>import_lib</code> statements are not yet supported</li>
+                <li>Some complex language features may not work in the dynamic REPL context</li>
+            </ul>
+
+        </main>
+    </div>
+
+    <footer>
+        <p><a href="../index.html">Strada</a> - A strongly-typed language inspired by Perl</p>
+        <p style="margin-top: 0.5rem; font-size: 0.85rem;">Licensed under <a href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html">GPLv2</a> | <a href="https://github.com/strada-lang/strada-lang">GitHub</a></p>
+    </footer>
+</body>
+</html>
