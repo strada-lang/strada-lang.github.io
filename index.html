@@ -501,6 +501,11 @@
                 <h3>Function Profiling</h3>
                 <p>Built-in profiler with -p flag shows call counts and timing for performance analysis.</p>
             </div>
+            <div class="feature">
+                <div class="feature-icon">📝</div>
+                <h3>Variadic Functions</h3>
+                <p>Accept variable arguments with ...@param syntax. Spread operator unpacks arrays at call sites.</p>
+            </div>
         </div>
     </section>
 
@@ -583,6 +588,25 @@
 }
 
 <span class="func">say</span>(<span class="func">factorial</span>(<span class="number">10</span>)); <span class="comment"># 3628800</span></pre>
+            </div>
+
+            <div class="example">
+                <div class="example-header">Variadic Functions</div>
+                <pre><span class="comment"># Accept variable number of args</span>
+<span class="keyword">func</span> <span class="func">sum</span>(<span class="type">int</span> ...<span class="sigil">@nums</span>) <span class="type">int</span> {
+    <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$total</span> = <span class="number">0</span>;
+    <span class="keyword">foreach</span> <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$n</span> (<span class="sigil">@nums</span>) {
+        <span class="sigil">$total</span> = <span class="sigil">$total</span> + <span class="sigil">$n</span>;
+    }
+    <span class="keyword">return</span> <span class="sigil">$total</span>;
+}
+
+<span class="func">sum</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>);   <span class="comment"># 15</span>
+
+<span class="comment"># Spread operator unpacks arrays</span>
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@vals</span> = [<span class="number">10</span>, <span class="number">20</span>, <span class="number">30</span>];
+<span class="func">sum</span>(...<span class="sigil">@vals</span>);            <span class="comment"># 60</span>
+<span class="func">sum</span>(<span class="number">1</span>, ...<span class="sigil">@vals</span>, <span class="number">99</span>);    <span class="comment"># 160</span></pre>
             </div>
 
             <div class="example">
