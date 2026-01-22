@@ -151,6 +151,35 @@
                 </ul>
             </div>
 
+            <h2>Calling Functions in Current Package</h2>
+
+            <p>Use <code>::func()</code> to call a function in the current package without repeating the package name:</p>
+
+            <pre><code><span class="keyword">package</span> <span class="type">Calculator</span>;
+
+<span class="keyword">func</span> <span class="func">add</span>(<span class="type">int</span> <span class="sigil">$a</span>, <span class="type">int</span> <span class="sigil">$b</span>) <span class="type">int</span> {
+    <span class="keyword">return</span> <span class="sigil">$a</span> + <span class="sigil">$b</span>;
+}
+
+<span class="keyword">func</span> <span class="func">compute</span>(<span class="type">int</span> <span class="sigil">$x</span>, <span class="type">int</span> <span class="sigil">$y</span>) <span class="type">int</span> {
+    <span class="comment"># These are equivalent:</span>
+    <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$sum</span> = ::<span class="func">add</span>(<span class="sigil">$x</span>, <span class="sigil">$y</span>);          <span class="comment"># Preferred</span>
+    <span class="comment"># my int $sum = .::add($x, $y);       # Alternate</span>
+    <span class="comment"># my int $sum = __PACKAGE__::add($x, $y);  # Explicit</span>
+    <span class="keyword">return</span> <span class="sigil">$sum</span>;
+}</code></pre>
+
+            <div class="info-box">
+                <strong>Package Call Syntax</strong>
+                <ul>
+                    <li><code>::func()</code> — Preferred shorthand</li>
+                    <li><code>.::func()</code> — Alternate shorthand</li>
+                    <li><code>__PACKAGE__::func()</code> — Explicit form</li>
+                </ul>
+                <p>All three resolve to <code>PackageName_func()</code> at <strong>compile time</strong>.</p>
+                <p>Note: <code>__PACKAGE__</code> alone (without <code>::</code>) returns the package name as a string at runtime.</p>
+            </div>
+
             <h2>Inheritance</h2>
 
             <p>Implement inheritance by blessing with a derived class name and calling parent methods:</p>
