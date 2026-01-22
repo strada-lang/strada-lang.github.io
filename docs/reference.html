@@ -499,6 +499,29 @@
                 </tbody>
             </table>
 
+            <h2>Package Syntax</h2>
+
+            <table>
+                <thead>
+                    <tr><th>Syntax</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>__PACKAGE__</code></td><td>Current package name (runtime)</td></tr>
+                    <tr><td><code>::func()</code></td><td>Call func in current package (compile-time)</td></tr>
+                    <tr><td><code>.::func()</code></td><td>Alternate syntax for above</td></tr>
+                    <tr><td><code>__PACKAGE__::func()</code></td><td>Explicit form of above</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Example</h3>
+            <pre><code><span class="keyword">package</span> <span class="type">Calculator</span>;
+
+<span class="keyword">func</span> <span class="func">add</span>(<span class="type">int</span> <span class="sigil">$a</span>, <span class="type">int</span> <span class="sigil">$b</span>) <span class="type">int</span> { <span class="keyword">return</span> <span class="sigil">$a</span> + <span class="sigil">$b</span>; }
+
+<span class="keyword">func</span> <span class="func">compute</span>(<span class="type">int</span> <span class="sigil">$x</span>, <span class="type">int</span> <span class="sigil">$y</span>) <span class="type">int</span> {
+    <span class="keyword">return</span> ::<span class="func">add</span>(<span class="sigil">$x</span>, <span class="sigil">$y</span>);  <span class="comment"># Calls Calculator_add</span>
+}</code></pre>
+
             <h2>Miscellaneous</h2>
 
             <table>

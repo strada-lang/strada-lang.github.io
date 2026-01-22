@@ -108,6 +108,13 @@
                 <strong>Package naming:</strong> Functions are automatically prefixed with the package name. <code>func add()</code> becomes <code>MathLib_add()</code> internally.
             </div>
 
+            <div class="info-box">
+                <strong>Tip:</strong> Call other functions in the same package using <code>::func()</code> shorthand:
+                <pre><code><span class="keyword">func</span> <span class="func">compute</span>(<span class="type">int</span> <span class="sigil">$x</span>, <span class="type">int</span> <span class="sigil">$y</span>) <span class="type">int</span> {
+    <span class="keyword">return</span> ::<span class="func">add</span>(<span class="sigil">$x</span>, <span class="sigil">$y</span>) * ::<span class="func">multiply</span>(<span class="sigil">$x</span>, <span class="sigil">$y</span>);
+}</code></pre>
+            </div>
+
             <h3>Step 2: Compile the Library</h3>
 
             <p><strong>For shared libraries (.so):</strong></p>

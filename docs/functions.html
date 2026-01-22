@@ -210,6 +210,36 @@
 <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$ref</span> = \&<span class="func">double</span>;
 <span class="func">say</span>(<span class="sigil">$ref</span>->(<span class="number">10</span>));  <span class="comment"># 20</span></code></pre>
 
+            <h2>Calling Functions in Current Package</h2>
+
+            <p>When working inside a <code>package</code>, use <code>::func()</code> to call other functions in the same package without repeating the package name:</p>
+
+            <pre><code><span class="keyword">package</span> <span class="type">Calculator</span>;
+
+<span class="keyword">func</span> <span class="func">add</span>(<span class="type">int</span> <span class="sigil">$a</span>, <span class="type">int</span> <span class="sigil">$b</span>) <span class="type">int</span> {
+    <span class="keyword">return</span> <span class="sigil">$a</span> + <span class="sigil">$b</span>;
+}
+
+<span class="keyword">func</span> <span class="func">multiply</span>(<span class="type">int</span> <span class="sigil">$a</span>, <span class="type">int</span> <span class="sigil">$b</span>) <span class="type">int</span> {
+    <span class="keyword">return</span> <span class="sigil">$a</span> * <span class="sigil">$b</span>;
+}
+
+<span class="keyword">func</span> <span class="func">compute</span>(<span class="type">int</span> <span class="sigil">$x</span>, <span class="type">int</span> <span class="sigil">$y</span>) <span class="type">int</span> {
+    <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$sum</span> = ::<span class="func">add</span>(<span class="sigil">$x</span>, <span class="sigil">$y</span>);        <span class="comment"># Calls Calculator_add</span>
+    <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$prod</span> = ::<span class="func">multiply</span>(<span class="sigil">$x</span>, <span class="sigil">$y</span>); <span class="comment"># Calls Calculator_multiply</span>
+    <span class="keyword">return</span> <span class="sigil">$sum</span> + <span class="sigil">$prod</span>;
+}</code></pre>
+
+            <div class="info-box">
+                <strong>Package Call Syntax</strong>
+                <ul>
+                    <li><code>::func()</code> — Preferred shorthand</li>
+                    <li><code>.::func()</code> — Alternate shorthand</li>
+                    <li><code>__PACKAGE__::func()</code> — Explicit form</li>
+                </ul>
+                <p>All three resolve to <code>PackageName_func()</code> at <strong>compile time</strong>.</p>
+            </div>
+
             <h2>Recursion</h2>
 
             <pre><code><span class="keyword">func</span> <span class="func">factorial</span>(<span class="type">int</span> <span class="sigil">$n</span>) <span class="type">int</span> {
