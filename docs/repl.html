@@ -104,6 +104,10 @@ strada> <span class="sigil">@nums</span>
                         <td>List defined functions with signatures</td>
                     </tr>
                     <tr>
+                        <td><code>.imports</code></td>
+                        <td>List library paths and registered imports</td>
+                    </tr>
+                    <tr>
                         <td><code>.load FILE</code></td>
                         <td>Load and execute code from a file</td>
                     </tr>
@@ -298,12 +302,39 @@ strada> .profile</code></pre>
                 <li>Variables and functions persist across evaluations until <code>.clear</code> or exit</li>
             </ul>
 
+            <h2>Imports and Library Paths</h2>
+
+            <p>The REPL supports <code>use</code>, <code>import_lib</code>, and <code>package</code> statements:</p>
+
+            <pre><code>strada> <span class="keyword">use lib</span> <span class="string">"lib"</span>
+Library path added: lib
+strada> <span class="keyword">import_lib</span> <span class="string">"JSON.so"</span>
+Import registered: import_lib "JSON.so"
+strada> <span class="keyword">package</span> MyApp
+Package set to: MyApp
+strada> .imports
+Library paths (high priority):
+  lib
+Imports:
+  import_lib "JSON.so";</code></pre>
+
+            <p>You can also specify library paths from the command line:</p>
+
+            <pre><code><span class="comment"># High priority (searched first)</span>
+./tools/strada-repl -L /opt/strada/lib
+
+<span class="comment"># Low priority (searched last)</span>
+./tools/strada-repl -LL /usr/share/strada/lib
+
+<span class="comment"># Multiple paths</span>
+./tools/strada-repl -L ./lib -LL /opt/lib</code></pre>
+
             <h2>Limitations</h2>
 
             <ul>
-                <li>Package declarations are ignored (all code is in the default namespace)</li>
-                <li><code>use</code> and <code>import_lib</code> statements are not yet supported</li>
                 <li>Some complex language features may not work in the dynamic REPL context</li>
+                <li>Structs and enums cannot be defined interactively</li>
+                <li>Global variables from imported libraries are not accessible</li>
             </ul>
 
         </main>
