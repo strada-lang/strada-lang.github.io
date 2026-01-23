@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation Tools - Strada Documentation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <a href="../index.html" class="logo">Strada<span>Lang</span></a>
+        <ul>
+            <li><a href="quickstart.html">QuickStart</a></li>
+            <li><a href="index.html">Docs</a></li>
+            <li><a href="reference.html">Reference</a></li>
+            <li><a href="https://github.com/strada-lang/strada-lang">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h3>Getting Started</h3>
+            <ul>
+                <li><a href="quickstart.html">QuickStart</a></li>
+                <li><a href="index.html">Documentation</a></li>
+                <li><a href="repl.html">REPL & Scripting</a></li>
+            </ul>
+            <h3>Language Guide</h3>
+            <ul>
+                <li><a href="basics.html">Language Basics</a></li>
+                <li><a href="types.html">Types & Variables</a></li>
+                <li><a href="functions.html">Functions</a></li>
+                <li><a href="control-flow.html">Control Flow</a></li>
+                <li><a href="oop.html">Object-Oriented Programming</a></li>
+            </ul>
+            <h3>Advanced</h3>
+            <ul>
+                <li><a href="memory.html">Memory Management</a></li>
+                <li><a href="debugging.html">Debugging</a></li>
+                <li><a href="async.html">Async/Await</a></li>
+                <li><a href="c-interop.html">C Interoperability</a></li>
+                <li><a href="libraries.html">Libraries Guide</a></li>
+                <li><a href="perl-integration.html">Perl Integration</a></li>
+            </ul>
+            <h3>Reference</h3>
+            <ul>
+                <li><a href="reference.html">Built-in Functions</a></li>
+                <li><a href="cannoli.html">Cannoli Web Framework</a></li>
+                <li><a href="stradadoc.html" class="active">Documentation Tools</a></li>
+            </ul>
+        </aside>
+
+        <main class="content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a> / <a href="index.html">Docs</a> / Documentation Tools
+            </div>
+
+            <h1>Documentation <span>Tools</span></h1>
+            <p class="subtitle">Document your Strada code with POD and generate HTML documentation.</p>
+
+            <h2>Overview</h2>
+
+            <p>Strada supports <strong>POD (Plain Old Documentation)</strong>, the same documentation format used by Perl. POD allows you to embed documentation directly in your source files, which can then be converted to HTML, man pages, or other formats.</p>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h4>POD Format</h4>
+                    <p>Write documentation inline with your code using simple markup directives.</p>
+                    <p><strong>Features:</strong> Headers, lists, code examples, links</p>
+                </div>
+                <div class="card">
+                    <h4>stradadoc Tool</h4>
+                    <p>Generate HTML documentation from POD-documented Strada source files.</p>
+                    <p><strong>Output:</strong> Styled HTML pages ready for publishing</p>
+                </div>
+            </div>
+
+            <h2>POD Basics</h2>
+
+            <p>POD blocks start with a directive (like <code>=head1</code>) and end with <code>=cut</code>. The compiler automatically skips POD blocks, so they don't affect compilation.</p>
+
+            <h3>Basic Structure</h3>
+
+            <pre><code><span class="comment">=head1 NAME</span>
+
+MyLib - A brief description of my library
+
+<span class="comment">=head1 SYNOPSIS</span>
+
+    use lib "lib";
+    use MyLib;
+
+    my int $result = MyLib::add(10, 20);
+
+<span class="comment">=head1 DESCRIPTION</span>
+
+MyLib provides utility functions for mathematical operations.
+
+<span class="comment">=head1 FUNCTIONS</span>
+
+<span class="comment">=head2 add($a, $b)</span>
+
+Returns the sum of two integers.
+
+<span class="comment">=head2 multiply($a, $b)</span>
+
+Returns the product of two integers.
+
+<span class="comment">=cut</span>
+
+<span class="keyword">package</span> <span class="type">MyLib</span>;
+
+<span class="keyword">func</span> <span class="func">add</span>(<span class="type">int</span> <span class="sigil">$a</span>, <span class="type">int</span> <span class="sigil">$b</span>) <span class="type">int</span> {
+    <span class="keyword">return</span> <span class="sigil">$a</span> + <span class="sigil">$b</span>;
+}</code></pre>
+
+            <h3>POD Directives</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Directive</th><th>Purpose</th><th>Example</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>=head1</code></td>
+                        <td>Top-level heading</td>
+                        <td><code>=head1 NAME</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>=head2</code></td>
+                        <td>Second-level heading</td>
+                        <td><code>=head2 add($a, $b)</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>=head3</code></td>
+                        <td>Third-level heading</td>
+                        <td><code>=head3 Parameters</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>=over</code></td>
+                        <td>Start a list</td>
+                        <td><code>=over 4</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>=item</code></td>
+                        <td>List item</td>
+                        <td><code>=item * First item</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>=back</code></td>
+                        <td>End a list</td>
+                        <td><code>=back</code></td>
+                    </tr>
+                    <tr>
+                        <td><code>=cut</code></td>
+                        <td>End POD block</td>
+                        <td><code>=cut</code></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Inline Formatting</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Code</th><th>Renders As</th><th>Use For</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>B&lt;text&gt;</code></td>
+                        <td><strong>text</strong></td>
+                        <td>Bold text</td>
+                    </tr>
+                    <tr>
+                        <td><code>I&lt;text&gt;</code></td>
+                        <td><em>text</em></td>
+                        <td>Italic text</td>
+                    </tr>
+                    <tr>
+                        <td><code>C&lt;code&gt;</code></td>
+                        <td><code>code</code></td>
+                        <td>Code/monospace</td>
+                    </tr>
+                    <tr>
+                        <td><code>L&lt;name&gt;</code></td>
+                        <td>link</td>
+                        <td>Cross-references</td>
+                    </tr>
+                    <tr>
+                        <td><code>F&lt;file&gt;</code></td>
+                        <td><em>file</em></td>
+                        <td>Filenames</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Code Blocks</h3>
+
+            <p>Indent text by 4 spaces to create a code block:</p>
+
+            <pre><code><span class="comment">=head1 EXAMPLE</span>
+
+    <span class="comment"># This is a code block</span>
+    my int $x = 10;
+    say($x);
+
+<span class="comment">=cut</span></code></pre>
+
+            <h3>Lists</h3>
+
+            <p>Create bullet lists with <code>=over</code>, <code>=item</code>, and <code>=back</code>:</p>
+
+            <pre><code><span class="comment">=head1 FEATURES</span>
+
+<span class="comment">=over 4</span>
+
+<span class="comment">=item * Fast compilation</span>
+
+<span class="comment">=item * Native executables</span>
+
+<span class="comment">=item * Perl-like syntax</span>
+
+<span class="comment">=back</span></code></pre>
+
+            <h2>Standard Sections</h2>
+
+            <p>By convention, POD documentation includes these sections:</p>
+
+            <table>
+                <thead>
+                    <tr><th>Section</th><th>Purpose</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>=head1 NAME</code></td><td>Module name and one-line description</td></tr>
+                    <tr><td><code>=head1 SYNOPSIS</code></td><td>Usage example (copy-paste ready)</td></tr>
+                    <tr><td><code>=head1 DESCRIPTION</code></td><td>Detailed explanation of the module</td></tr>
+                    <tr><td><code>=head1 FUNCTIONS</code></td><td>List of exported functions with <code>=head2</code> for each</td></tr>
+                    <tr><td><code>=head1 EXAMPLE</code></td><td>Complete working example</td></tr>
+                    <tr><td><code>=head1 SEE ALSO</code></td><td>Related modules and resources</td></tr>
+                </tbody>
+            </table>
+
+            <h2>stradadoc Tool</h2>
+
+            <p>The <code>stradadoc</code> tool extracts POD from Strada source files and generates HTML documentation.</p>
+
+            <h3>Basic Usage</h3>
+
+            <pre><code><span class="comment"># Generate HTML for a single file</span>
+./tools/stradadoc lib/JSON.strada > JSON.html
+
+<span class="comment"># Generate documentation for all libraries</span>
+for f in lib/*.strada; do
+    ./tools/stradadoc "$f" > "docs/$(basename "$f" .strada).html"
+done</code></pre>
+
+            <h3>Output Features</h3>
+
+            <ul>
+                <li>Syntax-highlighted code blocks</li>
+                <li>Styled headings and lists</li>
+                <li>Responsive design</li>
+                <li>Table of contents from headings</li>
+            </ul>
+
+            <h2>Complete Example</h2>
+
+            <p>Here's a fully documented library following best practices:</p>
+
+            <pre><code><span class="comment">=head1 NAME</span>
+
+List::Util - Common list utility functions for Strada
+
+<span class="comment">=head1 SYNOPSIS</span>
+
+    use lib "lib";
+    use List::Util;
+
+    my array @nums = (3, 1, 4, 1, 5, 9);
+    my int $max = List::Util::max(@nums);       # 9
+    my int $sum = List::Util::sum(@nums);       # 23
+    my int $first = List::Util::first(@nums);   # 3
+
+<span class="comment">=head1 DESCRIPTION</span>
+
+List::Util provides commonly needed list processing functions.
+All functions operate on arrays and return scalar values.
+
+<span class="comment">=head1 FUNCTIONS</span>
+
+<span class="comment">=head2 sum(@array)</span>
+
+Returns the sum of all elements in the array.
+
+    my int $total = List::Util::sum(@prices);
+
+<span class="comment">=head2 max(@array)</span>
+
+Returns the maximum value in the array.
+
+    my int $highest = List::Util::max(@scores);
+
+<span class="comment">=head2 min(@array)</span>
+
+Returns the minimum value in the array.
+
+    my int $lowest = List::Util::min(@scores);
+
+<span class="comment">=head2 first(@array)</span>
+
+Returns the first element of the array (same as C<@array[0]>).
+
+<span class="comment">=head1 SEE ALSO</span>
+
+L<JSON>, L<Text::CSV>
+
+<span class="comment">=cut</span>
+
+<span class="keyword">package</span> <span class="type">List::Util</span>;
+
+<span class="keyword">func</span> <span class="func">sum</span>(<span class="type">array</span> <span class="sigil">@arr</span>) <span class="type">int</span> {
+    <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$total</span> = <span class="number">0</span>;
+    <span class="keyword">foreach</span> <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$n</span> (<span class="sigil">@arr</span>) {
+        <span class="sigil">$total</span> = <span class="sigil">$total</span> + <span class="sigil">$n</span>;
+    }
+    <span class="keyword">return</span> <span class="sigil">$total</span>;
+}
+
+<span class="keyword">func</span> <span class="func">max</span>(<span class="type">array</span> <span class="sigil">@arr</span>) <span class="type">int</span> {
+    <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$max</span> = <span class="sigil">@arr</span>[<span class="number">0</span>];
+    <span class="keyword">foreach</span> <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$n</span> (<span class="sigil">@arr</span>) {
+        <span class="keyword">if</span> (<span class="sigil">$n</span> > <span class="sigil">$max</span>) {
+            <span class="sigil">$max</span> = <span class="sigil">$n</span>;
+        }
+    }
+    <span class="keyword">return</span> <span class="sigil">$max</span>;
+}
+
+<span class="keyword">func</span> <span class="func">min</span>(<span class="type">array</span> <span class="sigil">@arr</span>) <span class="type">int</span> {
+    <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$min</span> = <span class="sigil">@arr</span>[<span class="number">0</span>];
+    <span class="keyword">foreach</span> <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$n</span> (<span class="sigil">@arr</span>) {
+        <span class="keyword">if</span> (<span class="sigil">$n</span> < <span class="sigil">$min</span>) {
+            <span class="sigil">$min</span> = <span class="sigil">$n</span>;
+        }
+    }
+    <span class="keyword">return</span> <span class="sigil">$min</span>;
+}
+
+<span class="keyword">func</span> <span class="func">first</span>(<span class="type">array</span> <span class="sigil">@arr</span>) <span class="type">scalar</span> {
+    <span class="keyword">return</span> <span class="sigil">@arr</span>[<span class="number">0</span>];
+}</code></pre>
+
+            <h2>Built-in Library Documentation</h2>
+
+            <p>All standard library modules include POD documentation. Use <code>stradadoc</code> to view them:</p>
+
+            <pre><code><span class="comment"># View JSON library documentation</span>
+./tools/stradadoc lib/JSON.strada | less
+
+<span class="comment"># Generate HTML docs for all libraries</span>
+mkdir -p website/docs/lib
+for f in lib/*.strada lib/*/*.strada; do
+    name=$(basename "$f" .strada)
+    ./tools/stradadoc "$f" > "website/docs/lib/$name.html"
+done</code></pre>
+
+            <h3>Available Libraries</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Library</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>JSON</code></td><td>JSON encoding and decoding</td></tr>
+                    <tr><td><code>Text::CSV</code></td><td>CSV parsing and generation</td></tr>
+                    <tr><td><code>Digest::MD5</code></td><td>MD5 hashing functions</td></tr>
+                    <tr><td><code>List::Util</code></td><td>List utility functions (sum, max, min)</td></tr>
+                    <tr><td><code>Time::HiRes</code></td><td>High-resolution time functions</td></tr>
+                    <tr><td><code>IPC::Open3</code></td><td>Execute commands with full I/O control</td></tr>
+                    <tr><td><code>Device::SerialPort</code></td><td>Serial port communication</td></tr>
+                    <tr><td><code>Net::SMTP</code></td><td>SMTP email client</td></tr>
+                    <tr><td><code>POSIX</code></td><td>POSIX system functions</td></tr>
+                    <tr><td><code>ssl</code></td><td>SSL/TLS secure connections</td></tr>
+                    <tr><td><code>readline</code></td><td>GNU Readline for interactive input</td></tr>
+                    <tr><td><code>compress</code></td><td>zlib compression</td></tr>
+                    <tr><td><code>usb</code></td><td>USB device access via libusb</td></tr>
+                    <tr><td><code>perl5</code></td><td>Perl 5 embedding</td></tr>
+                </tbody>
+            </table>
+
+            <div class="page-nav">
+                <a href="cannoli.html">
+                    <span class="label">&larr; Previous</span>
+                    <span class="title">Cannoli Web Framework</span>
+                </a>
+                <a href="libraries.html" class="next">
+                    <span class="label">Next &rarr;</span>
+                    <span class="title">Libraries Guide</span>
+                </a>
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <p><a href="../index.html">Strada</a> - A strongly-typed language inspired by Perl</p>
+    </footer>
+</body>
+</html>
