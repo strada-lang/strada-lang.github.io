@@ -130,6 +130,12 @@ mv MathLib.o lib/</code></pre>
             <pre><code>./strada --static-lib lib/MathLib.strada
 mv MathLib.a lib/</code></pre>
 
+            <div class="info-box success">
+                <strong>Building standard libraries:</strong> Use <code>./configure</code> and <code>make libs</code> to build the standard libraries (DBI, crypt, ssl, readline) with auto-detected dependencies:
+                <pre><code>./configure    <span class="comment"># Detect MySQL, PostgreSQL, OpenSSL, etc.</span>
+make libs      <span class="comment"># Build all libraries</span></code></pre>
+            </div>
+
             <div class="info-box">
                 <strong>Self-contained metadata:</strong> Function signatures are embedded in the compiled <code>.so</code>, <code>.o</code>, and <code>.a</code> files via <code>__strada_export_info()</code>. You don't need to keep the original <code>.strada</code> source file.
             </div>
@@ -453,6 +459,45 @@ Call examples:
             <p>Compile with additional libraries:</p>
 
             <pre><code>./strada --shared lib/Compress.strada -- -lz</code></pre>
+
+            <h2>Standard Libraries</h2>
+
+            <p>Strada includes several standard libraries that require external dependencies. Use <code>./configure</code> and <code>make libs</code> to build them with auto-detected dependencies.</p>
+
+            <h3>DBI (Database Interface)</h3>
+
+            <p>The DBI library provides a unified interface for MySQL, SQLite, and PostgreSQL. The configure script detects which database drivers are available.</p>
+
+            <pre><code><span class="comment"># Install database development libraries</span>
+sudo apt install libmysqlclient-dev   <span class="comment"># MySQL</span>
+sudo apt install libsqlite3-dev       <span class="comment"># SQLite</span>
+sudo apt install libpq-dev            <span class="comment"># PostgreSQL</span>
+
+<span class="comment"># Configure to detect databases</span>
+./configure
+
+<span class="comment"># Build DBI with detected drivers</span>
+make lib-dbi
+
+<span class="comment"># Output shows which drivers are enabled:</span>
+<span class="comment">#   DBI drivers: MySQL=1 SQLite=1 PostgreSQL=0</span></code></pre>
+
+            <h3>Other Standard Libraries</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Library</th><th>Make Target</th><th>Dependencies</th><th>Purpose</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>lib/DBI.so</code></td><td><code>make lib-dbi</code></td><td>libmysqlclient, libsqlite3, libpq</td><td>Database interface</td></tr>
+                    <tr><td><code>lib/crypt.so</code></td><td><code>make lib-crypt</code></td><td>libcrypt</td><td>Password hashing</td></tr>
+                    <tr><td><code>lib/ssl.so</code></td><td><code>make lib-ssl</code></td><td>libssl, libcrypto</td><td>SSL/TLS support</td></tr>
+                    <tr><td><code>lib/readline/readline.so</code></td><td><code>make lib-readline</code></td><td>libreadline</td><td>Line editing for REPL</td></tr>
+                </tbody>
+            </table>
+
+            <pre><code><span class="comment"># Build all standard libraries at once</span>
+make libs</code></pre>
 
             <h2>Troubleshooting</h2>
 

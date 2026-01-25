@@ -67,21 +67,35 @@
 
             <div class="steps">
                 <div class="step">
-                    <h3>Clone the Repository</h3>
+                    <h3>1. Clone the Repository</h3>
                     <p>Get the Strada source code from GitHub:</p>
                     <pre><code>git clone https://github.com/strada-lang/strada-lang.git
 cd strada-lang</code></pre>
                 </div>
 
                 <div class="step">
-                    <h3>Build the Compiler</h3>
+                    <h3>2. Configure (Recommended)</h3>
+                    <p>Detect available system libraries (MySQL, PostgreSQL, OpenSSL, etc.):</p>
+                    <pre><code>./configure</code></pre>
+                    <p>This creates <code>config.mk</code> with detected dependencies for building libraries.</p>
+                </div>
+
+                <div class="step">
+                    <h3>3. Build the Compiler</h3>
                     <p>Run make to build the self-hosting compiler:</p>
                     <pre><code>make</code></pre>
                     <p>This creates the <code>./stradac</code> compiler and the <code>./strada</code> wrapper script.</p>
                 </div>
 
                 <div class="step">
-                    <h3>Verify Installation</h3>
+                    <h3>4. Build Libraries (Optional)</h3>
+                    <p>Build shared libraries with detected dependencies:</p>
+                    <pre><code>make libs</code></pre>
+                    <p>This builds DBI (database), crypt (password hashing), SSL, and readline libraries.</p>
+                </div>
+
+                <div class="step">
+                    <h3>5. Verify Installation</h3>
                     <p>Test that everything works by running an example:</p>
                     <pre><code>make run PROG=test_simple</code></pre>
                 </div>
