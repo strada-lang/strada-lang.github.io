@@ -46,6 +46,7 @@
             <ul>
                 <li><a href="reference.html">Built-in Functions</a></li>
                 <li><a href="cannoli.html">Cannoli Web Framework</a></li>
+                <li><a href="forma.html">Forma Template Engine</a></li>
                 <li><a href="stradadoc.html">Documentation Tools</a></li>
             </ul>
         </aside>
@@ -109,9 +110,9 @@
             <pre><code><span class="func">say</span>(<span class="func">typeof</span>(<span class="number">42</span>));           <span class="comment"># "int"</span>
 <span class="func">say</span>(<span class="func">typeof</span>(<span class="number">3.14</span>));         <span class="comment"># "num"</span>
 <span class="func">say</span>(<span class="func">typeof</span>(<span class="string">"hello"</span>));      <span class="comment"># "str"</span>
-<span class="func">say</span>(<span class="func">typeof</span>([<span class="number">1</span>, <span class="number">2</span>]));       <span class="comment"># "array"</span>
-<span class="func">say</span>(<span class="func">typeof</span>({<span class="string">"a"</span> => <span class="number">1</span>}));   <span class="comment"># "hash"</span>
-<span class="func">say</span>(<span class="func">typeof</span>(\<span class="sigil">$x</span>));          <span class="comment"># "ref"</span>
+<span class="func">say</span>(<span class="func">typeof</span>([<span class="number">1</span>, <span class="number">2</span>]));       <span class="comment"># "ARRAY"</span>
+<span class="func">say</span>(<span class="func">typeof</span>({<span class="string">"a"</span> => <span class="number">1</span>}));   <span class="comment"># "HASH"</span>
+<span class="func">say</span>(<span class="func">typeof</span>(\<span class="sigil">$x</span>));          <span class="comment"># "REF"</span>
 <span class="func">say</span>(<span class="func">typeof</span>(<span class="func">undef</span>));        <span class="comment"># "undef"</span></code></pre>
 
             <h3>refcount() - Check Reference Count</h3>

@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forma Template Engine - Strada Documentation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <a href="../index.html" class="logo">Strada<span>Lang</span></a>
+        <ul>
+            <li><a href="quickstart.html">QuickStart</a></li>
+            <li><a href="index.html">Docs</a></li>
+            <li><a href="reference.html">Reference</a></li>
+            <li><a href="https://github.com/strada-lang/strada-lang">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h3>Getting Started</h3>
+            <ul>
+                <li><a href="quickstart.html">QuickStart</a></li>
+                <li><a href="index.html">Documentation</a></li>
+                <li><a href="repl.html">REPL & Scripting</a></li>
+            </ul>
+            <h3>Language Guide</h3>
+            <ul>
+                <li><a href="basics.html">Language Basics</a></li>
+                <li><a href="types.html">Types & Variables</a></li>
+                <li><a href="functions.html">Functions</a></li>
+                <li><a href="control-flow.html">Control Flow</a></li>
+                <li><a href="oop.html">Object-Oriented Programming</a></li>
+            </ul>
+            <h3>Advanced</h3>
+            <ul>
+                <li><a href="memory.html">Memory Management</a></li>
+                <li><a href="debugging.html">Debugging</a></li>
+                <li><a href="async.html">Async/Await</a></li>
+                <li><a href="c-interop.html">C Interoperability</a></li>
+                <li><a href="libraries.html">Libraries Guide</a></li>
+                <li><a href="perl-integration.html">Perl Integration</a></li>
+            </ul>
+            <h3>Reference</h3>
+            <ul>
+                <li><a href="reference.html">Built-in Functions</a></li>
+                <li><a href="cannoli.html">Cannoli Web Framework</a></li>
+                <li><a href="forma.html" class="active">Forma Template Engine</a></li>
+                <li><a href="stradadoc.html">Documentation Tools</a></li>
+            </ul>
+        </aside>
+
+        <main class="content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a> / <a href="index.html">Docs</a> / Forma Template Engine
+            </div>
+
+            <h1>Forma<span> Template Engine</span></h1>
+            <p class="subtitle">A lightweight, Handlebars-inspired template engine for building dynamic HTML pages.</p>
+
+            <h2>Overview</h2>
+
+            <p>Forma is Strada's built-in template rendering library. It supports variable substitution, loops, conditionals, nested object access, and layout composition. Forma is used by the Cannoli web framework for rendering dynamic pages.</p>
+
+            <h3>Key Features</h3>
+            <ul>
+                <li>Variable substitution with <code>{{variable}}</code> syntax</li>
+                <li>Nested object access: <code>{{user.address.city}}</code></li>
+                <li>Loops with <code>{{#each}}</code> and <code>{{#range}}</code></li>
+                <li>Conditionals with <code>{{#if}}</code>, <code>{{#unless}}</code>, and comparison helpers</li>
+                <li>String helpers: <code>upper</code>, <code>lower</code>, <code>capitalize</code>, <code>truncate</code></li>
+                <li>Array helpers: <code>length</code>, <code>first</code>, <code>last</code>, <code>join</code></li>
+                <li>Number formatting: <code>commas</code>, <code>format_number</code>, <code>plural</code></li>
+                <li>Pipe syntax with filters: <code>{{var | default "value"}}</code></li>
+                <li>JSON output: <code>{{json object}}</code></li>
+                <li>Comments: <code>{{!-- comment --}}</code></li>
+                <li>Context switching with <code>{{#with}}</code></li>
+                <li>Template caching for performance</li>
+                <li>Layout/partial support</li>
+                <li>HTML escaping for XSS protection</li>
+            </ul>
+
+            <h2>Getting Started</h2>
+
+            <pre><code><span class="keyword">use</span> <span class="type">lib</span> <span class="string">"lib"</span>;
+<span class="keyword">use</span> Forma;
+
+<span class="comment"># Initialize with template directory</span>
+Forma::init(<span class="string">"./templates"</span>);
+
+<span class="comment"># Create template data</span>
+<span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%vars</span> = ();
+<span class="sigil">$vars</span>{<span class="string">"title"</span>} = <span class="string">"Welcome"</span>;
+<span class="sigil">$vars</span>{<span class="string">"username"</span>} = <span class="string">"Alice"</span>;
+
+<span class="comment"># Render a template file</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$html</span> = Forma::render(<span class="string">"page.html"</span>, \<span class="sigil">%vars</span>);
+<span class="func">say</span>(<span class="sigil">$html</span>);</code></pre>
+
+            <h2>Template Syntax</h2>
+
+            <h3>Variables</h3>
+
+            <p>Use double curly braces to output variables:</p>
+
+            <pre><code><span class="comment">&lt;!-- Template --&gt;</span>
+&lt;h1&gt;Hello, {{username}}!&lt;/h1&gt;
+&lt;p&gt;You have {{message_count}} unread messages.&lt;/p&gt;</code></pre>
+
+            <h3>Nested Object Access</h3>
+
+            <p>Access nested properties using dot notation:</p>
+
+            <pre><code><span class="comment">&lt;!-- Template --&gt;</span>
+&lt;div class="profile"&gt;
+    &lt;h2&gt;{{user.name}}&lt;/h2&gt;
+    &lt;p&gt;{{user.address.city}}, {{user.address.country}}&lt;/p&gt;
+    &lt;p&gt;Email: {{user.contact.email}}&lt;/p&gt;
+&lt;/div&gt;</code></pre>
+
+            <pre><code><span class="comment"># Strada code</span>
+<span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%vars</span> = ();
+<span class="sigil">$vars</span>{<span class="string">"user"</span>} = {
+    <span class="string">"name"</span> => <span class="string">"Alice"</span>,
+    <span class="string">"address"</span> => {
+        <span class="string">"city"</span> => <span class="string">"Portland"</span>,
+        <span class="string">"country"</span> => <span class="string">"USA"</span>
+    },
+    <span class="string">"contact"</span> => {
+        <span class="string">"email"</span> => <span class="string">"alice@example.com"</span>
+    }
+};</code></pre>
+
+            <h3>Loops with {{#each}}</h3>
+
+            <p>Loop over arrays with the <code>{{#each}}</code> block. Hash fields are accessible directly:</p>
+
+            <pre><code><span class="comment">&lt;!-- Template --&gt;</span>
+&lt;ul&gt;
+{{#each users}}
+    &lt;li&gt;{{name}} - {{email}}&lt;/li&gt;
+{{/each}}
+&lt;/ul&gt;</code></pre>
+
+            <p>Use a named variable for clearer templates:</p>
+
+            <pre><code><span class="comment">&lt;!-- Template --&gt;</span>
+&lt;ul&gt;
+{{#each user in users}}
+    &lt;li&gt;{{user.name}} - {{user.email}}&lt;/li&gt;
+{{/each}}
+&lt;/ul&gt;</code></pre>
+
+            <h4>Loop Metadata</h4>
+
+            <p>Access loop metadata with special <code>@</code> variables:</p>
+
+            <pre><code><span class="comment">&lt;!-- Template --&gt;</span>
+&lt;table&gt;
+{{#each item in items}}
+    &lt;tr class="{{#if @first}}first-row{{/if}} {{#if @last}}last-row{{/if}}"&gt;
+        &lt;td&gt;{{@index}}&lt;/td&gt;
+        &lt;td&gt;{{item.name}}&lt;/td&gt;
+    &lt;/tr&gt;
+{{/each}}
+&lt;/table&gt;</code></pre>
+
+            <table>
+                <tr><th>Variable</th><th>Description</th></tr>
+                <tr><td><code>{{@index}}</code></td><td>Current iteration index (0-based)</td></tr>
+                <tr><td><code>{{@first}}</code></td><td>True (1) on first iteration</td></tr>
+                <tr><td><code>{{@last}}</code></td><td>True (1) on last iteration</td></tr>
+            </table>
+
+            <h3>Conditionals with {{#if}}</h3>
+
+            <p>Show or hide content based on a condition:</p>
+
+            <pre><code><span class="comment">&lt;!-- Template --&gt;</span>
+{{#if logged_in}}
+    &lt;p&gt;Welcome back, {{username}}!&lt;/p&gt;
+    &lt;a href="/logout"&gt;Logout&lt;/a&gt;
+{{else}}
+    &lt;p&gt;Please log in to continue.&lt;/p&gt;
+    &lt;a href="/login"&gt;Login&lt;/a&gt;
+{{/if}}</code></pre>
+
+            <h4>Truthiness</h4>
+            <p>Values are considered "truthy" if they are:</p>
+            <ul>
+                <li>Non-empty strings (except "0")</li>
+                <li>Non-zero numbers</li>
+                <li>Non-empty arrays</li>
+                <li>Any hash reference</li>
+            </ul>
+
+            <h3>Inverse Conditionals with {{#unless}}</h3>
+
+            <p>Show content when a condition is false:</p>
+
+            <pre><code><span class="comment">&lt;!-- Template --&gt;</span>
+{{#unless has_items}}
+    &lt;p&gt;Your cart is empty.&lt;/p&gt;
+{{/unless}}
+
+{{#unless logged_in}}
+    &lt;a href="/login"&gt;Login&lt;/a&gt;
+{{/unless}}</code></pre>
+
+            <h3>Context Switching with {{#with}}</h3>
+
+            <p>Change the current scope to a nested object:</p>
+
+            <pre><code><span class="comment">&lt;!-- Template --&gt;</span>
+{{#with user}}
+    &lt;div class="user-card"&gt;
+        &lt;h3&gt;{{name}}&lt;/h3&gt;
+        &lt;p&gt;{{email}}&lt;/p&gt;
+        {{#with address}}
+            &lt;p&gt;{{city}}, {{country}}&lt;/p&gt;
+        {{/with}}
+    &lt;/div&gt;
+{{/with}}</code></pre>
+
+            <h3>Variable Assignment with {{#set}}</h3>
+
+            <p>Create or assign variables within templates:</p>
+
+            <pre><code><span class="comment">&lt;!-- Template --&gt;</span>
+{{#set page_title = "Dashboard"}}
+{{#set full_name = user.first_name}}
+
+&lt;title&gt;{{page_title}}&lt;/title&gt;
+&lt;h1&gt;Welcome, {{full_name}}!&lt;/h1&gt;</code></pre>
+
+            <h3>Range Loops with {{#range}}</h3>
+
+            <p>Iterate over a numeric range:</p>
+
+            <pre><code><span class="comment">&lt;!-- Generate page numbers --&gt;</span>
+{{#range 1 5}}
+    &lt;a href="/page/{{.}}"&gt;Page {{.}}&lt;/a&gt;
+{{/range}}
+
+<span class="comment">&lt;!-- Output: Page 1, Page 2, Page 3, Page 4, Page 5 --&gt;</span></code></pre>
+
+            <p>Range loops support the same metadata variables as <code>{{#each}}</code>:</p>
+            <pre><code>{{#range 1 3}}
+    &lt;span{{#if @first}} class="first"{{/if}}&gt;{{.}}&lt;/span&gt;
+{{/range}}</code></pre>
+
+            <h3>Comparison Helpers</h3>
+
+            <p>Use comparison helpers for more complex conditionals:</p>
+
+            <pre><code><span class="comment">&lt;!-- Equal --&gt;</span>
+{{#if_eq status "active"}}
+    &lt;span class="badge-green"&gt;Active&lt;/span&gt;
+{{else}}
+    &lt;span class="badge-gray"&gt;Inactive&lt;/span&gt;
+{{/if_eq}}
+
+<span class="comment">&lt;!-- Not equal --&gt;</span>
+{{#if_ne role "admin"}}
+    &lt;p&gt;Regular user&lt;/p&gt;
+{{/if_ne}}
+
+<span class="comment">&lt;!-- Numeric comparisons --&gt;</span>
+{{#if_gt score 80}}&lt;span&gt;Excellent!&lt;/span&gt;{{/if_gt}}
+{{#if_lt items_count 5}}&lt;span&gt;Low stock&lt;/span&gt;{{/if_lt}}
+{{#if_ge age 18}}&lt;span&gt;Adult&lt;/span&gt;{{/if_ge}}
+{{#if_le price 100}}&lt;span&gt;Budget-friendly&lt;/span&gt;{{/if_le}}</code></pre>
+
+            <table>
+                <tr><th>Helper</th><th>Comparison</th></tr>
+                <tr><td><code>{{#if_eq var "value"}}</code></td><td>Equal (string comparison)</td></tr>
+                <tr><td><code>{{#if_ne var "value"}}</code></td><td>Not equal</td></tr>
+                <tr><td><code>{{#if_gt var value}}</code></td><td>Greater than (numeric)</td></tr>
+                <tr><td><code>{{#if_lt var value}}</code></td><td>Less than (numeric)</td></tr>
+                <tr><td><code>{{#if_ge var value}}</code></td><td>Greater than or equal</td></tr>
+                <tr><td><code>{{#if_le var value}}</code></td><td>Less than or equal</td></tr>
+            </table>
+
+            <h3>String Helpers</h3>
+
+            <p>Transform strings with built-in helpers:</p>
+
+            <pre><code><span class="comment">&lt;!-- Convert to uppercase --&gt;</span>
+{{upper name}}          <span class="comment">&lt;!-- "alice" -&gt; "ALICE" --&gt;</span>
+
+<span class="comment">&lt;!-- Convert to lowercase --&gt;</span>
+{{lower title}}         <span class="comment">&lt;!-- "HELLO" -&gt; "hello" --&gt;</span>
+
+<span class="comment">&lt;!-- Capitalize first letter --&gt;</span>
+{{capitalize name}}     <span class="comment">&lt;!-- "alice" -&gt; "Alice" --&gt;</span>
+
+<span class="comment">&lt;!-- Truncate with ellipsis --&gt;</span>
+{{truncate description 50}}   <span class="comment">&lt;!-- Long text... --&gt;</span></code></pre>
+
+            <h3>Array Helpers</h3>
+
+            <p>Work with arrays in templates:</p>
+
+            <pre><code><span class="comment">&lt;!-- Get array/string length --&gt;</span>
+You have {{length items}} items
+
+<span class="comment">&lt;!-- Get first/last element --&gt;</span>
+First: {{first items}}
+Last: {{last items}}
+
+<span class="comment">&lt;!-- Join array elements --&gt;</span>
+Tags: {{join tags ", "}}   <span class="comment">&lt;!-- "apple, banana, cherry" --&gt;</span></code></pre>
+
+            <h3>Number Formatting</h3>
+
+            <p>Format numbers for display:</p>
+
+            <pre><code><span class="comment">&lt;!-- Add thousands separators --&gt;</span>
+Price: ${{commas price}}    <span class="comment">&lt;!-- 1234567 -&gt; "1,234,567" --&gt;</span>
+
+<span class="comment">&lt;!-- Format with decimal places --&gt;</span>
+{{format_number pi 2}}      <span class="comment">&lt;!-- 3.14159 -&gt; "3.14" --&gt;</span>
+
+<span class="comment">&lt;!-- Pluralize based on count --&gt;</span>
+{{plural count "item" "items"}}   <span class="comment">&lt;!-- "1 item" or "5 items" --&gt;</span></code></pre>
+
+            <h3>Pipe Syntax with Filters</h3>
+
+            <p>Use pipe syntax to apply filters to values:</p>
+
+            <pre><code><span class="comment">&lt;!-- Default value for missing variables --&gt;</span>
+{{username | default "Guest"}}
+
+<span class="comment">&lt;!-- Transform with filters --&gt;</span>
+{{name | upper}}
+{{email | lower}}
+{{title | capitalize}}
+{{user_content | escape}}</code></pre>
+
+            <table>
+                <tr><th>Filter</th><th>Description</th></tr>
+                <tr><td><code>default "value"</code></td><td>Use value if variable is empty/missing</td></tr>
+                <tr><td><code>upper</code></td><td>Convert to uppercase</td></tr>
+                <tr><td><code>lower</code></td><td>Convert to lowercase</td></tr>
+                <tr><td><code>capitalize</code></td><td>Capitalize first letter</td></tr>
+                <tr><td><code>escape</code></td><td>HTML-escape the value</td></tr>
+            </table>
+
+            <h3>JSON Output</h3>
+
+            <p>Output a variable as JSON (useful for JavaScript integration):</p>
+
+            <pre><code>&lt;script&gt;
+    const userData = {{json user}};
+    const items = {{json items}};
+&lt;/script&gt;</code></pre>
+
+            <h3>Comments</h3>
+
+            <p>Add comments that won't appear in the output:</p>
+
+            <pre><code>{{!-- This comment will not be rendered --}}
+&lt;div&gt;
+    {{!-- TODO: Add user avatar here --}}
+    &lt;h2&gt;{{username}}&lt;/h2&gt;
+&lt;/div&gt;</code></pre>
+
+            <h3>Debugging with {{dump}}</h3>
+
+            <p>Output a variable's contents for debugging:</p>
+
+            <pre><code><span class="comment">&lt;!-- Template --&gt;</span>
+&lt;pre&gt;{{dump user}}&lt;/pre&gt;</code></pre>
+
+            <h2>API Reference</h2>
+
+            <h3>Forma::init($dir)</h3>
+            <p>Initialize the template system with a directory path.</p>
+            <pre><code>Forma::init(<span class="string">"./templates"</span>);</code></pre>
+
+            <h3>Forma::render($name, $vars)</h3>
+            <p>Render a template file with variables.</p>
+            <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$html</span> = Forma::render(<span class="string">"page.html"</span>, \<span class="sigil">%vars</span>);</code></pre>
+
+            <h3>Forma::render_string($template, $vars)</h3>
+            <p>Render a template string directly.</p>
+            <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$html</span> = Forma::render_string(<span class="string">"Hello, {{name}}!"</span>, \<span class="sigil">%vars</span>);</code></pre>
+
+            <h3>Forma::render_safe($name, $vars)</h3>
+            <p>Render with automatic HTML escaping for all variables. Use <code>{{{var}}}</code> for unescaped output.</p>
+            <pre><code><span class="comment"># User input is automatically escaped</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$html</span> = Forma::render_safe(<span class="string">"comment.html"</span>, \<span class="sigil">%vars</span>);</code></pre>
+
+            <h3>Forma::render_with_layout($template, $layout, $vars)</h3>
+            <p>Render a template within a layout. The layout should contain <code>{{content}}</code>.</p>
+            <pre><code><span class="comment"># layout.html contains: &lt;html&gt;&lt;body&gt;{{content}}&lt;/body&gt;&lt;/html&gt;</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$html</span> = Forma::render_with_layout(<span class="string">"page.html"</span>, <span class="string">"layout.html"</span>, \<span class="sigil">%vars</span>);</code></pre>
+
+            <h3>Forma::include($name, $vars)</h3>
+            <p>Include and render a partial template.</p>
+            <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$sidebar</span> = Forma::include(<span class="string">"sidebar.html"</span>, \<span class="sigil">%vars</span>);</code></pre>
+
+            <h3>Forma::set_cache($enabled)</h3>
+            <p>Enable or disable template caching.</p>
+            <pre><code>Forma::set_cache(<span class="number">0</span>);  <span class="comment"># Disable for development</span>
+Forma::set_cache(<span class="number">1</span>);  <span class="comment"># Enable for production (default)</span></code></pre>
+
+            <h3>Forma::clear_cache()</h3>
+            <p>Clear the template cache.</p>
+            <pre><code>Forma::clear_cache();</code></pre>
+
+            <h3>Forma::escape_html($string)</h3>
+            <p>Escape HTML special characters in a string.</p>
+            <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$safe</span> = Forma::escape_html(<span class="string">"&lt;script&gt;alert('xss')&lt;/script&gt;"</span>);
+<span class="comment"># Returns: &amp;lt;script&amp;gt;alert('xss')&amp;lt;/script&amp;gt;</span></code></pre>
+
+            <h2>Custom Helpers (Functional Macros)</h2>
+
+            <p>Register your own helper functions that can be called from templates. This allows you to extend Forma with domain-specific functionality.</p>
+
+            <h3>Forma::register_helper($name, $handler)</h3>
+            <p>Register a custom helper function.</p>
+            <pre><code><span class="comment"># Define a helper function</span>
+<span class="comment"># Arguments: $args (array ref), $vars (template variables)</span>
+<span class="comment"># Returns: string result</span>
+<span class="keyword">func</span> <span class="func">double_helper</span>(<span class="type">scalar</span> <span class="sigil">$args</span>, <span class="type">scalar</span> <span class="sigil">$vars</span>) <span class="type">str</span> {
+    <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@a</span> = <span class="sigil">@{$args}</span>;
+    <span class="keyword">if</span> (<span class="func">scalar</span>(<span class="sigil">@a</span>) == <span class="number">0</span>) {
+        <span class="keyword">return</span> <span class="string">"0"</span>;
+    }
+    <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$n</span> = <span class="sigil">@a</span>[<span class="number">0</span>] + <span class="number">0</span>;
+    <span class="keyword">return</span> <span class="string">""</span> . (<span class="sigil">$n</span> * <span class="number">2</span>);
+}
+
+<span class="comment"># Register it</span>
+Forma::register_helper(<span class="string">"double"</span>, \&amp;double_helper);
+
+<span class="comment"># Use in templates</span>
+<span class="comment"># {{double count}}  -&gt; doubles the value of count</span>
+<span class="comment"># {{double 21}}     -&gt; outputs "42"</span></code></pre>
+
+            <h3>Using Custom Helpers in Templates</h3>
+            <p>Custom helpers can be used in two ways:</p>
+
+            <pre><code><span class="comment">&lt;!-- As a direct helper --&gt;</span>
+{{double count}}
+{{greet name "Hello"}}
+
+<span class="comment">&lt;!-- As a pipe filter --&gt;</span>
+{{count | double}}
+{{name | wrap "strong"}}</code></pre>
+
+            <h4>Example: Custom Helpers</h4>
+            <pre><code><span class="comment"># Greeting helper with optional salutation</span>
+<span class="keyword">func</span> <span class="func">greet_helper</span>(<span class="type">scalar</span> <span class="sigil">$args</span>, <span class="type">scalar</span> <span class="sigil">$vars</span>) <span class="type">str</span> {
+    <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@a</span> = <span class="sigil">@{$args}</span>;
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$name</span> = <span class="func">scalar</span>(<span class="sigil">@a</span>) > <span class="number">0</span> ? <span class="string">""</span> . <span class="sigil">@a</span>[<span class="number">0</span>] : <span class="string">"World"</span>;
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$greeting</span> = <span class="func">scalar</span>(<span class="sigil">@a</span>) > <span class="number">1</span> ? <span class="string">""</span> . <span class="sigil">@a</span>[<span class="number">1</span>] : <span class="string">"Hello"</span>;
+    <span class="keyword">return</span> <span class="sigil">$greeting</span> . <span class="string">", "</span> . <span class="sigil">$name</span> . <span class="string">"!"</span>;
+}
+
+Forma::register_helper(<span class="string">"greet"</span>, \&amp;greet_helper);
+
+<span class="comment"># Template usage:</span>
+<span class="comment"># {{greet name}}         -&gt; "Hello, Alice!"</span>
+<span class="comment"># {{greet name "Hi"}}    -&gt; "Hi, Alice!"</span>
+<span class="comment"># {{greet "Bob" "Hey"}}  -&gt; "Hey, Bob!"</span></code></pre>
+
+            <h4>Example: Custom Filter for Pipe Syntax</h4>
+            <pre><code><span class="comment"># Wrap text in HTML tags</span>
+<span class="keyword">func</span> <span class="func">wrap_filter</span>(<span class="type">scalar</span> <span class="sigil">$args</span>, <span class="type">scalar</span> <span class="sigil">$vars</span>) <span class="type">str</span> {
+    <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@a</span> = <span class="sigil">@{$args}</span>;
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$val</span> = <span class="func">scalar</span>(<span class="sigil">@a</span>) > <span class="number">0</span> ? <span class="string">""</span> . <span class="sigil">@a</span>[<span class="number">0</span>] : <span class="string">""</span>;
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$tag</span> = <span class="func">scalar</span>(<span class="sigil">@a</span>) > <span class="number">1</span> ? <span class="string">""</span> . <span class="sigil">@a</span>[<span class="number">1</span>] : <span class="string">"span"</span>;
+    <span class="keyword">return</span> <span class="string">"&lt;"</span> . <span class="sigil">$tag</span> . <span class="string">"&gt;"</span> . <span class="sigil">$val</span> . <span class="string">"&lt;/"</span> . <span class="sigil">$tag</span> . <span class="string">"&gt;"</span>;
+}
+
+Forma::register_helper(<span class="string">"wrap"</span>, \&amp;wrap_filter);
+
+<span class="comment"># Template usage with pipe syntax:</span>
+<span class="comment"># {{name | wrap "strong"}}  -&gt; "&lt;strong&gt;Alice&lt;/strong&gt;"</span>
+<span class="comment"># {{title | wrap "h1"}}     -&gt; "&lt;h1&gt;Page Title&lt;/h1&gt;"</span></code></pre>
+
+            <h3>Forma::unregister_helper($name)</h3>
+            <p>Remove a registered helper.</p>
+            <pre><code>Forma::unregister_helper(<span class="string">"double"</span>);</code></pre>
+
+            <h3>Forma::has_helper($name)</h3>
+            <p>Check if a helper is registered.</p>
+            <pre><code><span class="keyword">if</span> (Forma::has_helper(<span class="string">"greet"</span>)) {
+    <span class="func">say</span>(<span class="string">"greet helper is available"</span>);
+}</code></pre>
+
+            <h3>Forma::list_helpers()</h3>
+            <p>Get all registered helper names.</p>
+            <pre><code><span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@helpers</span> = Forma::list_helpers();
+<span class="func">say</span>(<span class="string">"Registered: "</span> . <span class="func">join</span>(<span class="string">", "</span>, <span class="sigil">@helpers</span>));</code></pre>
+
+            <h3>Forma::clear_helpers()</h3>
+            <p>Remove all custom helpers.</p>
+            <pre><code>Forma::clear_helpers();</code></pre>
+
+            <h2>Example: Complete Web Page</h2>
+
+            <h3>layout.html</h3>
+            <pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;{{title}} - My Site&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;nav&gt;
+        {{#if logged_in}}
+            &lt;span&gt;Welcome, {{username}}&lt;/span&gt;
+            &lt;a href="/logout"&gt;Logout&lt;/a&gt;
+        {{else}}
+            &lt;a href="/login"&gt;Login&lt;/a&gt;
+        {{/if}}
+    &lt;/nav&gt;
+    &lt;main&gt;
+        {{content}}
+    &lt;/main&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+
+            <h3>products.html</h3>
+            <pre><code>&lt;h1&gt;Products&lt;/h1&gt;
+
+{{#if has_products}}
+    &lt;div class="product-grid"&gt;
+    {{#each product in products}}
+        &lt;div class="product {{#if @first}}featured{{/if}}"&gt;
+            &lt;h2&gt;{{product.name}}&lt;/h2&gt;
+            &lt;p class="price"&gt;${{product.price}}&lt;/p&gt;
+            {{#if product.in_stock}}
+                &lt;button&gt;Add to Cart&lt;/button&gt;
+            {{else}}
+                &lt;span class="out-of-stock"&gt;Out of Stock&lt;/span&gt;
+            {{/if}}
+        &lt;/div&gt;
+    {{/each}}
+    &lt;/div&gt;
+{{else}}
+    &lt;p&gt;No products available.&lt;/p&gt;
+{{/if}}</code></pre>
+
+            <h3>Strada Code</h3>
+            <pre><code><span class="keyword">use</span> <span class="type">lib</span> <span class="string">"lib"</span>;
+<span class="keyword">use</span> Forma;
+
+Forma::init(<span class="string">"./templates"</span>);
+
+<span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%vars</span> = ();
+<span class="sigil">$vars</span>{<span class="string">"title"</span>} = <span class="string">"Products"</span>;
+<span class="sigil">$vars</span>{<span class="string">"logged_in"</span>} = <span class="number">1</span>;
+<span class="sigil">$vars</span>{<span class="string">"username"</span>} = <span class="string">"Alice"</span>;
+<span class="sigil">$vars</span>{<span class="string">"products"</span>} = [
+    { <span class="string">"name"</span> => <span class="string">"Widget"</span>, <span class="string">"price"</span> => <span class="string">"19.99"</span>, <span class="string">"in_stock"</span> => <span class="number">1</span> },
+    { <span class="string">"name"</span> => <span class="string">"Gadget"</span>, <span class="string">"price"</span> => <span class="string">"29.99"</span>, <span class="string">"in_stock"</span> => <span class="number">0</span> },
+    { <span class="string">"name"</span> => <span class="string">"Gizmo"</span>, <span class="string">"price"</span> => <span class="string">"39.99"</span>, <span class="string">"in_stock"</span> => <span class="number">1</span> }
+];
+<span class="sigil">$vars</span>{<span class="string">"has_products"</span>} = <span class="number">1</span>;
+
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$html</span> = Forma::render_with_layout(<span class="string">"products.html"</span>, <span class="string">"layout.html"</span>, \<span class="sigil">%vars</span>);
+<span class="func">say</span>(<span class="sigil">$html</span>);</code></pre>
+
+            <h2>Using with Cannoli</h2>
+
+            <p>Forma integrates seamlessly with the Cannoli web framework:</p>
+
+            <pre><code><span class="keyword">use</span> <span class="type">lib</span> <span class="string">"lib"</span>;
+<span class="keyword">use</span> cannoli;
+<span class="keyword">use</span> Forma;
+
+Forma::init(<span class="string">"./templates"</span>);
+
+<span class="keyword">func</span> <span class="func">handle_home</span>(<span class="type">scalar</span> <span class="sigil">$c</span>) <span class="type">hash</span> {
+    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%vars</span> = ();
+    <span class="sigil">$vars</span>{<span class="string">"title"</span>} = <span class="string">"Home"</span>;
+    <span class="sigil">$vars</span>{<span class="string">"message"</span>} = <span class="string">"Welcome to my site!"</span>;
+
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$html</span> = Forma::render_with_layout(<span class="string">"home.html"</span>, <span class="string">"layout.html"</span>, \<span class="sigil">%vars</span>);
+
+    <span class="sigil">$c</span>->status(<span class="number">200</span>);
+    <span class="sigil">$c</span>->content_type(<span class="string">"text/html"</span>);
+    <span class="sigil">$c</span>->write_body(<span class="sigil">$html</span>);
+    <span class="keyword">return</span> <span class="sigil">$c</span>->build_response();
+}</code></pre>
+
+            <h2>Best Practices</h2>
+
+            <ul>
+                <li><strong>Use layouts</strong>: Keep common HTML structure in a layout file to avoid repetition.</li>
+                <li><strong>Use render_safe()</strong> for user-generated content to prevent XSS attacks.</li>
+                <li><strong>Enable caching in production</strong>: Templates are cached by default for performance.</li>
+                <li><strong>Disable caching in development</strong>: Use <code>Forma::set_cache(0)</code> to see template changes immediately.</li>
+                <li><strong>Pre-compute booleans</strong>: Set <code>has_items</code> in your code rather than checking array length in templates.</li>
+                <li><strong>Use partials</strong>: Break large templates into smaller, reusable pieces with <code>include()</code>.</li>
+            </ul>
+
+            <div class="tip">
+                <strong>Tip:</strong> For complex web applications, consider using Pacco (the Strada package registry) as an example of Forma and Cannoli working together.
+            </div>
+
+        </main>
+    </div>
+
+    <footer>
+        <p>Strada Programming Language &copy; 2026</p>
+    </footer>
+</body>
+</html>
