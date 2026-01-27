@@ -588,6 +588,153 @@ Forma::init(<span class="string">"./templates"</span>);
     <span class="keyword">return</span> <span class="sigil">$c</span>->build_response();
 }</code></pre>
 
+            <h2>Additional Built-in Helpers</h2>
+
+            <h3>Math Helpers</h3>
+
+            <p>Perform arithmetic operations in templates:</p>
+
+            <pre><code><span class="comment">&lt;!-- Basic arithmetic --&gt;</span>
+{{add count 10}}           <span class="comment">&lt;!-- count + 10 --&gt;</span>
+{{subtract total 5}}       <span class="comment">&lt;!-- total - 5 --&gt;</span>
+{{multiply price quantity}}<span class="comment">&lt;!-- price * quantity --&gt;</span>
+{{divide total count}}     <span class="comment">&lt;!-- total / count --&gt;</span>
+{{mod index 2}}            <span class="comment">&lt;!-- index % 2 (modulo) --&gt;</span>
+
+<span class="comment">&lt;!-- Rounding --&gt;</span>
+{{round price}}            <span class="comment">&lt;!-- Round to nearest integer --&gt;</span>
+{{round price 2}}          <span class="comment">&lt;!-- Round to 2 decimal places --&gt;</span></code></pre>
+
+            <h3>Additional String Helpers</h3>
+
+            <p>More string manipulation tools:</p>
+
+            <pre><code><span class="comment">&lt;!-- Replace text --&gt;</span>
+{{replace text "old" "new"}}     <span class="comment">&lt;!-- Replace all occurrences --&gt;</span>
+
+<span class="comment">&lt;!-- String checks --&gt;</span>
+{{#if (contains name "admin")}}
+    &lt;span class="admin-badge"&gt;Admin&lt;/span&gt;
+{{/if}}
+{{#if (starts_with filename "temp_")}}...{{/if}}
+{{#if (ends_with filename ".txt")}}...{{/if}}
+
+<span class="comment">&lt;!-- Padding --&gt;</span>
+{{pad_left id 5 "0"}}      <span class="comment">&lt;!-- "42" -&gt; "00042" --&gt;</span>
+{{pad_right name 10 "."}}  <span class="comment">&lt;!-- "Bob" -&gt; "Bob......." --&gt;</span>
+
+<span class="comment">&lt;!-- Repeat string --&gt;</span>
+{{repeat "=" 20}}          <span class="comment">&lt;!-- "====================" --&gt;</span>
+{{repeat "*" count}}       <span class="comment">&lt;!-- Repeat count times --&gt;</span>
+
+<span class="comment">&lt;!-- Strip HTML tags --&gt;</span>
+{{strip_tags html_content}}<span class="comment">&lt;!-- Remove all HTML tags --&gt;</span></code></pre>
+
+            <h3>URL Encoding</h3>
+
+            <p>Encode and decode URL components:</p>
+
+            <pre><code><span class="comment">&lt;!-- Encode for use in URLs --&gt;</span>
+&lt;a href="/search?q={{url_encode query}}"&gt;Search&lt;/a&gt;
+
+<span class="comment">&lt;!-- Decode URL-encoded strings --&gt;</span>
+{{url_decode encoded_text}}</code></pre>
+
+            <h3>Date and Time Helpers</h3>
+
+            <p>Format dates and display relative time:</p>
+
+            <pre><code><span class="comment">&lt;!-- Format timestamps --&gt;</span>
+{{date_format timestamp "%Y-%m-%d"}}        <span class="comment">&lt;!-- 2026-01-27 --&gt;</span>
+{{date_format timestamp "%B %d, %Y"}}       <span class="comment">&lt;!-- January 27, 2026 --&gt;</span>
+{{date_format timestamp "%H:%M:%S"}}        <span class="comment">&lt;!-- 14:30:45 --&gt;</span>
+{{date_format timestamp "%A"}}              <span class="comment">&lt;!-- Tuesday --&gt;</span>
+
+<span class="comment">&lt;!-- Relative time (time ago) --&gt;</span>
+{{time_ago created_at}}    <span class="comment">&lt;!-- "5 minutes ago", "2 hours ago", "3 days ago" --&gt;</span></code></pre>
+
+            <table>
+                <tr><th>Format Code</th><th>Description</th><th>Example</th></tr>
+                <tr><td><code>%Y</code></td><td>4-digit year</td><td>2026</td></tr>
+                <tr><td><code>%m</code></td><td>Month (01-12)</td><td>01</td></tr>
+                <tr><td><code>%d</code></td><td>Day (01-31)</td><td>27</td></tr>
+                <tr><td><code>%H</code></td><td>Hour (00-23)</td><td>14</td></tr>
+                <tr><td><code>%M</code></td><td>Minute (00-59)</td><td>30</td></tr>
+                <tr><td><code>%S</code></td><td>Second (00-59)</td><td>45</td></tr>
+                <tr><td><code>%B</code></td><td>Full month name</td><td>January</td></tr>
+                <tr><td><code>%b</code></td><td>Abbreviated month</td><td>Jan</td></tr>
+                <tr><td><code>%A</code></td><td>Full weekday name</td><td>Tuesday</td></tr>
+                <tr><td><code>%a</code></td><td>Abbreviated weekday</td><td>Tue</td></tr>
+            </table>
+
+            <h3>Currency and Percentage Formatting</h3>
+
+            <pre><code><span class="comment">&lt;!-- Currency formatting --&gt;</span>
+{{currency price}}         <span class="comment">&lt;!-- "$1,234.56" (default USD) --&gt;</span>
+{{currency price "EUR"}}   <span class="comment">&lt;!-- "€1,234.56" --&gt;</span>
+{{currency price "GBP"}}   <span class="comment">&lt;!-- "£1,234.56" --&gt;</span>
+{{currency price "JPY"}}   <span class="comment">&lt;!-- "¥1,235" (no decimals) --&gt;</span>
+
+<span class="comment">&lt;!-- Percentage formatting --&gt;</span>
+{{percent ratio}}          <span class="comment">&lt;!-- 0.75 -&gt; "75%" --&gt;</span>
+{{percent ratio 1}}        <span class="comment">&lt;!-- 0.756 -&gt; "75.6%" --&gt;</span></code></pre>
+
+            <h3>Inline Conditional (iif)</h3>
+
+            <p>Ternary-style conditionals in a single expression:</p>
+
+            <pre><code><span class="comment">&lt;!-- value if true : value if false --&gt;</span>
+{{iif is_active "Active" "Inactive"}}
+{{iif count "Has items" "Empty"}}
+
+<span class="comment">&lt;!-- Use in attributes --&gt;</span>
+&lt;button class="btn {{iif primary 'btn-primary' 'btn-secondary'}}"&gt;
+    {{label}}
+&lt;/button&gt;</code></pre>
+
+            <h2>Complete Helper Reference</h2>
+
+            <table>
+                <thead>
+                    <tr><th>Category</th><th>Helper</th><th>Usage</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td rowspan="4">String</td><td>upper</td><td><code>{{upper name}}</code></td></tr>
+                    <tr><td>lower</td><td><code>{{lower name}}</code></td></tr>
+                    <tr><td>capitalize</td><td><code>{{capitalize name}}</code></td></tr>
+                    <tr><td>truncate</td><td><code>{{truncate text 50}}</code></td></tr>
+                    <tr><td rowspan="6">String (adv)</td><td>replace</td><td><code>{{replace text "a" "b"}}</code></td></tr>
+                    <tr><td>contains</td><td><code>{{contains str "sub"}}</code></td></tr>
+                    <tr><td>starts_with</td><td><code>{{starts_with str "pre"}}</code></td></tr>
+                    <tr><td>ends_with</td><td><code>{{ends_with str "suf"}}</code></td></tr>
+                    <tr><td>pad_left</td><td><code>{{pad_left n 5 "0"}}</code></td></tr>
+                    <tr><td>pad_right</td><td><code>{{pad_right s 10 "."}}</code></td></tr>
+                    <tr><td rowspan="4">Array</td><td>length</td><td><code>{{length items}}</code></td></tr>
+                    <tr><td>first</td><td><code>{{first items}}</code></td></tr>
+                    <tr><td>last</td><td><code>{{last items}}</code></td></tr>
+                    <tr><td>join</td><td><code>{{join items ", "}}</code></td></tr>
+                    <tr><td rowspan="6">Math</td><td>add</td><td><code>{{add a b}}</code></td></tr>
+                    <tr><td>subtract</td><td><code>{{subtract a b}}</code></td></tr>
+                    <tr><td>multiply</td><td><code>{{multiply a b}}</code></td></tr>
+                    <tr><td>divide</td><td><code>{{divide a b}}</code></td></tr>
+                    <tr><td>mod</td><td><code>{{mod a b}}</code></td></tr>
+                    <tr><td>round</td><td><code>{{round n 2}}</code></td></tr>
+                    <tr><td rowspan="4">Numbers</td><td>commas</td><td><code>{{commas 1234567}}</code></td></tr>
+                    <tr><td>format_number</td><td><code>{{format_number pi 2}}</code></td></tr>
+                    <tr><td>currency</td><td><code>{{currency price "USD"}}</code></td></tr>
+                    <tr><td>percent</td><td><code>{{percent ratio 1}}</code></td></tr>
+                    <tr><td rowspan="3">Date/Time</td><td>date_format</td><td><code>{{date_format ts "%Y-%m-%d"}}</code></td></tr>
+                    <tr><td>time_ago</td><td><code>{{time_ago timestamp}}</code></td></tr>
+                    <tr><td>plural</td><td><code>{{plural n "item" "items"}}</code></td></tr>
+                    <tr><td rowspan="3">URL/HTML</td><td>url_encode</td><td><code>{{url_encode query}}</code></td></tr>
+                    <tr><td>url_decode</td><td><code>{{url_decode str}}</code></td></tr>
+                    <tr><td>strip_tags</td><td><code>{{strip_tags html}}</code></td></tr>
+                    <tr><td rowspan="3">Utility</td><td>repeat</td><td><code>{{repeat "=" 20}}</code></td></tr>
+                    <tr><td>iif</td><td><code>{{iif cond "yes" "no"}}</code></td></tr>
+                    <tr><td>json</td><td><code>{{json object}}</code></td></tr>
+                </tbody>
+            </table>
+
             <h2>Best Practices</h2>
 
             <ul>
