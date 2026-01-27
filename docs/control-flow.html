@@ -176,6 +176,53 @@
     }
 }</code></pre>
 
+            <h2>Functional Array Operations</h2>
+
+            <p>Strada supports Perl-style <code>map</code>, <code>grep</code>, and <code>sort</code> for powerful array transformations. Use <code>$_</code> for the current element.</p>
+
+            <h3>Map (Transform)</h3>
+            <pre><code><span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@nums</span> = (<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>);
+
+<span class="comment"># Transform each element</span>
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@doubled</span> = <span class="keyword">map</span> { <span class="sigil">$_</span> * <span class="number">2</span> } <span class="sigil">@nums</span>;
+<span class="comment"># Result: (2, 4, 6, 8, 10)</span></code></pre>
+
+            <h3>Map to Hash (Perl Idiom)</h3>
+            <p>Create lookup hashes using the fat arrow (<code>=&gt;</code>):</p>
+            <pre><code><span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@fruits</span> = (<span class="string">"apple"</span>, <span class="string">"banana"</span>, <span class="string">"cherry"</span>);
+
+<span class="comment"># The classic Perl idiom - works in Strada!</span>
+<span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%lookup</span> = <span class="keyword">map</span> { <span class="sigil">$_</span> => <span class="number">1</span> } <span class="sigil">@fruits</span>;
+
+<span class="comment"># Fast O(1) membership testing</span>
+<span class="keyword">if</span> (<span class="func">exists</span>(<span class="sigil">$lookup</span>{<span class="string">"apple"</span>})) {
+    <span class="func">say</span>(<span class="string">"Found apple!"</span>);
+}</code></pre>
+
+            <h3>Grep (Filter)</h3>
+            <pre><code><span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@nums</span> = (<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>);
+
+<span class="comment"># Keep only even numbers</span>
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@evens</span> = <span class="keyword">grep</span> { <span class="sigil">$_</span> % <span class="number">2</span> == <span class="number">0</span> } <span class="sigil">@nums</span>;
+<span class="comment"># Result: (2, 4, 6)</span></code></pre>
+
+            <h3>Sort</h3>
+            <pre><code><span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@nums</span> = (<span class="number">5</span>, <span class="number">2</span>, <span class="number">8</span>, <span class="number">1</span>, <span class="number">9</span>);
+
+<span class="comment"># Numeric sort (ascending) - use $a, $b with spaceship</span>
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@asc</span> = <span class="keyword">sort</span> { <span class="sigil">$a</span> <=> <span class="sigil">$b</span> } <span class="sigil">@nums</span>;
+
+<span class="comment"># Descending</span>
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@desc</span> = <span class="keyword">sort</span> { <span class="sigil">$b</span> <=> <span class="sigil">$a</span> } <span class="sigil">@nums</span>;</code></pre>
+
+            <h3>Chaining Operations</h3>
+            <pre><code><span class="comment"># Filter, transform, and sort in one line</span>
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@result</span> = <span class="keyword">sort</span> { <span class="sigil">$a</span> <=> <span class="sigil">$b</span> } <span class="keyword">map</span> { <span class="sigil">$_</span> * <span class="number">10</span> } <span class="keyword">grep</span> { <span class="sigil">$_</span> > <span class="number">3</span> } <span class="sigil">@data</span>;</code></pre>
+
+            <div class="info-box">
+                <strong>See Also</strong>: <a href="reference.html">Built-in Functions Reference</a> for more examples.
+            </div>
+
             <h2>Exception Handling</h2>
 
             <h3>Try / Catch / Throw</h3>

@@ -149,6 +149,78 @@
 }</code></pre>
             </div>
 
+            <h2>Array Transformations (map, grep, sort)</h2>
+
+            <p>Strada supports Perl-style block expressions for powerful array transformations. The special variable <code>$_</code> contains the current element.</p>
+
+            <table>
+                <thead>
+                    <tr><th>Expression</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>map { expr } @arr</code></td><td>Transform each element</td></tr>
+                    <tr><td><code>grep { cond } @arr</code></td><td>Filter elements where condition is true</td></tr>
+                    <tr><td><code>sort { $a &lt;=&gt; $b } @arr</code></td><td>Sort with custom comparison ($a, $b)</td></tr>
+                    <tr><td><code>sort @arr</code></td><td>Sort alphabetically (default)</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Map Examples</h3>
+            <pre><code><span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@nums</span> = (<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>);
+
+<span class="comment"># Transform each element (double)</span>
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@doubled</span> = <span class="keyword">map</span> { <span class="sigil">$_</span> * <span class="number">2</span> } <span class="sigil">@nums</span>;
+<span class="comment"># Result: (2, 4, 6, 8, 10)</span>
+
+<span class="comment"># Transform to strings</span>
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@strings</span> = <span class="keyword">map</span> { <span class="string">"Value: "</span> . <span class="sigil">$_</span> } <span class="sigil">@nums</span>;</code></pre>
+
+            <h3>Map with Fat Arrow (Creating Hashes)</h3>
+            <p>The classic Perl idiom for building lookup hashes works in Strada:</p>
+            <pre><code><span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@fruits</span> = (<span class="string">"apple"</span>, <span class="string">"banana"</span>, <span class="string">"cherry"</span>);
+
+<span class="comment"># Create a lookup hash - the Perl way!</span>
+<span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%lookup</span> = <span class="keyword">map</span> { <span class="sigil">$_</span> => <span class="number">1</span> } <span class="sigil">@fruits</span>;
+<span class="comment"># %lookup is now {"apple" => 1, "banana" => 1, "cherry" => 1}</span>
+
+<span class="comment"># Fast membership testing</span>
+<span class="keyword">if</span> (<span class="func">exists</span>(<span class="sigil">$lookup</span>{<span class="string">"apple"</span>})) {
+    <span class="func">say</span>(<span class="string">"Found apple!"</span>);
+}</code></pre>
+            <p>The fat arrow <code>$_ =&gt; value</code> creates a key-value pair. When assigned to a hash variable, these pairs become hash entries.</p>
+
+            <h3>Grep Examples</h3>
+            <pre><code><span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@nums</span> = (<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>);
+
+<span class="comment"># Keep only even numbers</span>
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@evens</span> = <span class="keyword">grep</span> { <span class="sigil">$_</span> % <span class="number">2</span> == <span class="number">0</span> } <span class="sigil">@nums</span>;
+<span class="comment"># Result: (2, 4, 6)</span>
+
+<span class="comment"># Keep values greater than 3</span>
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@big</span> = <span class="keyword">grep</span> { <span class="sigil">$_</span> > <span class="number">3</span> } <span class="sigil">@nums</span>;
+<span class="comment"># Result: (4, 5, 6)</span></code></pre>
+
+            <h3>Sort Examples</h3>
+            <pre><code><span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@nums</span> = (<span class="number">5</span>, <span class="number">2</span>, <span class="number">8</span>, <span class="number">1</span>, <span class="number">9</span>);
+
+<span class="comment"># Sort ascending (numeric) - use spaceship operator</span>
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@asc</span> = <span class="keyword">sort</span> { <span class="sigil">$a</span> <=> <span class="sigil">$b</span> } <span class="sigil">@nums</span>;
+<span class="comment"># Result: (1, 2, 5, 8, 9)</span>
+
+<span class="comment"># Sort descending</span>
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@desc</span> = <span class="keyword">sort</span> { <span class="sigil">$b</span> <=> <span class="sigil">$a</span> } <span class="sigil">@nums</span>;
+<span class="comment"># Result: (9, 8, 5, 2, 1)</span>
+
+<span class="comment"># Default sort (alphabetical)</span>
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@alpha</span> = <span class="keyword">sort</span> <span class="sigil">@names</span>;</code></pre>
+
+            <h3>Chaining Operations</h3>
+            <pre><code><span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@data</span> = (<span class="number">5</span>, <span class="number">2</span>, <span class="number">8</span>, <span class="number">1</span>, <span class="number">9</span>, <span class="number">3</span>, <span class="number">7</span>);
+
+<span class="comment"># Filter, transform, and sort in one pipeline</span>
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@result</span> = <span class="keyword">sort</span> { <span class="sigil">$a</span> <=> <span class="sigil">$b</span> } <span class="keyword">map</span> { <span class="sigil">$_</span> * <span class="number">10</span> } <span class="keyword">grep</span> { <span class="sigil">$_</span> > <span class="number">3</span> } <span class="sigil">@data</span>;
+<span class="comment"># Result: (50, 70, 80, 90)</span></code></pre>
+
             <h2>Hash Functions</h2>
 
             <table>
