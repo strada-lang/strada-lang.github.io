@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nesso ORM - Strada Documentation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <a href="../index.html" class="logo">Strada<span>Lang</span></a>
+        <ul>
+            <li><a href="quickstart.html">QuickStart</a></li>
+            <li><a href="index.html">Docs</a></li>
+            <li><a href="reference.html">Reference</a></li>
+            <li><a href="https://github.com/strada-lang/strada-lang">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h3>Getting Started</h3>
+            <ul>
+                <li><a href="quickstart.html">QuickStart</a></li>
+                <li><a href="index.html">Documentation</a></li>
+                <li><a href="repl.html">REPL & Scripting</a></li>
+            </ul>
+            <h3>Language Guide</h3>
+            <ul>
+                <li><a href="basics.html">Language Basics</a></li>
+                <li><a href="types.html">Types & Variables</a></li>
+                <li><a href="functions.html">Functions</a></li>
+                <li><a href="control-flow.html">Control Flow</a></li>
+                <li><a href="oop.html">Object-Oriented Programming</a></li>
+            </ul>
+            <h3>Advanced</h3>
+            <ul>
+                <li><a href="memory.html">Memory Management</a></li>
+                <li><a href="debugging.html">Debugging</a></li>
+                <li><a href="async.html">Async/Await</a></li>
+                <li><a href="c-interop.html">C Interoperability</a></li>
+                <li><a href="libraries.html">Libraries Guide</a></li>
+                <li><a href="perl-integration.html">Perl Integration</a></li>
+            </ul>
+            <h3>Reference</h3>
+            <ul>
+                <li><a href="reference.html">Built-in Functions</a></li>
+                <li><a href="cannoli.html">Cannoli Web Framework</a></li>
+                <li><a href="forma.html">Forma Template Engine</a></li>
+                <li><a href="dbi.html">DBI Database Interface</a></li>
+                <li><a href="nesso.html" class="active">Nesso ORM</a></li>
+                <li><a href="stradadoc.html">Documentation Tools</a></li>
+            </ul>
+        </aside>
+
+        <main class="content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a> / <a href="index.html">Docs</a> / Nesso ORM
+            </div>
+
+            <h1>Nesso <span>ORM</span></h1>
+            <p class="subtitle">A lightweight Object-Relational Mapper for Strada, built on DBI.</p>
+
+            <h2>Overview</h2>
+
+            <p>Nesso provides a thin, practical model layer over DBI. It offers:</p>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h4>Schema Definition</h4>
+                    <p>Define models with tables, columns, and primary keys.</p>
+                </div>
+                <div class="card">
+                    <h4>CRUD Operations</h4>
+                    <p>Create, read, update, and delete records with simple method calls.</p>
+                </div>
+                <div class="card">
+                    <h4>Relationships</h4>
+                    <p>Define has_many, belongs_to, and has_one relationships between models.</p>
+                </div>
+                <div class="card">
+                    <h4>Two Styles</h4>
+                    <p>Use Data Mapper style or ActiveRecord style based on preference.</p>
+                </div>
+            </div>
+
+            <h2>Quick Start</h2>
+
+            <pre><code><span class="keyword">use</span> <span class="keyword">lib</span> <span class="string">"lib"</span>;
+<span class="keyword">use</span> <span class="type">DBI</span>;
+<span class="keyword">use</span> <span class="type">Nesso</span>;
+<span class="keyword">use</span> <span class="type">Nesso::Record</span>;    <span class="comment"># For ActiveRecord-style methods</span>
+
+<span class="comment"># Connect to database and create Nesso instance</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$db</span> = <span class="type">DBI</span>::<span class="func">connect</span>(<span class="string">"dbi:SQLite:app.db"</span>, <span class="string">""</span>, <span class="string">""</span>);
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$n</span> = <span class="type">Nesso</span>::<span class="func">new</span>(<span class="sigil">$db</span>);
+
+<span class="comment"># Define a model</span>
+<span class="sigil">$n</span>-&gt;<span class="func">define</span>(<span class="string">"users"</span>, {
+    <span class="string">"table"</span>   =&gt; <span class="string">"users"</span>,
+    <span class="string">"columns"</span> =&gt; [<span class="string">"id"</span>, <span class="string">"username"</span>, <span class="string">"email"</span>],
+    <span class="string">"primary"</span> =&gt; <span class="string">"id"</span>
+});
+
+<span class="comment"># Create and save a record</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$user</span> = <span class="sigil">$n</span>-&gt;<span class="func">create</span>(<span class="string">"users"</span>, { <span class="string">"username"</span> =&gt; <span class="string">"alice"</span> });
+<span class="sigil">$user</span>-&gt;<span class="func">save</span>();    <span class="comment"># ActiveRecord style</span>
+
+<span class="comment"># Query records</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$found</span> = <span class="sigil">$n</span>-&gt;<span class="func">find</span>(<span class="string">"users"</span>, <span class="number">1</span>);
+<span class="func">say</span>(<span class="sigil">$found</span>-&gt;{<span class="string">"username"</span>});</code></pre>
+
+            <h2>Defining Models</h2>
+
+            <p>Use <code>define()</code> to register a model with its schema:</p>
+
+            <pre><code><span class="sigil">$n</span>-&gt;<span class="func">define</span>(<span class="string">"users"</span>, {
+    <span class="string">"table"</span>   =&gt; <span class="string">"users"</span>,           <span class="comment"># Database table name</span>
+    <span class="string">"columns"</span> =&gt; [<span class="string">"id"</span>, <span class="string">"username"</span>, <span class="string">"email"</span>, <span class="string">"created_at"</span>],
+    <span class="string">"primary"</span> =&gt; <span class="string">"id"</span>              <span class="comment"># Primary key column</span>
+});
+
+<span class="sigil">$n</span>-&gt;<span class="func">define</span>(<span class="string">"posts"</span>, {
+    <span class="string">"table"</span>   =&gt; <span class="string">"posts"</span>,
+    <span class="string">"columns"</span> =&gt; [<span class="string">"id"</span>, <span class="string">"user_id"</span>, <span class="string">"title"</span>, <span class="string">"body"</span>],
+    <span class="string">"primary"</span> =&gt; <span class="string">"id"</span>
+});</code></pre>
+
+            <h2>CRUD Operations</h2>
+
+            <h3>Create</h3>
+            <p>Create a new record object (not saved until you call <code>save()</code>):</p>
+            <pre><code><span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$user</span> = <span class="sigil">$n</span>-&gt;<span class="func">create</span>(<span class="string">"users"</span>, {
+    <span class="string">"username"</span> =&gt; <span class="string">"alice"</span>,
+    <span class="string">"email"</span>    =&gt; <span class="string">"alice@example.com"</span>
+});
+
+<span class="comment"># Data Mapper style</span>
+<span class="sigil">$n</span>-&gt;<span class="func">save</span>(<span class="sigil">$user</span>);
+
+<span class="comment"># Or ActiveRecord style (requires Nesso::Record)</span>
+<span class="sigil">$user</span>-&gt;<span class="func">save</span>();</code></pre>
+
+            <h3>Read</h3>
+            <pre><code><span class="comment"># Find by primary key</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$user</span> = <span class="sigil">$n</span>-&gt;<span class="func">find</span>(<span class="string">"users"</span>, <span class="number">42</span>);
+
+<span class="comment"># Find first matching record</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$alice</span> = <span class="sigil">$n</span>-&gt;<span class="func">find_by</span>(<span class="string">"users"</span>, { <span class="string">"username"</span> =&gt; <span class="string">"alice"</span> });
+
+<span class="comment"># Find all matching records</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$active</span> = <span class="sigil">$n</span>-&gt;<span class="func">where</span>(<span class="string">"users"</span>, { <span class="string">"status"</span> =&gt; <span class="string">"active"</span> });
+
+<span class="comment"># Get all records</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$all</span> = <span class="sigil">$n</span>-&gt;<span class="func">all</span>(<span class="string">"users"</span>);
+
+<span class="comment"># Count records</span>
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$count</span> = <span class="sigil">$n</span>-&gt;<span class="func">count</span>(<span class="string">"users"</span>, { <span class="string">"status"</span> =&gt; <span class="string">"active"</span> });</code></pre>
+
+            <h3>Update</h3>
+            <pre><code><span class="comment"># Modify and save</span>
+<span class="sigil">$user</span>-&gt;{<span class="string">"email"</span>} = <span class="string">"newemail@example.com"</span>;
+<span class="sigil">$user</span>-&gt;<span class="func">save</span>();
+
+<span class="comment"># Or use update() for multiple fields at once</span>
+<span class="sigil">$user</span>-&gt;<span class="func">update</span>({
+    <span class="string">"email"</span>    =&gt; <span class="string">"new@example.com"</span>,
+    <span class="string">"username"</span> =&gt; <span class="string">"alice2"</span>
+});</code></pre>
+
+            <h3>Delete</h3>
+            <pre><code><span class="comment"># Data Mapper style</span>
+<span class="sigil">$n</span>-&gt;<span class="func">delete</span>(<span class="sigil">$user</span>);
+
+<span class="comment"># Or ActiveRecord style</span>
+<span class="sigil">$user</span>-&gt;<span class="func">delete</span>();</code></pre>
+
+            <h2>Query Options</h2>
+
+            <p>Use special directives in conditions for ordering, limiting, and pagination:</p>
+
+            <pre><code><span class="comment"># Order by column</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$recent</span> = <span class="sigil">$n</span>-&gt;<span class="func">where</span>(<span class="string">"posts"</span>, {
+    <span class="string">"status"</span>  =&gt; <span class="string">"published"</span>,
+    <span class="string">"_order"</span>  =&gt; <span class="string">"created_at DESC"</span>
+});
+
+<span class="comment"># Limit results</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$top10</span> = <span class="sigil">$n</span>-&gt;<span class="func">where</span>(<span class="string">"posts"</span>, {
+    <span class="string">"_order"</span> =&gt; <span class="string">"views DESC"</span>,
+    <span class="string">"_limit"</span> =&gt; <span class="number">10</span>
+});
+
+<span class="comment"># Pagination</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$page2</span> = <span class="sigil">$n</span>-&gt;<span class="func">where</span>(<span class="string">"posts"</span>, {
+    <span class="string">"_order"</span>  =&gt; <span class="string">"created_at DESC"</span>,
+    <span class="string">"_limit"</span>  =&gt; <span class="number">20</span>,
+    <span class="string">"_offset"</span> =&gt; <span class="number">20</span>
+});</code></pre>
+
+            <h2>Relationships</h2>
+
+            <p>Nesso supports three types of relationships:</p>
+
+            <h3>has_many</h3>
+            <p>One-to-many relationship (e.g., a user has many posts):</p>
+            <pre><code><span class="comment"># A user has many posts (posts.user_id references users.id)</span>
+<span class="sigil">$n</span>-&gt;<span class="func">has_many</span>(<span class="string">"users"</span>, <span class="string">"posts"</span>, <span class="string">"user_id"</span>);
+
+<span class="comment"># Fetch user's posts</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$user</span> = <span class="sigil">$n</span>-&gt;<span class="func">find</span>(<span class="string">"users"</span>, <span class="number">1</span>);
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$posts</span> = <span class="sigil">$n</span>-&gt;<span class="func">related</span>(<span class="sigil">$user</span>, <span class="string">"posts"</span>);   <span class="comment"># Returns array</span>
+<span class="comment"># Or: $posts = $user->related("posts");</span>
+
+<span class="keyword">foreach</span> <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$post</span> (<span class="sigil">@{$posts}</span>) {
+    <span class="func">say</span>(<span class="sigil">$post</span>-&gt;{<span class="string">"title"</span>});
+}</code></pre>
+
+            <h3>belongs_to</h3>
+            <p>Many-to-one relationship (e.g., a post belongs to an author):</p>
+            <pre><code><span class="comment"># A post belongs to an author (posts.user_id references users.id)</span>
+<span class="sigil">$n</span>-&gt;<span class="func">belongs_to</span>(<span class="string">"posts"</span>, <span class="string">"author"</span>, <span class="string">"users"</span>, <span class="string">"user_id"</span>);
+
+<span class="comment"># Fetch post's author</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$post</span> = <span class="sigil">$n</span>-&gt;<span class="func">find</span>(<span class="string">"posts"</span>, <span class="number">1</span>);
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$author</span> = <span class="sigil">$post</span>-&gt;<span class="func">related</span>(<span class="string">"author"</span>);   <span class="comment"># Returns single record</span>
+<span class="func">say</span>(<span class="string">"Written by: "</span> . <span class="sigil">$author</span>-&gt;{<span class="string">"username"</span>});</code></pre>
+
+            <h3>has_one</h3>
+            <p>One-to-one relationship (e.g., a user has one profile):</p>
+            <pre><code><span class="comment"># A user has one profile (profiles.user_id references users.id)</span>
+<span class="sigil">$n</span>-&gt;<span class="func">has_one</span>(<span class="string">"users"</span>, <span class="string">"profile"</span>, <span class="string">"profiles"</span>, <span class="string">"user_id"</span>);
+
+<span class="comment"># Fetch user's profile</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$profile</span> = <span class="sigil">$user</span>-&gt;<span class="func">related</span>(<span class="string">"profile"</span>);  <span class="comment"># Returns single record or undef</span>
+<span class="keyword">if</span> (<span class="func">defined</span>(<span class="sigil">$profile</span>)) {
+    <span class="func">say</span>(<span class="sigil">$profile</span>-&gt;{<span class="string">"bio"</span>});
+}</code></pre>
+
+            <h2>Transactions</h2>
+
+            <p>Wrap multiple operations in a transaction for atomicity:</p>
+
+            <pre><code><span class="sigil">$n</span>-&gt;<span class="func">transaction</span>(<span class="keyword">func</span> () {
+    <span class="comment"># All operations here are atomic</span>
+    <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$user</span> = <span class="sigil">$n</span>-&gt;<span class="func">create</span>(<span class="string">"users"</span>, { <span class="string">"username"</span> =&gt; <span class="string">"bob"</span> });
+    <span class="sigil">$user</span>-&gt;<span class="func">save</span>();
+
+    <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$post</span> = <span class="sigil">$n</span>-&gt;<span class="func">create</span>(<span class="string">"posts"</span>, {
+        <span class="string">"user_id"</span> =&gt; <span class="sigil">$user</span>-&gt;<span class="func">id</span>(),
+        <span class="string">"title"</span>   =&gt; <span class="string">"First post"</span>
+    });
+    <span class="sigil">$post</span>-&gt;<span class="func">save</span>();
+
+    <span class="comment"># If anything throws, both operations are rolled back</span>
+});</code></pre>
+
+            <h2>ActiveRecord Methods</h2>
+
+            <p>When you <code>use Nesso::Record</code>, records gain these instance methods:</p>
+
+            <table>
+                <thead>
+                    <tr><th>Method</th><th>Description</th><th>Example</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>save()</code></td><td>INSERT or UPDATE the record</td><td><code>$user->save();</code></td></tr>
+                    <tr><td><code>update($attrs)</code></td><td>Update attributes and save</td><td><code>$user->update({"email" => "..."})</code></td></tr>
+                    <tr><td><code>delete()</code></td><td>DELETE the record</td><td><code>$user->delete();</code></td></tr>
+                    <tr><td><code>reload()</code></td><td>Refresh from database</td><td><code>$user->reload();</code></td></tr>
+                    <tr><td><code>related($name)</code></td><td>Fetch related records</td><td><code>$user->related("posts")</code></td></tr>
+                    <tr><td><code>id()</code></td><td>Get primary key value</td><td><code>$user->id()</code></td></tr>
+                    <tr><td><code>model()</code></td><td>Get model name</td><td><code>$user->model()</code></td></tr>
+                    <tr><td><code>is_new()</code></td><td>Check if unsaved</td><td><code>$user->is_new()</code></td></tr>
+                </tbody>
+            </table>
+
+            <h2>Custom Model Classes</h2>
+
+            <p>Create custom classes that inherit from <code>Nesso::Record</code> to add model-specific methods:</p>
+
+            <pre><code><span class="keyword">package</span> <span class="type">User</span>;
+<span class="keyword">inherit</span> <span class="type">Nesso::Record</span>;
+
+<span class="keyword">func</span> <span class="func">set_password</span>(<span class="type">scalar</span> <span class="sigil">$self</span>, <span class="type">str</span> <span class="sigil">$password</span>) <span class="type">void</span> {
+    <span class="sigil">$self</span>-&gt;{<span class="string">"password_hash"</span>} = <span class="type">crypt</span>::<span class="func">hash_password</span>(<span class="sigil">$password</span>);
+    <span class="sigil">$self</span>-&gt;<span class="func">save</span>();
+}
+
+<span class="keyword">func</span> <span class="func">authenticate</span>(<span class="type">scalar</span> <span class="sigil">$self</span>, <span class="type">str</span> <span class="sigil">$password</span>) <span class="type">int</span> {
+    <span class="keyword">return</span> <span class="type">crypt</span>::<span class="func">check_password</span>(<span class="sigil">$password</span>, <span class="sigil">$self</span>-&gt;{<span class="string">"password_hash"</span>});
+}
+
+<span class="keyword">func</span> <span class="func">full_name</span>(<span class="type">scalar</span> <span class="sigil">$self</span>) <span class="type">str</span> {
+    <span class="keyword">return</span> <span class="sigil">$self</span>-&gt;{<span class="string">"first_name"</span>} . <span class="string">" "</span> . <span class="sigil">$self</span>-&gt;{<span class="string">"last_name"</span>};
+}</code></pre>
+
+            <p>Specify the custom class in the model definition:</p>
+
+            <pre><code><span class="sigil">$n</span>-&gt;<span class="func">define</span>(<span class="string">"users"</span>, {
+    <span class="string">"table"</span>   =&gt; <span class="string">"users"</span>,
+    <span class="string">"columns"</span> =&gt; [<span class="string">"id"</span>, <span class="string">"username"</span>, <span class="string">"password_hash"</span>, <span class="string">"first_name"</span>, <span class="string">"last_name"</span>],
+    <span class="string">"primary"</span> =&gt; <span class="string">"id"</span>,
+    <span class="string">"class"</span>   =&gt; <span class="string">"User"</span>   <span class="comment"># Use custom User class</span>
+});
+
+<span class="comment"># Now records are blessed as User objects</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$user</span> = <span class="sigil">$n</span>-&gt;<span class="func">find</span>(<span class="string">"users"</span>, <span class="number">1</span>);
+<span class="sigil">$user</span>-&gt;<span class="func">set_password</span>(<span class="string">"secret123"</span>);    <span class="comment"># Custom method</span>
+<span class="func">say</span>(<span class="sigil">$user</span>-&gt;<span class="func">full_name</span>());              <span class="comment"># Custom method</span>
+<span class="sigil">$user</span>-&gt;<span class="func">save</span>();                        <span class="comment"># Inherited method</span></code></pre>
+
+            <h2>Debug Mode</h2>
+
+            <p>Enable SQL logging to see all queries:</p>
+
+            <pre><code><span class="sigil">$n</span>-&gt;<span class="func">set_debug</span>(<span class="number">1</span>);
+
+<span class="comment"># Now all queries are logged:</span>
+<span class="comment"># [Nesso] SQL: SELECT * FROM users WHERE id = ?</span>
+<span class="comment"># [Nesso] PARAMS: ["1"]</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$user</span> = <span class="sigil">$n</span>-&gt;<span class="func">find</span>(<span class="string">"users"</span>, <span class="number">1</span>);
+
+<span class="sigil">$n</span>-&gt;<span class="func">set_debug</span>(<span class="number">0</span>);  <span class="comment"># Disable logging</span></code></pre>
+
+            <h2>Raw SQL Queries</h2>
+
+            <p>For complex queries, use <code>query()</code>:</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$stats</span> = <span class="sigil">$n</span>-&gt;<span class="func">query</span>(
+    <span class="string">"SELECT status, COUNT(*) as count FROM users GROUP BY status"</span>,
+    []
+);
+
+<span class="keyword">foreach</span> <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$row</span> (<span class="sigil">@{$stats}</span>) {
+    <span class="func">say</span>(<span class="sigil">$row</span>-&gt;{<span class="string">"status"</span>} . <span class="string">": "</span> . <span class="sigil">$row</span>-&gt;{<span class="string">"count"</span>});
+}</code></pre>
+
+            <h2>Database Swapping</h2>
+
+            <p>Change the database handle at runtime:</p>
+
+            <pre><code><span class="comment"># Switch to a different database</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$test_db</span> = <span class="type">DBI</span>::<span class="func">connect</span>(<span class="string">"dbi:SQLite:test.db"</span>, <span class="string">""</span>, <span class="string">""</span>);
+<span class="sigil">$n</span>-&gt;<span class="func">set_db</span>(<span class="sigil">$test_db</span>);
+
+<span class="comment"># Or clone the Nesso instance with a different database</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$test_n</span> = <span class="sigil">$n</span>-&gt;<span class="func">clone</span>(<span class="sigil">$test_db</span>);
+<span class="comment"># $test_n has same models and relationships, different database</span></code></pre>
+
+            <h2>Complete Example</h2>
+
+            <pre><code><span class="keyword">use</span> <span class="keyword">lib</span> <span class="string">"lib"</span>;
+<span class="keyword">use</span> <span class="type">DBI</span>;
+<span class="keyword">use</span> <span class="type">Nesso</span>;
+<span class="keyword">use</span> <span class="type">Nesso::Record</span>;
+
+<span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
+    <span class="comment"># Connect</span>
+    <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$db</span> = <span class="type">DBI</span>::<span class="func">connect</span>(<span class="string">"dbi:SQLite:blog.db"</span>, <span class="string">""</span>, <span class="string">""</span>);
+    <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$n</span> = <span class="type">Nesso</span>::<span class="func">new</span>(<span class="sigil">$db</span>);
+
+    <span class="comment"># Create tables</span>
+    <span class="type">DBI</span>::<span class="func">do_sql</span>(<span class="sigil">$db</span>, <span class="string">"CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY, username TEXT, email TEXT
+    )"</span>);
+    <span class="type">DBI</span>::<span class="func">do_sql</span>(<span class="sigil">$db</span>, <span class="string">"CREATE TABLE IF NOT EXISTS posts (
+        id INTEGER PRIMARY KEY, user_id INTEGER, title TEXT, body TEXT
+    )"</span>);
+
+    <span class="comment"># Define models</span>
+    <span class="sigil">$n</span>-&gt;<span class="func">define</span>(<span class="string">"users"</span>, {
+        <span class="string">"table"</span> =&gt; <span class="string">"users"</span>, <span class="string">"columns"</span> =&gt; [<span class="string">"id"</span>, <span class="string">"username"</span>, <span class="string">"email"</span>], <span class="string">"primary"</span> =&gt; <span class="string">"id"</span>
+    });
+    <span class="sigil">$n</span>-&gt;<span class="func">define</span>(<span class="string">"posts"</span>, {
+        <span class="string">"table"</span> =&gt; <span class="string">"posts"</span>, <span class="string">"columns"</span> =&gt; [<span class="string">"id"</span>, <span class="string">"user_id"</span>, <span class="string">"title"</span>, <span class="string">"body"</span>], <span class="string">"primary"</span> =&gt; <span class="string">"id"</span>
+    });
+
+    <span class="comment"># Define relationships</span>
+    <span class="sigil">$n</span>-&gt;<span class="func">has_many</span>(<span class="string">"users"</span>, <span class="string">"posts"</span>, <span class="string">"user_id"</span>);
+    <span class="sigil">$n</span>-&gt;<span class="func">belongs_to</span>(<span class="string">"posts"</span>, <span class="string">"author"</span>, <span class="string">"users"</span>, <span class="string">"user_id"</span>);
+
+    <span class="comment"># Create user and posts</span>
+    <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$user</span> = <span class="sigil">$n</span>-&gt;<span class="func">create</span>(<span class="string">"users"</span>, {
+        <span class="string">"username"</span> =&gt; <span class="string">"alice"</span>, <span class="string">"email"</span> =&gt; <span class="string">"alice@example.com"</span>
+    });
+    <span class="sigil">$user</span>-&gt;<span class="func">save</span>();
+
+    <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$post</span> = <span class="sigil">$n</span>-&gt;<span class="func">create</span>(<span class="string">"posts"</span>, {
+        <span class="string">"user_id"</span> =&gt; <span class="sigil">$user</span>-&gt;<span class="func">id</span>(),
+        <span class="string">"title"</span>   =&gt; <span class="string">"Hello World"</span>,
+        <span class="string">"body"</span>    =&gt; <span class="string">"My first blog post!"</span>
+    });
+    <span class="sigil">$post</span>-&gt;<span class="func">save</span>();
+
+    <span class="comment"># Query with relationships</span>
+    <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$all_users</span> = <span class="sigil">$n</span>-&gt;<span class="func">all</span>(<span class="string">"users"</span>);
+    <span class="keyword">foreach</span> <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$u</span> (<span class="sigil">@{$all_users}</span>) {
+        <span class="func">say</span>(<span class="string">"User: "</span> . <span class="sigil">$u</span>-&gt;{<span class="string">"username"</span>});
+
+        <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$posts</span> = <span class="sigil">$u</span>-&gt;<span class="func">related</span>(<span class="string">"posts"</span>);
+        <span class="keyword">foreach</span> <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$p</span> (<span class="sigil">@{$posts}</span>) {
+            <span class="func">say</span>(<span class="string">"  - "</span> . <span class="sigil">$p</span>-&gt;{<span class="string">"title"</span>});
+        }
+    }
+
+    <span class="type">DBI</span>::<span class="func">disconnect</span>(<span class="sigil">$db</span>);
+    <span class="keyword">return</span> <span class="number">0</span>;
+}</code></pre>
+
+            <h2>Function Reference</h2>
+
+            <table>
+                <thead>
+                    <tr><th>Category</th><th>Method</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td rowspan="4">Setup</td><td><code>new($dbh)</code></td><td>Create Nesso instance</td></tr>
+                    <tr><td><code>define($name, $schema)</code></td><td>Register a model</td></tr>
+                    <tr><td><code>set_db($dbh)</code></td><td>Change database handle</td></tr>
+                    <tr><td><code>clone($dbh)</code></td><td>Clone with different DB</td></tr>
+                    <tr><td rowspan="6">CRUD</td><td><code>create($model, $attrs)</code></td><td>Create record (unsaved)</td></tr>
+                    <tr><td><code>save($record)</code></td><td>INSERT or UPDATE</td></tr>
+                    <tr><td><code>find($model, $id)</code></td><td>Find by primary key</td></tr>
+                    <tr><td><code>find_by($model, $conds)</code></td><td>Find first match</td></tr>
+                    <tr><td><code>where($model, $conds)</code></td><td>Find all matches</td></tr>
+                    <tr><td><code>delete($record)</code></td><td>Delete record</td></tr>
+                    <tr><td rowspan="2">Query</td><td><code>all($model)</code></td><td>Get all records</td></tr>
+                    <tr><td><code>count($model, $conds)</code></td><td>Count matches</td></tr>
+                    <tr><td rowspan="4">Relations</td><td><code>has_many($owner, $name, $fk)</code></td><td>Define 1:N relation</td></tr>
+                    <tr><td><code>belongs_to($owner, $name, $target, $fk)</code></td><td>Define N:1 relation</td></tr>
+                    <tr><td><code>has_one($owner, $name, $target, $fk)</code></td><td>Define 1:1 relation</td></tr>
+                    <tr><td><code>related($record, $name)</code></td><td>Fetch related records</td></tr>
+                    <tr><td rowspan="2">Other</td><td><code>transaction($callback)</code></td><td>Atomic operations</td></tr>
+                    <tr><td><code>query($sql, $params)</code></td><td>Raw SQL query</td></tr>
+                </tbody>
+            </table>
+
+            <div class="tip">
+                <strong>Tip:</strong> Nesso is built on <a href="dbi.html">DBI</a>. For low-level database operations or features not covered by Nesso, you can always use DBI directly with <code>$n->get_db()</code>.
+            </div>
+
+        </main>
+    </div>
+
+    <footer>
+        <p>Strada Programming Language &copy; 2026</p>
+    </footer>
+</body>
+</html>
