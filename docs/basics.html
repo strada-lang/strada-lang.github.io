@@ -150,14 +150,19 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td><code>&&</code></td><td>Logical AND</td><td><code>$a && $b</code></td></tr>
-                    <tr><td><code>||</code></td><td>Logical OR</td><td><code>$a || $b</code></td></tr>
+                    <tr><td><code>&&</code></td><td>Logical AND (returns boolean)</td><td><code>$a && $b</code></td></tr>
+                    <tr><td><code>||</code></td><td>Logical OR (returns value)</td><td><code>$h{"key"} || "default"</code></td></tr>
+                    <tr><td><code>//</code></td><td>Defined-or</td><td><code>$h{"key"} // "default"</code></td></tr>
                     <tr><td><code>!</code></td><td>Logical NOT</td><td><code>!$a</code></td></tr>
                     <tr><td><code>and</code></td><td>Low-precedence AND</td><td><code>$a and $b</code></td></tr>
                     <tr><td><code>or</code></td><td>Low-precedence OR</td><td><code>$a or $b</code></td></tr>
                     <tr><td><code>not</code></td><td>Low-precedence NOT</td><td><code>not $a</code></td></tr>
                 </tbody>
             </table>
+
+            <div class="note">
+                <strong>|| vs //</strong>: The <code>||</code> operator returns its left operand if truthy, otherwise its right operand (like Perl/JavaScript). The <code>//</code> operator returns its left operand if <em>defined</em> (not undef), otherwise its right operand. Use <code>//</code> when you want empty strings or zero to be considered valid values.
+            </div>
 
             <h3>String Operators</h3>
 
