@@ -276,6 +276,26 @@
 <span class="func">undef</span>(<span class="sigil">$counter</span>);
 <span class="comment"># Now $count is finally freed</span></code></pre>
 
+            <h3>Closures Without Return Statements</h3>
+
+            <p>Closures (anonymous functions) that don't have an explicit <code>return</code> statement automatically return <code>undef</code>. This is safe and efficient:</p>
+
+            <pre><code><span class="comment"># This closure has no return - it's used as a callback</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$callback</span> = <span class="keyword">func</span> () {
+    <span class="func">say</span>(<span class="string">"Processing..."</span>);
+    <span class="func">do_something</span>();
+    <span class="comment"># No return statement - automatically returns undef</span>
+};
+
+<span class="comment"># Safe to call - result is undef</span>
+<span class="sigil">$callback</span>->();
+
+<span class="comment"># Common pattern: pass closure to methods</span>
+<span class="sigil">$db</span>-><span class="func">transaction</span>(<span class="keyword">func</span> () {
+    <span class="sigil">$db</span>-><span class="func">execute</span>(<span class="string">"UPDATE ..."</span>);
+    <span class="sigil">$db</span>-><span class="func">execute</span>(<span class="string">"INSERT ..."</span>);
+});</code></pre>
+
             <div class="info-box warning">
                 <strong>Watch for Cycles</strong>
                 If a closure captures a variable that references the closure itself, you create a cycle that won't be freed automatically. Break cycles manually with <code>undef()</code>.

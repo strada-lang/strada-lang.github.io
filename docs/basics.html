@@ -130,8 +130,14 @@
                     <tr><td><code>&gt;</code></td><td><code>gt</code></td><td>Greater than</td></tr>
                     <tr><td><code>&lt;=</code></td><td><code>le</code></td><td>Less than or equal</td></tr>
                     <tr><td><code>&gt;=</code></td><td><code>ge</code></td><td>Greater than or equal</td></tr>
+                    <tr><td><code>&lt;=&gt;</code></td><td><code>cmp</code></td><td>Spaceship (returns -1, 0, or 1)</td></tr>
                 </tbody>
             </table>
+
+            <div class="note">
+                <strong>Spaceship operators:</strong> Use <code>&lt;=&gt;</code> for numeric sort and <code>cmp</code> for string sort:
+                <code>sort { $a &lt;=&gt; $b; } @nums</code> or <code>sort { $a cmp $b; } @strings</code>
+            </div>
 
             <div class="info-box warning">
                 <strong>Important</strong>

@@ -239,7 +239,7 @@
 
             <h2>Transactions</h2>
 
-            <p>Wrap multiple operations in a transaction for atomicity:</p>
+            <p>Wrap multiple operations in a transaction for atomicity. The closure passed to <code>transaction()</code> runs within a database transaction &mdash; if it succeeds, changes are committed; if it throws, changes are rolled back:</p>
 
             <pre><code><span class="sigil">$n</span>-&gt;<span class="func">transaction</span>(<span class="keyword">func</span> () {
     <span class="comment"># All operations here are atomic</span>

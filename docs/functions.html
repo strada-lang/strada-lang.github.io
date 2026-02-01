@@ -177,6 +177,22 @@
 <span class="func">say</span>(<span class="func">apply</span>(<span class="sigil">$square</span>, <span class="number">5</span>));  <span class="comment"># 25</span>
 <span class="func">say</span>(<span class="func">apply</span>(<span class="sigil">$negate</span>, <span class="number">5</span>)); <span class="comment"># -5</span></code></pre>
 
+            <h3>Closures as Callbacks</h3>
+
+            <p>Closures without a <code>return</code> statement automatically return <code>undef</code>. This is common when using closures as callbacks:</p>
+
+            <pre><code><span class="comment"># Closure used as callback - no return needed</span>
+<span class="sigil">$db</span>-><span class="func">transaction</span>(<span class="keyword">func</span> () {
+    <span class="sigil">$db</span>-><span class="func">execute</span>(<span class="string">"UPDATE users SET active = 1"</span>);
+    <span class="sigil">$db</span>-><span class="func">execute</span>(<span class="string">"INSERT INTO logs ..."</span>);
+    <span class="comment"># No return - automatically returns undef</span>
+});
+
+<span class="comment"># Array processing with side effects</span>
+<span class="keyword">foreach</span> <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$item</span> (<span class="sigil">@items</span>) {
+    <span class="sigil">$process</span>->(<span class="sigil">$item</span>);  <span class="comment"># Call closure, ignore return</span>
+}</code></pre>
+
             <h2>Optional Parameters</h2>
 
             <p>Parameters with default values are optional:</p>
