@@ -129,12 +129,12 @@
 
             <h2>Stack Traces</h2>
 
-            <h3>stacktrace() - Print Call Stack</h3>
+            <h3>Automatic Stack Traces on Uncaught Exceptions</h3>
 
-            <p>Prints the current call stack to stderr:</p>
+            <p>When an exception goes uncaught, Strada automatically prints a stack trace:</p>
 
             <pre><code><span class="keyword">func</span> <span class="func">deep_function</span>() <span class="type">void</span> {
-    <span class="func">stacktrace</span>();
+    <span class="keyword">throw</span> <span class="string">"something went wrong"</span>;
 }
 
 <span class="keyword">func</span> <span class="func">middle_function</span>() <span class="type">void</span> {
@@ -147,21 +147,27 @@
 }
 
 <span class="comment"># Output:</span>
+<span class="comment"># Uncaught exception: something went wrong</span>
 <span class="comment"># Stack trace:</span>
-<span class="comment">#   deep_function (test.strada:2)</span>
-<span class="comment">#   middle_function (test.strada:6)</span>
-<span class="comment">#   main (test.strada:10)</span></code></pre>
+<span class="comment">#   at deep_function (test.strada)</span>
+<span class="comment">#   at middle_function (test.strada)</span>
+<span class="comment">#   at main (test.strada)</span></code></pre>
 
-            <h3>backtrace() - Alias for stacktrace()</h3>
+            <h3>sys::stack_trace() - Get Stack as String</h3>
 
-            <pre><code><span class="func">backtrace</span>();  <span class="comment"># Same as stacktrace()</span></code></pre>
+            <p>Returns the current call stack as a string for debugging or logging:</p>
 
-            <h3>stacktrace_str() - Get Stack as String</h3>
+            <pre><code><span class="keyword">func</span> <span class="func">debug_location</span>() <span class="type">void</span> {
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$trace</span> = <span class="func">sys::stack_trace</span>();
+    <span class="func">say</span>(<span class="string">"Current location:\n"</span> . <span class="sigil">$trace</span>);
+}
 
-            <p>Returns the stack trace as a string for logging:</p>
-
-            <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$trace</span> = <span class="func">stacktrace_str</span>();
-<span class="func">Log::error</span>(<span class="string">"Error occurred at:\n"</span> . <span class="sigil">$trace</span>);</code></pre>
+<span class="keyword">try</span> {
+    <span class="func">risky_operation</span>();
+} <span class="keyword">catch</span> (<span class="sigil">$e</span>) {
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$trace</span> = <span class="func">sys::stack_trace</span>();
+    <span class="func">log_error</span>(<span class="string">"Error: "</span> . <span class="sigil">$e</span> . <span class="string">"\nStack:\n"</span> . <span class="sigil">$trace</span>);
+}</code></pre>
 
             <h3>caller() - Get Caller Information</h3>
 

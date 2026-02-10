@@ -131,6 +131,30 @@
 <span class="sigil">$x</span> = <span class="number">10</span>;     <span class="comment"># Now $x is 10</span></code></pre>
             </div>
 
+            <h2>Constants</h2>
+
+            <p>Use <code>const</code> to declare compile-time constants:</p>
+
+            <pre><code><span class="comment"># Global constants (compile to C #define)</span>
+<span class="keyword">const</span> <span class="type">int</span> MAX_SIZE = <span class="number">100</span>;
+<span class="keyword">const</span> <span class="type">str</span> VERSION = <span class="string">"1.0.0"</span>;
+<span class="keyword">const</span> <span class="type">num</span> PI = <span class="number">3.14159</span>;
+
+<span class="comment"># Sigil is optional for const</span>
+<span class="keyword">const</span> <span class="type">int</span> LIMIT = <span class="number">50</span>;      <span class="comment"># Without sigil</span>
+<span class="keyword">const</span> <span class="type">int</span> <span class="sigil">$LIMIT</span> = <span class="number">50</span>;   <span class="comment"># With sigil - same effect</span>
+
+<span class="comment"># Local constants</span>
+<span class="keyword">func</span> <span class="func">example</span>() <span class="type">void</span> {
+    <span class="keyword">const</span> <span class="type">int</span> LOCAL_MAX = MAX_SIZE / <span class="number">2</span>;
+    <span class="comment"># ...</span>
+}</code></pre>
+
+            <div class="info-box">
+                <strong>Zero overhead for global constants</strong>
+                Global constants with literal values compile to C <code>#define</code> macros, so there's no runtime overhead.
+            </div>
+
             <h2>Integers (int)</h2>
 
             <pre><code><span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$a</span> = <span class="number">42</span>;
