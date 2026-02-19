@@ -82,8 +82,23 @@
                     <tr><td><code>scalar</code></td><td>Generic type (any value)</td><td>Any value</td></tr>
                     <tr><td><code>void</code></td><td>No value (function returns)</td><td>-</td></tr>
                     <tr><td><code>undef</code></td><td>Undefined value</td><td><code>undef</code></td></tr>
+                    <tr><td><code>dynamic</code></td><td>Context-sensitive return type</td><td>Function returns</td></tr>
                 </tbody>
             </table>
+
+            <h3>Dynamic Return Type</h3>
+            <p>The <code>dynamic</code> return type allows functions to return different types based on calling context, similar to Perl's <code>wantarray()</code>:</p>
+<pre><code>func flexible() dynamic {
+    if (sys::wantarray()) {
+        my array @r = (1, 2, 3);
+        return @r;
+    }
+    return 42;
+}
+
+my array @arr = flexible();  # (1, 2, 3)
+my int $val = flexible();    # 42</code></pre>
+            <p>Context functions: <code>sys::wantarray()</code>, <code>sys::wantscalar()</code>, <code>sys::wanthash()</code></p>
 
             <h2>Sigils</h2>
 

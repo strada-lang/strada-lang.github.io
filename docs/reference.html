@@ -418,6 +418,18 @@
                 </tbody>
             </table>
 
+            <h3>Call Context (Dynamic Return Type)</h3>
+            <table>
+                <thead>
+                    <tr><th>Function</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>sys::wantarray()</code></td><td>Returns 1 if called in array context</td></tr>
+                    <tr><td><code>sys::wantscalar()</code></td><td>Returns 1 if called in scalar context (default)</td></tr>
+                    <tr><td><code>sys::wanthash()</code></td><td>Returns 1 if called in hash context</td></tr>
+                </tbody>
+            </table>
+
             <h3>Networking</h3>
             <table>
                 <thead>
@@ -457,6 +469,35 @@
 
 <span class="comment"># Or use the convenience function:</span>
 <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$page</span> = <span class="func">ssl::http_get</span>(<span class="string">"example.com"</span>, <span class="number">443</span>, <span class="string">"/"</span>);</code></pre>
+
+            <h3>UTF-8 Introspection (utf8::)</h3>
+            <p>Perl-compatible UTF-8 introspection functions. In Strada, all strings are stored as raw bytes (typically UTF-8). There is no separate "UTF-8 flag" like Perl.</p>
+            <table>
+                <thead>
+                    <tr><th>Function</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>utf8::is_utf8($str)</code></td><td>Returns 1 if string is valid UTF-8, 0 otherwise</td></tr>
+                    <tr><td><code>utf8::valid($str)</code></td><td>Alias for <code>is_utf8()</code></td></tr>
+                    <tr><td><code>utf8::encode($str)</code></td><td>No-op (strings are already bytes), returns the string</td></tr>
+                    <tr><td><code>utf8::decode($str)</code></td><td>Validates UTF-8; returns 1 if valid, 0 if not</td></tr>
+                    <tr><td><code>utf8::upgrade($str)</code></td><td>No-op (strings are already UTF-8), returns the string</td></tr>
+                    <tr><td><code>utf8::downgrade($str)</code></td><td>Returns string if ASCII-only, dies on non-ASCII</td></tr>
+                    <tr><td><code>utf8::downgrade($str, 1)</code></td><td>With fail_ok=1, returns undef instead of dying</td></tr>
+                    <tr><td><code>utf8::unicode_to_native($cp)</code></td><td>Identity mapping on modern systems</td></tr>
+                </tbody>
+            </table>
+
+            <h4>UTF-8 Example</h4>
+            <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$text</span> = <span class="string">"Hello"</span>;
+<span class="func">say</span>(<span class="func">utf8::is_utf8</span>(<span class="sigil">$text</span>));    <span class="comment"># 1 (ASCII is valid UTF-8)</span>
+<span class="func">say</span>(<span class="func">utf8::downgrade</span>(<span class="sigil">$text</span>)); <span class="comment"># "Hello" (ASCII-only, succeeds)</span>
+
+<span class="comment"># Safe downgrade with fail_ok</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$result</span> = <span class="func">utf8::downgrade</span>(<span class="sigil">$text</span>, <span class="number">1</span>);
+<span class="keyword">if</span> (!<span class="func">defined</span>(<span class="sigil">$result</span>)) {
+    <span class="func">say</span>(<span class="string">"Contains non-ASCII"</span>);
+}</code></pre>
 
             <h3>Signals</h3>
             <table>

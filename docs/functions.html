@@ -114,6 +114,34 @@
     }
 }</code></pre>
 
+            <h2>Variadic Functions</h2>
+
+            <p>Functions can accept a variable number of arguments using the <code>...@param</code> syntax. The variadic parameter must be the last one:</p>
+
+<pre><code><span class="comment"># Basic variadic function</span>
+<span class="keyword">func</span> <span class="func">sum</span>(<span class="type">int</span> ...<span class="sigil">@nums</span>) <span class="type">int</span> {
+    <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$total</span> = <span class="number">0</span>;
+    <span class="keyword">foreach</span> <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$n</span> (<span class="sigil">@nums</span>) {
+        <span class="sigil">$total</span> = <span class="sigil">$total</span> + <span class="sigil">$n</span>;
+    }
+    <span class="keyword">return</span> <span class="sigil">$total</span>;
+}
+
+<span class="func">sum</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>);       <span class="comment"># 6</span>
+<span class="func">sum</span>(<span class="number">10</span>, <span class="number">20</span>, <span class="number">30</span>, <span class="number">40</span>); <span class="comment"># 100</span>
+
+<span class="comment"># Fixed params + variadic</span>
+<span class="keyword">func</span> <span class="func">format</span>(<span class="type">str</span> <span class="sigil">$prefix</span>, <span class="type">str</span> <span class="sigil">$sep</span>, <span class="type">int</span> ...<span class="sigil">@nums</span>) <span class="type">str</span> {
+    <span class="comment"># $prefix and $sep are fixed, @nums collects remaining args</span>
+}</code></pre>
+
+            <h3>Spread Operator</h3>
+            <p>Use <code>...@array</code> to unpack an array into individual arguments:</p>
+
+<pre><code><span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@values</span> = (<span class="number">10</span>, <span class="number">20</span>, <span class="number">30</span>);
+<span class="func">sum</span>(...<span class="sigil">@values</span>);               <span class="comment"># 60</span>
+<span class="func">sum</span>(<span class="number">1</span>, ...<span class="sigil">@values</span>, <span class="number">99</span>);       <span class="comment"># 160 (mixed args and spread)</span></code></pre>
+
             <h2>Return Types</h2>
 
             <table>
@@ -131,8 +159,28 @@
                     <tr><td><code>array</code></td><td>Returns array</td></tr>
                     <tr><td><code>hash</code></td><td>Returns hash</td></tr>
                     <tr><td><code>scalar</code></td><td>Returns any value</td></tr>
+                    <tr><td><code>dynamic</code></td><td>Context-sensitive return (use with <code>sys::wantarray()</code>)</td></tr>
                 </tbody>
             </table>
+
+            <h3>Dynamic Return Type</h3>
+            <p>The <code>dynamic</code> return type enables functions to check how their result will be used and return different types accordingly:</p>
+<pre><code>func flexible() dynamic {
+    if (sys::wantarray()) {
+        my array @r = (1, 2, 3);
+        return @r;    <span class="comment"># array context</span>
+    }
+    if (sys::wanthash()) {
+        my hash %h = ();
+        $h{"key"} = "val";
+        return %h;    <span class="comment"># hash context</span>
+    }
+    return 42;        <span class="comment"># scalar context (default)</span>
+}
+
+my array @a = flexible();  <span class="comment"># array context</span>
+my hash %h = flexible();   <span class="comment"># hash context</span>
+my int $v = flexible();    <span class="comment"># scalar context</span></code></pre>
 
             <h2>Anonymous Functions (Closures)</h2>
 
@@ -302,6 +350,42 @@
 
 <span class="comment"># Or ignore signals</span>
 <span class="func">sys::signal</span>(<span class="string">"PIPE"</span>, <span class="string">"IGNORE"</span>);</code></pre>
+
+            <h2>UTF-8 Introspection (utf8::)</h2>
+
+            <p>The <code>utf8::</code> namespace provides Perl-compatible UTF-8 introspection functions. In Strada, all strings are stored as raw bytes (typically UTF-8). There is no separate "UTF-8 flag" like Perl has.</p>
+
+            <table>
+                <thead>
+                    <tr><th>Function</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>utf8::is_utf8($str)</code></td><td>Returns 1 if string is valid UTF-8, 0 otherwise</td></tr>
+                    <tr><td><code>utf8::valid($str)</code></td><td>Alias for <code>is_utf8()</code></td></tr>
+                    <tr><td><code>utf8::encode($str)</code></td><td>No-op (strings are already bytes), returns the string</td></tr>
+                    <tr><td><code>utf8::decode($str)</code></td><td>Validates UTF-8; returns 1 if valid, 0 if not</td></tr>
+                    <tr><td><code>utf8::upgrade($str)</code></td><td>No-op (strings are already UTF-8), returns the string</td></tr>
+                    <tr><td><code>utf8::downgrade($str)</code></td><td>Returns string if ASCII-only, dies on non-ASCII</td></tr>
+                    <tr><td><code>utf8::downgrade($str, 1)</code></td><td>With fail_ok=1, returns undef instead of dying</td></tr>
+                    <tr><td><code>utf8::unicode_to_native($cp)</code></td><td>Identity mapping on modern systems</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Example</h3>
+            <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$ascii</span> = <span class="string">"Hello"</span>;
+<span class="func">say</span>(<span class="func">utf8::is_utf8</span>(<span class="sigil">$ascii</span>));     <span class="comment"># 1 (ASCII is valid UTF-8)</span>
+<span class="func">say</span>(<span class="func">utf8::downgrade</span>(<span class="sigil">$ascii</span>));  <span class="comment"># "Hello" (ASCII-only, succeeds)</span>
+
+<span class="comment"># Safe downgrade with fail_ok flag</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$result</span> = <span class="func">utf8::downgrade</span>(<span class="sigil">$ascii</span>, <span class="number">1</span>);
+<span class="keyword">if</span> (!<span class="func">defined</span>(<span class="sigil">$result</span>)) {
+    <span class="func">say</span>(<span class="string">"Contains non-ASCII characters"</span>);
+}</code></pre>
+
+            <div class="info-box">
+                <strong>Strada String Model</strong>
+                <p>Unlike Perl, Strada does not have an internal "UTF-8 flag" on strings. All strings are raw byte sequences. The <code>utf8::</code> functions validate byte sequences as UTF-8 but do not change internal representation. <code>utf8::encode()</code> and <code>utf8::upgrade()</code> are no-ops provided for Perl compatibility.</p>
+            </div>
 
             <h2>Best Practices</h2>
 
