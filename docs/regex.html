@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regular Expressions - Strada Documentation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <a href="../index.html" class="logo">Strada<span>Lang</span></a>
+        <ul>
+            <li><a href="quickstart.html">QuickStart</a></li>
+            <li><a href="index.html">Docs</a></li>
+            <li><a href="reference.html">Reference</a></li>
+            <li><a href="https://github.com/strada-lang/strada-lang">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h3>Getting Started</h3>
+            <ul>
+                <li><a href="quickstart.html">QuickStart</a></li>
+                <li><a href="index.html">Documentation</a></li>
+                <li><a href="repl.html">REPL & Scripting</a></li>
+            </ul>
+            <h3>Language Guide</h3>
+            <ul>
+                <li><a href="basics.html">Language Basics</a></li>
+                <li><a href="types.html">Types & Variables</a></li>
+                <li><a href="functions.html">Functions</a></li>
+                <li><a href="control-flow.html">Control Flow</a></li>
+                <li><a href="oop.html">Object-Oriented Programming</a></li>
+                <li><a href="regex.html" class="active">Regular Expressions</a></li>
+            </ul>
+            <h3>Advanced</h3>
+            <ul>
+                <li><a href="memory.html">Memory Management</a></li>
+                <li><a href="debugging.html">Debugging</a></li>
+                <li><a href="async.html">Async/Await</a></li>
+                <li><a href="c-interop.html">C Interoperability</a></li>
+                <li><a href="libraries.html">Libraries Guide</a></li>
+                <li><a href="perl-integration.html">Perl Integration</a></li>
+            </ul>
+            <h3>Reference</h3>
+            <ul>
+                <li><a href="reference.html">Built-in Functions</a></li>
+                <li><a href="cannoli.html">Cannoli Web Framework</a></li>
+                <li><a href="forma.html">Forma Template Engine</a></li>
+                <li><a href="dbi.html">DBI Database Interface</a></li>
+                <li><a href="nesso.html">Nesso ORM</a></li>
+                <li><a href="stradadoc.html">Documentation Tools</a></li>
+            </ul>
+        </aside>
+
+        <main class="content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a> / <a href="index.html">Docs</a> / Regular Expressions
+            </div>
+
+            <h1>Regular <span>Expressions</span></h1>
+            <p class="subtitle">Pattern matching, substitution, and text processing with regex.</p>
+
+            <h2>Pattern Matching</h2>
+
+            <p>Use the <code>=~</code> operator to test if a string matches a pattern, and <code>!~</code> for negated matching:</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$text</span> = <span class="string">"Hello, World!"</span>;
+
+<span class="comment"># Match operator</span>
+<span class="keyword">if</span> (<span class="sigil">$text</span> =~ <span class="string">/World/</span>) {
+    <span class="func">say</span>(<span class="string">"Found World!"</span>);
+}
+
+<span class="comment"># Negated match</span>
+<span class="keyword">if</span> (<span class="sigil">$text</span> !~ <span class="string">/Goodbye/</span>) {
+    <span class="func">say</span>(<span class="string">"No Goodbye found"</span>);
+}</code></pre>
+
+            <p>The <code>=~</code> operator returns <code>1</code> if the pattern matches, <code>0</code> otherwise. The <code>!~</code> operator returns the opposite.</p>
+
+            <h2>Pattern Syntax</h2>
+
+            <p>Strada uses POSIX Extended Regular Expressions (ERE) with some Perl extensions.</p>
+
+            <h3>Anchors</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Pattern</th>
+                        <th>Meaning</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>^</code></td><td>Start of string</td></tr>
+                    <tr><td><code>$</code></td><td>End of string</td></tr>
+                    <tr><td><code>\b</code></td><td>Word boundary</td></tr>
+                </tbody>
+            </table>
+
+            <pre><code><span class="comment"># ^ matches start of string</span>
+<span class="keyword">if</span> (<span class="string">"hello world"</span> =~ <span class="string">/^hello/</span>) {
+    <span class="func">say</span>(<span class="string">"Starts with hello"</span>);
+}
+
+<span class="comment"># $ matches end of string</span>
+<span class="keyword">if</span> (<span class="string">"hello world"</span> =~ <span class="string">/world$/</span>) {
+    <span class="func">say</span>(<span class="string">"Ends with world"</span>);
+}
+
+<span class="comment"># Both anchors for exact match</span>
+<span class="keyword">if</span> (<span class="string">"hello"</span> =~ <span class="string">/^hello$/</span>) {
+    <span class="func">say</span>(<span class="string">"Exact match"</span>);
+}</code></pre>
+
+            <h3>Character Classes</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Pattern</th>
+                        <th>Meaning</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>.</code></td><td>Any character except newline</td></tr>
+                    <tr><td><code>\d</code></td><td>Digit (0-9)</td></tr>
+                    <tr><td><code>\D</code></td><td>Non-digit</td></tr>
+                    <tr><td><code>\w</code></td><td>Word character (a-z, A-Z, 0-9, _)</td></tr>
+                    <tr><td><code>\W</code></td><td>Non-word character</td></tr>
+                    <tr><td><code>\s</code></td><td>Whitespace (space, tab, newline)</td></tr>
+                    <tr><td><code>\S</code></td><td>Non-whitespace</td></tr>
+                    <tr><td><code>[abc]</code></td><td>Character class (a, b, or c)</td></tr>
+                    <tr><td><code>[^abc]</code></td><td>Negated class (not a, b, or c)</td></tr>
+                    <tr><td><code>[a-z]</code></td><td>Character range</td></tr>
+                </tbody>
+            </table>
+
+            <pre><code><span class="keyword">if</span> (<span class="sigil">$text</span> =~ <span class="string">/\d+/</span>) {
+    <span class="func">say</span>(<span class="string">"Contains digits"</span>);
+}
+
+<span class="keyword">if</span> (<span class="sigil">$text</span> =~ <span class="string">/[aeiou]/</span>) {
+    <span class="func">say</span>(<span class="string">"Contains a vowel"</span>);
+}
+
+<span class="keyword">if</span> (<span class="sigil">$text</span> =~ <span class="string">/[A-Z][a-z]+/</span>) {
+    <span class="func">say</span>(<span class="string">"Contains capitalized word"</span>);
+}</code></pre>
+
+            <h3>Quantifiers</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Pattern</th>
+                        <th>Meaning</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>*</code></td><td>Zero or more</td></tr>
+                    <tr><td><code>+</code></td><td>One or more</td></tr>
+                    <tr><td><code>?</code></td><td>Zero or one</td></tr>
+                    <tr><td><code>{n}</code></td><td>Exactly n times</td></tr>
+                    <tr><td><code>{n,}</code></td><td>n or more times</td></tr>
+                    <tr><td><code>{n,m}</code></td><td>Between n and m times</td></tr>
+                </tbody>
+            </table>
+
+            <pre><code><span class="keyword">if</span> (<span class="sigil">$text</span> =~ <span class="string">/a+/</span>) {
+    <span class="func">say</span>(<span class="string">"One or more a's"</span>);
+}
+
+<span class="keyword">if</span> (<span class="sigil">$text</span> =~ <span class="string">/\d{3}-\d{4}/</span>) {
+    <span class="func">say</span>(<span class="string">"Phone number format"</span>);
+}</code></pre>
+
+            <h3>Alternation and Grouping</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Pattern</th>
+                        <th>Meaning</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>|</code></td><td>Alternation (or)</td></tr>
+                    <tr><td><code>(...)</code></td><td>Grouping and capture</td></tr>
+                    <tr><td><code>(?:...)</code></td><td>Non-capturing group</td></tr>
+                </tbody>
+            </table>
+
+            <pre><code><span class="keyword">if</span> (<span class="sigil">$text</span> =~ <span class="string">/cat|dog/</span>) {
+    <span class="func">say</span>(<span class="string">"Found cat or dog"</span>);
+}
+
+<span class="keyword">if</span> (<span class="sigil">$text</span> =~ <span class="string">/(hello|hi) world/</span>) {
+    <span class="func">say</span>(<span class="string">"Greeting found"</span>);
+}</code></pre>
+
+            <h2>Flags and Modifiers</h2>
+
+            <p>Flags are specified after the closing delimiter:</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Flag</th>
+                        <th>Meaning</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>i</code></td><td>Case-insensitive matching</td></tr>
+                    <tr><td><code>m</code></td><td>Multi-line mode (<code>^</code> and <code>$</code> match line boundaries)</td></tr>
+                    <tr><td><code>s</code></td><td>Single-line mode (<code>.</code> matches newline)</td></tr>
+                    <tr><td><code>g</code></td><td>Global (for substitution &mdash; replace all occurrences)</td></tr>
+                </tbody>
+            </table>
+
+            <pre><code><span class="comment"># Case-insensitive matching</span>
+<span class="keyword">if</span> (<span class="sigil">$text</span> =~ <span class="string">/hello/i</span>) {
+    <span class="func">say</span>(<span class="string">"Found hello (any case)"</span>);
+}
+
+<span class="comment"># Multi-line mode</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$lines</span> = <span class="string">"line1\nline2"</span>;
+<span class="keyword">if</span> (<span class="sigil">$lines</span> =~ <span class="string">/^line2/m</span>) {
+    <span class="func">say</span>(<span class="string">"Found line2 at start of line"</span>);
+}</code></pre>
+
+            <h2>Capturing Groups</h2>
+
+            <p>Use parentheses to capture parts of a match. Access the captured groups with the <code>captures()</code> function:</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$date</span> = <span class="string">"2024-01-15"</span>;
+
+<span class="keyword">if</span> (<span class="sigil">$date</span> =~ <span class="string">/(\d{4})-(\d{2})-(\d{2})/</span>) {
+    <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@parts</span> = <span class="func">captures</span>();
+    <span class="func">say</span>(<span class="string">"Full match: "</span> . <span class="sigil">$parts</span>[<span class="number">0</span>]);   <span class="comment"># 2024-01-15</span>
+    <span class="func">say</span>(<span class="string">"Year: "</span> . <span class="sigil">$parts</span>[<span class="number">1</span>]);        <span class="comment"># 2024</span>
+    <span class="func">say</span>(<span class="string">"Month: "</span> . <span class="sigil">$parts</span>[<span class="number">2</span>]);       <span class="comment"># 01</span>
+    <span class="func">say</span>(<span class="string">"Day: "</span> . <span class="sigil">$parts</span>[<span class="number">3</span>]);         <span class="comment"># 15</span>
+}</code></pre>
+
+            <div class="info-box">
+                <strong>Capture Indices</strong>
+                <ul>
+                    <li><code>captures()[0]</code> is the <strong>full match</strong> (entire matched string)</li>
+                    <li><code>captures()[1]</code> is the first capture group</li>
+                    <li><code>captures()[2]</code> is the second capture group, and so on</li>
+                </ul>
+            </div>
+
+            <p>Always check that the pattern matched before calling <code>captures()</code>, and save the result immediately since captures are cleared on the next match:</p>
+
+            <pre><code><span class="keyword">if</span> (<span class="sigil">$text</span> =~ <span class="string">/(\w+)@(\w+)/</span>) {
+    <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@saved</span> = <span class="func">captures</span>();  <span class="comment"># Save immediately</span>
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$user</span> = <span class="sigil">$saved</span>[<span class="number">1</span>];
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$domain</span> = <span class="sigil">$saved</span>[<span class="number">2</span>];
+    <span class="func">say</span>(<span class="string">"User: "</span> . <span class="sigil">$user</span> . <span class="string">", Domain: "</span> . <span class="sigil">$domain</span>);
+}</code></pre>
+
+            <h2>Substitution</h2>
+
+            <p>Use <code>s///</code> for search and replace:</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$text</span> = <span class="string">"Hello World"</span>;
+
+<span class="comment"># Replace first occurrence</span>
+<span class="sigil">$text</span> =~ s/World/Strada/;
+<span class="func">say</span>(<span class="sigil">$text</span>);  <span class="comment"># Hello Strada</span>
+
+<span class="comment"># Replace all occurrences with /g flag</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$repeated</span> = <span class="string">"cat cat cat"</span>;
+<span class="sigil">$repeated</span> =~ s/cat/dog/g;
+<span class="func">say</span>(<span class="sigil">$repeated</span>);  <span class="comment"># dog dog dog</span>
+
+<span class="comment"># Case-insensitive replacement</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$greeting</span> = <span class="string">"HELLO world"</span>;
+<span class="sigil">$greeting</span> =~ s/hello/Hi/i;
+<span class="func">say</span>(<span class="sigil">$greeting</span>);  <span class="comment"># Hi world</span></code></pre>
+
+            <div class="note">
+                <strong>Case modification:</strong> Strada does not support <code>\U</code>, <code>\L</code>, or <code>\E</code> in replacement strings. Use the <code>uc()</code> and <code>lc()</code> functions instead.
+            </div>
+
+            <h2>Variable Interpolation</h2>
+
+            <p>Variables are interpolated inside regex patterns when prefixed with <code>$</code>:</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$search</span> = <span class="string">"world"</span>;
+
+<span class="comment"># Variable is interpolated into the pattern</span>
+<span class="keyword">if</span> (<span class="sigil">$text</span> =~ <span class="string">/$search/</span>) {
+    <span class="func">say</span>(<span class="string">"Found it!"</span>);
+}</code></pre>
+
+            <h3>$ as Anchor vs Variable</h3>
+
+            <p>The <code>$</code> character has two meanings inside a pattern:</p>
+
+            <ul>
+                <li><strong>End-of-line anchor</strong> &mdash; when at the end of the pattern or not followed by a word character</li>
+                <li><strong>Variable interpolation</strong> &mdash; when followed by a variable name (a word character)</li>
+            </ul>
+
+            <pre><code><span class="comment"># $ as end-of-line anchor</span>
+<span class="keyword">if</span> (<span class="sigil">$text</span> =~ <span class="string">/end$/</span>) {
+    <span class="func">say</span>(<span class="string">"Ends with 'end'"</span>);
+}
+
+<span class="comment"># $ as variable interpolation</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$var</span> = <span class="string">"test"</span>;
+<span class="keyword">if</span> (<span class="sigil">$text</span> =~ <span class="string">/$var/</span>) {
+    <span class="func">say</span>(<span class="string">"Found test"</span>);
+}
+
+<span class="comment"># Both together: variable followed by anchor</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$suffix</span> = <span class="string">"world"</span>;
+<span class="keyword">if</span> (<span class="sigil">$text</span> =~ <span class="string">/$suffix$/</span>) {
+    <span class="func">say</span>(<span class="string">"Text ends with world"</span>);
+}</code></pre>
+
+            <h3>Escaping Special Characters</h3>
+
+            <p>To match literal special characters, escape them with a backslash:</p>
+
+            <pre><code><span class="comment"># Match literal dot</span>
+<span class="keyword">if</span> (<span class="sigil">$filename</span> =~ <span class="string">/\.txt$/</span>) {
+    <span class="func">say</span>(<span class="string">"Text file"</span>);
+}
+
+<span class="comment"># Match literal dollar sign</span>
+<span class="keyword">if</span> (<span class="sigil">$price</span> =~ <span class="string">/\$\d+/</span>) {
+    <span class="func">say</span>(<span class="string">"Price found"</span>);
+}
+
+<span class="comment"># Common metacharacters that need escaping:</span>
+<span class="comment">#   . * + ? [ ] { } ( ) | ^ $ \</span></code></pre>
+
+            <h2>Built-in Functions</h2>
+
+            <p>Strada provides several built-in functions for regex and string operations.</p>
+
+            <h3>match()</h3>
+
+            <p>Simple pattern match that returns <code>1</code> or <code>0</code>:</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$found</span> = <span class="func">match</span>(<span class="sigil">$text</span>, <span class="string">"pattern"</span>);
+
+<span class="keyword">if</span> (<span class="func">match</span>(<span class="sigil">$email</span>, <span class="string">"@"</span>)) {
+    <span class="func">say</span>(<span class="string">"Looks like an email"</span>);
+}</code></pre>
+
+            <h3>capture()</h3>
+
+            <p>Get all capture groups as an array:</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@groups</span> = <span class="func">capture</span>(<span class="sigil">$text</span>, <span class="string">"(\\d+)-(\\d+)"</span>);
+<span class="comment"># @groups[0] = full match, @groups[1] = first group, etc.</span></code></pre>
+
+            <h3>split()</h3>
+
+            <p>Split a string by a regex pattern:</p>
+
+            <pre><code><span class="comment"># Split on whitespace</span>
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@words</span> = <span class="func">split</span>(<span class="string">"\\s+"</span>, <span class="sigil">$text</span>);
+
+<span class="comment"># Split on comma</span>
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@parts</span> = <span class="func">split</span>(<span class="string">","</span>, <span class="sigil">$csv</span>);</code></pre>
+
+            <div class="info-box warning">
+                <strong>Important</strong>
+                <code>split()</code> uses regex patterns. To split on literal special characters, escape them with a double backslash:
+            </div>
+
+            <pre><code><span class="comment"># Split on literal dot</span>
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@parts</span> = <span class="func">split</span>(<span class="string">"\\."</span>, <span class="sigil">$ip_address</span>);
+
+<span class="comment"># Split on literal pipe</span>
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@items</span> = <span class="func">split</span>(<span class="string">"\\|"</span>, <span class="sigil">$data</span>);</code></pre>
+
+            <h3>join()</h3>
+
+            <p>Join array elements with a separator (not regex, but commonly paired with <code>split()</code>):</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$result</span> = <span class="func">join</span>(<span class="string">", "</span>, <span class="sigil">@items</span>);
+<span class="func">say</span>(<span class="sigil">$result</span>);  <span class="comment"># "apple, banana, cherry"</span></code></pre>
+
+            <h3>replace() and replace_all()</h3>
+
+            <p>Functional alternatives to the <code>s///</code> operator:</p>
+
+            <pre><code><span class="comment"># Replace first match (returns new string)</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$new</span> = <span class="func">replace</span>(<span class="sigil">$text</span>, <span class="string">"world"</span>, <span class="string">"Strada"</span>);
+
+<span class="comment"># Replace all matches (returns new string)</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$cleaned</span> = <span class="func">replace_all</span>(<span class="sigil">$text</span>, <span class="string">"\\s+"</span>, <span class="string">" "</span>);</code></pre>
+
+            <div class="note">
+                <strong>replace() vs s///:</strong> The <code>replace()</code> and <code>replace_all()</code> functions return a <strong>new string</strong> without modifying the original. The <code>s///</code> operator modifies the variable <strong>in place</strong>.
+            </div>
+
+            <h2>Common Patterns</h2>
+
+            <h3>Email Validation</h3>
+
+            <pre><code><span class="keyword">func</span> <span class="func">is_valid_email</span>(<span class="type">str</span> <span class="sigil">$email</span>) <span class="type">int</span> {
+    <span class="keyword">return</span> <span class="func">match</span>(<span class="sigil">$email</span>, <span class="string">"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"</span>);
+}</code></pre>
+
+            <h3>Phone Number</h3>
+
+            <pre><code><span class="keyword">func</span> <span class="func">is_phone</span>(<span class="type">str</span> <span class="sigil">$phone</span>) <span class="type">int</span> {
+    <span class="keyword">return</span> <span class="func">match</span>(<span class="sigil">$phone</span>, <span class="string">"^\\d{3}[-.]?\\d{3}[-.]?\\d{4}$"</span>);
+}</code></pre>
+
+            <h3>URL Extraction</h3>
+
+            <pre><code><span class="keyword">func</span> <span class="func">extract_urls</span>(<span class="type">str</span> <span class="sigil">$text</span>) <span class="type">array</span> {
+    <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@urls</span> = ();
+    <span class="keyword">while</span> (<span class="sigil">$text</span> =~ <span class="string">/(https?:\/\/[^\s]+)/</span>) {
+        <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@cap</span> = <span class="func">captures</span>();
+        <span class="func">push</span>(<span class="sigil">@urls</span>, <span class="sigil">$cap</span>[<span class="number">1</span>]);
+        <span class="sigil">$text</span> =~ s/https?:\/\/[^\s]+//;
+    }
+    <span class="keyword">return</span> <span class="sigil">@urls</span>;
+}</code></pre>
+
+            <h3>Whitespace Cleanup</h3>
+
+            <pre><code><span class="comment"># Trim leading whitespace</span>
+<span class="sigil">$text</span> =~ s/^\s+//;
+
+<span class="comment"># Trim trailing whitespace</span>
+<span class="sigil">$text</span> =~ s/\s+$//;
+
+<span class="comment"># Collapse multiple spaces to a single space</span>
+<span class="sigil">$text</span> =~ s/\s+/ /g;</code></pre>
+
+            <h2>Transliteration (tr///, y///)</h2>
+
+            <p>The <code>tr///</code> operator (alias <code>y///</code>) performs character-by-character transliteration. Unlike <code>s///</code>, it does <strong>not</strong> use regular expressions &mdash; it maps individual characters from a search list to a replacement list.</p>
+
+            <h3>Basic Syntax</h3>
+
+            <pre><code><span class="sigil">$str</span> =~ tr/<span class="string">SEARCHLIST</span>/<span class="string">REPLACEMENTLIST</span>/flags;
+<span class="sigil">$str</span> =~ y/<span class="string">SEARCHLIST</span>/<span class="string">REPLACEMENTLIST</span>/flags;  <span class="comment"># Alias</span></code></pre>
+
+            <p>Each character in the search list is replaced by the character at the corresponding position in the replacement list. Ranges like <code>a-z</code> are expanded.</p>
+
+            <h3>Examples</h3>
+
+            <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$text</span> = <span class="string">"Hello World"</span>;
+
+<span class="comment"># Lowercase to uppercase</span>
+<span class="sigil">$text</span> =~ tr/a-z/A-Z/;
+<span class="func">say</span>(<span class="sigil">$text</span>);  <span class="comment"># "HELLO WORLD"</span>
+
+<span class="comment"># ROT13 encoding</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$secret</span> = <span class="string">"Hello World"</span>;
+<span class="sigil">$secret</span> =~ tr/A-Za-z/N-ZA-Mn-za-m/;
+<span class="func">say</span>(<span class="sigil">$secret</span>);  <span class="comment"># "Uryyb Jbeyq"</span>
+
+<span class="comment"># Replace vowels with stars</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$censored</span> = <span class="string">"hello"</span>;
+<span class="sigil">$censored</span> =~ tr/aeiou/*****/;
+<span class="func">say</span>(<span class="sigil">$censored</span>);  <span class="comment"># "h*ll*"</span></code></pre>
+
+            <h3>Flags</h3>
+
+            <table>
+                <thead>
+                    <tr><th>Flag</th><th>Meaning</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>c</code></td><td><strong>Complement</strong> &mdash; transliterate characters NOT in the search list</td></tr>
+                    <tr><td><code>d</code></td><td><strong>Delete</strong> &mdash; delete characters found in search list that have no corresponding replacement</td></tr>
+                    <tr><td><code>s</code></td><td><strong>Squeeze</strong> &mdash; collapse duplicate replacement characters into a single one</td></tr>
+                    <tr><td><code>r</code></td><td><strong>Return</strong> &mdash; return a modified copy, do not change the original</td></tr>
+                </tbody>
+            </table>
+
+            <h4>Delete (/d)</h4>
+
+            <pre><code><span class="comment"># Delete all digits</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$data</span> = <span class="string">"abc123def456"</span>;
+<span class="sigil">$data</span> =~ tr/0-9//d;
+<span class="func">say</span>(<span class="sigil">$data</span>);  <span class="comment"># "abcdef"</span>
+
+<span class="comment"># Delete all non-alphanumeric characters</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$clean</span> = <span class="string">"hello, world! #2024"</span>;
+<span class="sigil">$clean</span> =~ tr/a-zA-Z0-9//cd;
+<span class="func">say</span>(<span class="sigil">$clean</span>);  <span class="comment"># "helloworld2024"</span></code></pre>
+
+            <h4>Squeeze (/s)</h4>
+
+            <pre><code><span class="comment"># Collapse repeated spaces</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$spaced</span> = <span class="string">"hello    world    foo"</span>;
+<span class="sigil">$spaced</span> =~ tr/ / /s;
+<span class="func">say</span>(<span class="sigil">$spaced</span>);  <span class="comment"># "hello world foo"</span>
+
+<span class="comment"># Collapse repeated characters after replacement</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$collapsed</span> = <span class="string">"Mississippi"</span>;
+<span class="sigil">$collapsed</span> =~ tr/sp/SP/s;
+<span class="func">say</span>(<span class="sigil">$collapsed</span>);  <span class="comment"># "MiSiSiPi"</span></code></pre>
+
+            <h4>Return (/r)</h4>
+
+            <pre><code><span class="comment"># Get a copy without modifying original</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$original</span> = <span class="string">"hello world"</span>;
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$upper</span> = (<span class="sigil">$original</span> =~ tr/a-z/A-Z/r);
+<span class="func">say</span>(<span class="sigil">$original</span>);  <span class="comment"># "hello world" (unchanged)</span>
+<span class="func">say</span>(<span class="sigil">$upper</span>);     <span class="comment"># "HELLO WORLD"</span></code></pre>
+
+            <h4>Complement (/c)</h4>
+
+            <pre><code><span class="comment"># Replace all non-letters with dash</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$text</span> = <span class="string">"hello 123 world!"</span>;
+<span class="sigil">$text</span> =~ tr/a-zA-Z/-/c;
+<span class="func">say</span>(<span class="sigil">$text</span>);  <span class="comment"># "hello-----world-"</span>
+
+<span class="comment"># Combine complement + squeeze: replace non-letters with single dash</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$slug</span> = <span class="string">"Hello, World! 2024"</span>;
+<span class="sigil">$slug</span> =~ tr/a-zA-Z/-/cs;
+<span class="func">say</span>(<span class="sigil">$slug</span>);  <span class="comment"># "Hello-World-"</span></code></pre>
+
+            <div class="info-box">
+                <strong>tr/// vs s///</strong>
+                <p><code>tr///</code> maps characters one-to-one &mdash; it does not use regex and is much faster for simple character replacements. Use <code>s///</code> when you need regex patterns or variable-length replacements.</p>
+            </div>
+
+            <h2>The /e Modifier &mdash; Evaluate Replacement</h2>
+
+            <p>The <code>/e</code> flag on <code>s///</code> evaluates the replacement as an expression instead of treating it as a literal string. This is useful for computed replacements based on the matched text.</p>
+
+            <h3>Basic Usage</h3>
+
+            <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$text</span> = <span class="string">"apples: 3, oranges: 7"</span>;
+
+<span class="comment"># Double all numbers</span>
+<span class="sigil">$text</span> =~ s/(\d+)/<span class="sigil">$1</span> * 2/eg;
+<span class="func">say</span>(<span class="sigil">$text</span>);  <span class="comment"># "apples: 6, oranges: 14"</span></code></pre>
+
+            <p>With <code>/e</code>, the replacement string is evaluated as a Strada expression. The <code>captures()</code> function is available inside the replacement to access captured groups.</p>
+
+            <h3>Using captures() with /e</h3>
+
+            <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$data</span> = <span class="string">"width=100 height=200"</span>;
+
+<span class="comment"># Convert pixels to em (divide by 16)</span>
+<span class="sigil">$data</span> =~ s/=(\d+)/= . (captures()[1] + 0) \/ 16 . "em"/eg;
+
+<span class="comment"># Uppercase matched words</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$words</span> = <span class="string">"hello world"</span>;
+<span class="sigil">$words</span> =~ s/(\w+)/uc(captures()[1])/eg;
+<span class="func">say</span>(<span class="sigil">$words</span>);  <span class="comment"># "HELLO WORLD"</span></code></pre>
+
+            <h3>Combining /e with Other Flags</h3>
+
+            <pre><code><span class="comment"># /eg - evaluate and replace globally</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$template</span> = <span class="string">"{{x}} + {{y}} = {{sum}}"</span>;
+<span class="comment"># Replace template variables with values from a hash</span>
+
+<span class="comment"># /ei - evaluate with case-insensitive match</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$text</span> = <span class="string">"Hello HELLO hello"</span>;
+<span class="sigil">$text</span> =~ s/(hello)/lc(captures()[1])/eig;
+<span class="func">say</span>(<span class="sigil">$text</span>);  <span class="comment"># "hello hello hello"</span></code></pre>
+
+            <div class="note">
+                <strong>Note:</strong> The <code>/e</code> modifier requires PCRE2 support. Ensure your Strada build was configured with PCRE2 (<code>./configure</code> auto-detects it if <code>libpcre2-dev</code> is installed).
+            </div>
+
+            <h2>Important Notes</h2>
+
+            <h3>POSIX vs Perl Regex</h3>
+
+            <p>Strada uses POSIX Extended Regular Expressions. Some Perl features are <strong>not available</strong>:</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th>Perl Syntax</th>
+                        <th>Status in Strada</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td>Lookahead</td><td><code>(?=...)</code>, <code>(?!...)</code></td><td>Not supported</td></tr>
+                    <tr><td>Lookbehind</td><td><code>(?&lt;=...)</code>, <code>(?&lt;!...)</code></td><td>Not supported</td></tr>
+                    <tr><td>Named captures</td><td><code>(?&lt;name&gt;...)</code></td><td>Not supported</td></tr>
+                    <tr><td>Possessive quantifiers</td><td><code>*+</code>, <code>++</code></td><td>Not supported</td></tr>
+                    <tr><td>Unicode properties</td><td><code>\p{...}</code></td><td>Not supported</td></tr>
+                    <tr><td>Non-capturing groups</td><td><code>(?:...)</code></td><td>Supported</td></tr>
+                    <tr><td>Character class shortcuts</td><td><code>\d</code>, <code>\w</code>, <code>\s</code></td><td>Supported</td></tr>
+                </tbody>
+            </table>
+
+            <h3>$ Anchor Behavior</h3>
+
+            <p>The <code>$</code> end-of-line anchor works correctly in patterns. Variable interpolation only triggers when <code>$</code> is followed by a word character (a variable name). At the end of a pattern or before a non-word character, <code>$</code> is treated as the anchor.</p>
+
+            <h3>Performance Tips</h3>
+
+            <div class="info-box">
+                <strong>Regex Performance</strong>
+                <ul>
+                    <li>Regex patterns are compiled each time they are used</li>
+                    <li>For repeated matching with the same pattern, store it in a variable</li>
+                    <li>Complex patterns with many alternations can be slow</li>
+                    <li>Use anchors (<code>^</code>, <code>$</code>) when possible to limit the search space</li>
+                    <li>Prefer <code>index()</code> for simple substring searches (no regex overhead)</li>
+                </ul>
+            </div>
+
+            <h3>Troubleshooting</h3>
+
+            <p><strong>Pattern not matching?</strong></p>
+            <ul>
+                <li>Check anchor usage &mdash; <code>^</code> and <code>$</code> match start/end of the entire string by default</li>
+                <li>Verify escaping &mdash; special characters need a backslash</li>
+                <li>Use the <code>/i</code> flag for case-insensitive matching</li>
+                <li>Test pattern components separately</li>
+            </ul>
+
+            <p><strong>Captures not working?</strong></p>
+            <ul>
+                <li>Ensure the pattern actually matched before calling <code>captures()</code></li>
+                <li>Remember <code>captures()[0]</code> is the full match &mdash; groups start at index 1</li>
+                <li>Captures are cleared on each new match &mdash; save them immediately</li>
+            </ul>
+
+            <pre><code><span class="keyword">if</span> (<span class="sigil">$text</span> =~ <span class="string">/(\w+)/</span>) {
+    <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@saved</span> = <span class="func">captures</span>();  <span class="comment"># Save immediately!</span>
+
+    <span class="comment"># Don't do another match before using @saved</span>
+    <span class="func">say</span>(<span class="string">"First word: "</span> . <span class="sigil">$saved</span>[<span class="number">1</span>]);
+}</code></pre>
+
+            <div class="page-nav">
+                <a href="oop.html">
+                    <span class="label">&larr; Previous</span>
+                    <span class="title">Object-Oriented Programming</span>
+                </a>
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <p><a href="../index.html">Strada</a> - A strongly-typed language inspired by Perl</p>
+    </footer>
+</body>
+</html>
