@@ -32,6 +32,7 @@
                 <li><a href="functions.html">Functions</a></li>
                 <li><a href="control-flow.html">Control Flow</a></li>
                 <li><a href="oop.html">Object-Oriented Programming</a></li>
+                <li><a href="regex.html">Regular Expressions</a></li>
             </ul>
             <h3>Advanced</h3>
             <ul>
@@ -369,7 +370,7 @@
     <span class="comment"># Stream data in chunks</span>
     <span class="keyword">for</span> (<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$i</span> = <span class="number">0</span>; <span class="sigil">$i</span> < <span class="number">5</span>; <span class="sigil">$i</span>++) {
         <span class="sigil">$c</span>-><span class="func">write_chunk</span>(<span class="string">"Chunk "</span> . <span class="sigil">$i</span> . <span class="string">"\n"</span>);
-        <span class="func">sys::sleep</span>(<span class="number">1</span>);
+        <span class="func">core::sleep</span>(<span class="number">1</span>);
     }
 
     <span class="sigil">$c</span>-><span class="func">end_chunked</span>();  <span class="comment"># Sends final 0\r\n\r\n</span>

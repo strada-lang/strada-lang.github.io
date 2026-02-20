@@ -32,6 +32,7 @@
                 <li><a href="functions.html">Functions</a></li>
                 <li><a href="control-flow.html">Control Flow</a></li>
                 <li><a href="oop.html" class="active">Object-Oriented Programming</a></li>
+                <li><a href="regex.html">Regular Expressions</a></li>
             </ul>
             <h3>Advanced</h3>
             <ul>
@@ -335,6 +336,312 @@
     <span class="keyword">return</span> <span class="number">0</span>;
 }</code></pre>
 
+            <h2>AUTOLOAD</h2>
+
+            <p>When a method is called on an object but doesn't exist in its package (or any parent), Strada normally dies with an error. Define an <code>AUTOLOAD</code> method to catch these calls instead:</p>
+
+            <pre><code><span class="keyword">package</span> <span class="type">Proxy</span>;
+
+<span class="keyword">func</span> <span class="func">new</span>(<span class="type">str</span> <span class="sigil">$target</span>) <span class="type">scalar</span> {
+    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%self</span> = ();
+    <span class="sigil">$self</span>{<span class="string">"target"</span>} = <span class="sigil">$target</span>;
+    <span class="keyword">return</span> <span class="func">bless</span>(\<span class="sigil">%self</span>, <span class="string">"Proxy"</span>);
+}
+
+<span class="keyword">func</span> <span class="func">AUTOLOAD</span>(<span class="type">scalar</span> <span class="sigil">$self</span>, <span class="type">str</span> <span class="sigil">$method</span>, <span class="type">scalar</span> ...<span class="sigil">@args</span>) <span class="type">scalar</span> {
+    <span class="func">say</span>(<span class="string">"Called: "</span> . <span class="sigil">$method</span>);
+    <span class="keyword">return</span> <span class="string">"handled"</span>;
+}</code></pre>
+
+            <div class="info-box">
+                <strong>AUTOLOAD Details</strong>
+                <ul>
+                    <li><code>$self</code> &mdash; the object instance</li>
+                    <li><code>$method</code> &mdash; name of the undefined method that was called</li>
+                    <li><code>...@args</code> &mdash; all arguments passed to the undefined method</li>
+                    <li>Real methods always take priority over AUTOLOAD</li>
+                    <li>AUTOLOAD is inherited through parent classes</li>
+                    <li><code>$obj-&gt;can("missing")</code> returns 0 even if AUTOLOAD exists</li>
+                </ul>
+            </div>
+
+            <h2>Operator Overloading</h2>
+
+            <p>Strada supports Perl-style operator overloading via <code>use overload</code>. This lets classes define custom behavior for built-in operators like <code>+</code>, <code>-</code>, <code>*</code>, <code>.</code>, <code>""</code>, <code>==</code>, <code>&lt;=&gt;</code>, etc.</p>
+
+            <pre><code><span class="keyword">package</span> <span class="type">Vector</span>;
+
+<span class="keyword">func</span> <span class="func">new</span>(<span class="type">num</span> <span class="sigil">$x</span>, <span class="type">num</span> <span class="sigil">$y</span>) <span class="type">scalar</span> {
+    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%self</span> = ();
+    <span class="sigil">$self</span>{<span class="string">"x"</span>} = <span class="sigil">$x</span>;
+    <span class="sigil">$self</span>{<span class="string">"y"</span>} = <span class="sigil">$y</span>;
+    <span class="keyword">return</span> <span class="func">bless</span>(\<span class="sigil">%self</span>, <span class="string">"Vector"</span>);
+}
+
+<span class="keyword">func</span> <span class="func">add</span>(<span class="type">scalar</span> <span class="sigil">$self</span>, <span class="type">scalar</span> <span class="sigil">$other</span>, <span class="type">int</span> <span class="sigil">$reversed</span>) <span class="type">scalar</span> {
+    <span class="keyword">return</span> <span class="type">Vector</span>::<span class="func">new</span>(
+        <span class="sigil">$self</span>->{<span class="string">"x"</span>} + <span class="sigil">$other</span>->{<span class="string">"x"</span>},
+        <span class="sigil">$self</span>->{<span class="string">"y"</span>} + <span class="sigil">$other</span>->{<span class="string">"y"</span>});
+}
+
+<span class="keyword">func</span> <span class="func">to_str</span>(<span class="type">scalar</span> <span class="sigil">$self</span>) <span class="type">str</span> {
+    <span class="keyword">return</span> <span class="string">"("</span> . <span class="sigil">$self</span>->{<span class="string">"x"</span>} . <span class="string">", "</span> . <span class="sigil">$self</span>->{<span class="string">"y"</span>} . <span class="string">")"</span>;
+}
+
+<span class="keyword">use</span> overload
+    <span class="string">"+"</span> => <span class="string">"add"</span>,
+    <span class="string">'""'</span> => <span class="string">"to_str"</span>;</code></pre>
+
+            <pre><code><span class="keyword">package</span> main;
+
+<span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
+    <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$a</span> = <span class="type">Vector</span>::<span class="func">new</span>(<span class="number">1.0</span>, <span class="number">2.0</span>);
+    <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$b</span> = <span class="type">Vector</span>::<span class="func">new</span>(<span class="number">3.0</span>, <span class="number">4.0</span>);
+
+    <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$c</span> = <span class="sigil">$a</span> + <span class="sigil">$b</span>;  <span class="comment"># Calls Vector::add</span>
+    <span class="func">say</span>(<span class="string">"Result: "</span> . <span class="sigil">$c</span>);     <span class="comment"># Calls to_str via "" overload</span>
+    <span class="comment"># Output: Result: (4, 6)</span>
+    <span class="keyword">return</span> <span class="number">0</span>;
+}</code></pre>
+
+            <div class="info-box">
+                <strong>Supported Operators</strong>
+                <ul>
+                    <li><strong>Arithmetic:</strong> <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>%</code>, <code>**</code></li>
+                    <li><strong>String:</strong> <code>.</code> (concatenation), <code>""</code> (stringify)</li>
+                    <li><strong>Unary:</strong> <code>neg</code> (unary minus), <code>!</code>, <code>bool</code></li>
+                    <li><strong>Comparison:</strong> <code>==</code>, <code>!=</code>, <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code>, <code>&lt;=&gt;</code></li>
+                    <li><strong>String comparison:</strong> <code>eq</code>, <code>ne</code>, <code>lt</code>, <code>gt</code>, <code>le</code>, <code>ge</code>, <code>cmp</code></li>
+                </ul>
+            </div>
+
+            <div class="info-box">
+                <strong>Handler Signatures</strong>
+                <ul>
+                    <li><strong>Binary:</strong> <code>func add(scalar $self, scalar $other, int $reversed) scalar</code></li>
+                    <li><strong>Unary:</strong> <code>func negate(scalar $self) scalar</code></li>
+                    <li><strong>Stringify:</strong> <code>func to_str(scalar $self) str</code></li>
+                </ul>
+                <p>The <code>$reversed</code> parameter is <code>1</code> when <code>$self</code> was the <em>right</em> operand (important for non-commutative operators like <code>-</code> and <code>/</code>).</p>
+                <p><strong>Zero overhead:</strong> If no <code>use overload</code> appears in the program, the generated C code is identical to code without overloading &mdash; no dispatch checks, no function calls, no extra branches.</p>
+            </div>
+
+            <h2 id="moose-style">Moose-Style OOP</h2>
+
+            <p>Strada supports a declarative, Moose-inspired OOP system on top of its core <code>bless</code>-based model. This provides automatic constructors, accessor generation, inheritance via <code>extends</code>, role composition via <code>with</code>, and method modifiers (<code>before</code>, <code>after</code>, <code>around</code>).</p>
+
+            <h3>Declaring Attributes with <code>has</code></h3>
+
+            <p>Use <code>has</code> inside a <code>package</code> to declare object attributes. The compiler generates getters (and setters for <code>rw</code> attributes) and an automatic <code>new()</code> constructor.</p>
+
+            <pre><code><span class="keyword">package</span> <span class="type">Person</span>;
+
+<span class="comment"># Read-only attribute, required in constructor</span>
+<span class="keyword">has</span> ro <span class="type">str</span> <span class="sigil">$name</span> (required);
+
+<span class="comment"># Read-write attribute with default value</span>
+<span class="keyword">has</span> rw <span class="type">int</span> <span class="sigil">$age</span> = <span class="number">0</span>;
+
+<span class="comment"># Read-write attribute with no default (defaults to undef)</span>
+<span class="keyword">has</span> rw <span class="type">str</span> <span class="sigil">$nickname</span>;
+
+<span class="keyword">func</span> <span class="func">greet</span>(<span class="type">scalar</span> <span class="sigil">$self</span>) <span class="type">void</span> {
+    <span class="func">say</span>(<span class="string">"Hi, I'm "</span> . <span class="sigil">$self</span>-><span class="func">name</span>() . <span class="string">", age "</span> . <span class="sigil">$self</span>-><span class="func">age</span>());
+}
+
+<span class="keyword">package</span> main;
+
+<span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
+    <span class="comment"># Auto-generated new() takes named arguments</span>
+    <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$p</span> = <span class="type">Person</span>::<span class="func">new</span>(<span class="string">"name"</span>, <span class="string">"Alice"</span>, <span class="string">"age"</span>, <span class="number">30</span>);
+
+    <span class="func">say</span>(<span class="sigil">$p</span>-><span class="func">name</span>());        <span class="comment"># "Alice" (getter)</span>
+    <span class="func">say</span>(<span class="sigil">$p</span>-><span class="func">age</span>());         <span class="comment"># 30 (getter)</span>
+    <span class="sigil">$p</span>-><span class="func">set_age</span>(<span class="number">31</span>);        <span class="comment"># setter (rw only)</span>
+    <span class="func">say</span>(<span class="sigil">$p</span>-><span class="func">age</span>());         <span class="comment"># 31</span>
+    <span class="sigil">$p</span>-><span class="func">greet</span>();             <span class="comment"># "Hi, I'm Alice, age 31"</span>
+    <span class="keyword">return</span> <span class="number">0</span>;
+}</code></pre>
+
+            <div class="info-box">
+                <strong>has Syntax</strong>
+                <p><code>has [ro|rw] type $name [= default] [(options)];</code></p>
+                <ul>
+                    <li><code>ro</code> (default) &mdash; read-only: generates a getter (<code>$obj-&gt;name()</code>)</li>
+                    <li><code>rw</code> &mdash; read-write: generates both getter and setter (<code>$obj-&gt;set_name($val)</code>)</li>
+                    <li><code>= default</code> &mdash; default value used when the attribute is not passed to the constructor</li>
+                    <li><code>(required)</code> &mdash; attribute must be passed to the constructor (no default)</li>
+                    <li><code>(lazy, builder =&gt; "method")</code> &mdash; lazy evaluation via a builder method</li>
+                </ul>
+                <p>The auto-generated <code>new()</code> constructor takes <strong>named arguments</strong> as alternating key-value pairs: <code>Class::new("key1", val1, "key2", val2)</code>. Missing attributes fall back to their default value (via the <code>//</code> defined-or operator).</p>
+                <p>If you define an explicit <code>func new(...)</code> in the package, the auto-generated constructor is skipped.</p>
+            </div>
+
+            <h3>Inheritance with <code>extends</code></h3>
+
+            <p>Use <code>extends</code> to declare that a class inherits from one or more parent classes. Child classes inherit parent attributes and their auto-generated constructor includes parent attributes.</p>
+
+            <pre><code><span class="keyword">package</span> <span class="type">Animal</span>;
+<span class="keyword">has</span> ro <span class="type">str</span> <span class="sigil">$species</span> (required);
+<span class="keyword">has</span> rw <span class="type">int</span> <span class="sigil">$energy</span> = <span class="number">100</span>;
+
+<span class="keyword">func</span> <span class="func">speak</span>(<span class="type">scalar</span> <span class="sigil">$self</span>) <span class="type">void</span> {
+    <span class="func">say</span>(<span class="sigil">$self</span>-><span class="func">species</span>() . <span class="string">" (energy: "</span> . <span class="sigil">$self</span>-><span class="func">energy</span>() . <span class="string">")"</span>);
+}
+
+<span class="keyword">package</span> <span class="type">Dog</span>;
+<span class="keyword">extends</span> <span class="type">Animal</span>;
+
+<span class="keyword">has</span> ro <span class="type">str</span> <span class="sigil">$name</span> (required);
+<span class="keyword">has</span> rw <span class="type">int</span> <span class="sigil">$age</span> = <span class="number">0</span>;
+
+<span class="keyword">func</span> <span class="func">bark</span>(<span class="type">scalar</span> <span class="sigil">$self</span>) <span class="type">void</span> {
+    <span class="func">say</span>(<span class="sigil">$self</span>-><span class="func">name</span>() . <span class="string">" barks!"</span>);
+}
+
+<span class="keyword">package</span> main;
+
+<span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
+    <span class="comment"># Constructor includes both Dog and Animal attributes</span>
+    <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$d</span> = <span class="type">Dog</span>::<span class="func">new</span>(<span class="string">"name"</span>, <span class="string">"Rex"</span>, <span class="string">"species"</span>, <span class="string">"dog"</span>, <span class="string">"age"</span>, <span class="number">3</span>);
+    <span class="sigil">$d</span>-><span class="func">bark</span>();       <span class="comment"># "Rex barks!"</span>
+    <span class="sigil">$d</span>-><span class="func">speak</span>();      <span class="comment"># "dog (energy: 100)" - inherited method</span>
+    <span class="func">say</span>(<span class="sigil">$d</span>-><span class="func">isa</span>(<span class="string">"Dog"</span>));     <span class="comment"># 1</span>
+    <span class="func">say</span>(<span class="sigil">$d</span>-><span class="func">isa</span>(<span class="string">"Animal"</span>));  <span class="comment"># 1</span>
+    <span class="keyword">return</span> <span class="number">0</span>;
+}</code></pre>
+
+            <h3>Role Composition with <code>with</code></h3>
+
+            <p>Use <code>with</code> to compose roles (mixins) into a class. Roles work similarly to inheritance &mdash; the class gains the role's attributes and methods.</p>
+
+            <pre><code><span class="keyword">package</span> <span class="type">Printable</span>;
+<span class="keyword">func</span> <span class="func">to_string</span>(<span class="type">scalar</span> <span class="sigil">$self</span>) <span class="type">str</span> {
+    <span class="keyword">return</span> <span class="string">"[Object]"</span>;
+}
+
+<span class="keyword">package</span> <span class="type">Widget</span>;
+<span class="keyword">with</span> <span class="type">Printable</span>;
+
+<span class="keyword">has</span> ro <span class="type">str</span> <span class="sigil">$label</span> (required);</code></pre>
+
+            <h3>Method Modifiers: <code>before</code>, <code>after</code>, <code>around</code></h3>
+
+            <p>Method modifiers let you hook into method calls without modifying the original method. This is useful for logging, validation, and cross-cutting concerns.</p>
+
+            <h4>before</h4>
+            <p>Runs <strong>before</strong> the original method. Receives <code>$self</code> as its argument.</p>
+
+            <pre><code><span class="keyword">package</span> <span class="type">Dog</span>;
+<span class="keyword">extends</span> <span class="type">Animal</span>;
+<span class="keyword">has</span> ro <span class="type">str</span> <span class="sigil">$name</span> (required);
+
+<span class="keyword">before</span> <span class="string">"bark"</span> <span class="keyword">func</span>(<span class="type">scalar</span> <span class="sigil">$self</span>) <span class="type">void</span> {
+    <span class="func">say</span>(<span class="string">"[preparing to bark]"</span>);
+}
+
+<span class="keyword">func</span> <span class="func">bark</span>(<span class="type">scalar</span> <span class="sigil">$self</span>) <span class="type">void</span> {
+    <span class="func">say</span>(<span class="sigil">$self</span>-><span class="func">name</span>() . <span class="string">" barks!"</span>);
+}
+
+<span class="comment"># $d->bark() prints:
+#   [preparing to bark]
+#   Rex barks!</span></code></pre>
+
+            <h4>after</h4>
+            <p>Runs <strong>after</strong> the original method. Receives <code>$self</code> as its argument.</p>
+
+            <pre><code><span class="keyword">after</span> <span class="string">"bark"</span> <span class="keyword">func</span>(<span class="type">scalar</span> <span class="sigil">$self</span>) <span class="type">void</span> {
+    <span class="func">say</span>(<span class="string">"[done barking]"</span>);
+}
+
+<span class="comment"># $d->bark() now prints:
+#   [preparing to bark]
+#   Rex barks!
+#   [done barking]</span></code></pre>
+
+            <h4>around</h4>
+            <p>Wraps the original method. The <code>around</code> modifier receives the original method as a function pointer in the first element of its args, allowing you to call, skip, or modify the original behavior.</p>
+
+            <pre><code><span class="keyword">around</span> <span class="string">"speak"</span> <span class="keyword">func</span>(<span class="type">scalar</span> <span class="sigil">$self</span>) <span class="type">void</span> {
+    <span class="func">say</span>(<span class="string">"[around: before speak]"</span>);
+    <span class="comment"># Call the original method via the args mechanism</span>
+    <span class="comment"># or implement custom logic entirely</span>
+    <span class="func">say</span>(<span class="string">"[around: after speak]"</span>);
+}</code></pre>
+
+            <div class="info-box">
+                <strong>Method Modifier Details</strong>
+                <ul>
+                    <li><code>before "method" func($self) void { ... }</code> &mdash; runs before the method</li>
+                    <li><code>after "method" func($self) void { ... }</code> &mdash; runs after the method</li>
+                    <li><code>around "method" func($self) void { ... }</code> &mdash; wraps the method entirely</li>
+                    <li>The method name is specified as a <strong>string literal</strong></li>
+                    <li>Multiple modifiers can be applied to the same method</li>
+                    <li>Modifiers are registered at runtime and dispatched automatically</li>
+                    <li><code>before</code> and <code>after</code> modifiers cannot change the method's return value</li>
+                </ul>
+            </div>
+
+            <h3>Complete Moose-Style Example</h3>
+
+            <p>Here is a full example combining <code>has</code>, <code>extends</code>, and method modifiers:</p>
+
+            <pre><code><span class="keyword">package</span> <span class="type">Animal</span>;
+<span class="keyword">has</span> ro <span class="type">str</span> <span class="sigil">$species</span> (required);
+<span class="keyword">has</span> rw <span class="type">int</span> <span class="sigil">$energy</span> = <span class="number">100</span>;
+
+<span class="keyword">func</span> <span class="func">speak</span>(<span class="type">scalar</span> <span class="sigil">$self</span>) <span class="type">void</span> {
+    <span class="func">say</span>(<span class="sigil">$self</span>-><span class="func">species</span>() . <span class="string">" (energy: "</span> . <span class="sigil">$self</span>-><span class="func">energy</span>() . <span class="string">")"</span>);
+}
+
+<span class="keyword">package</span> <span class="type">Dog</span>;
+<span class="keyword">extends</span> <span class="type">Animal</span>;
+
+<span class="keyword">has</span> ro <span class="type">str</span> <span class="sigil">$name</span> (required);
+<span class="keyword">has</span> rw <span class="type">int</span> <span class="sigil">$age</span> = <span class="number">0</span>;
+<span class="keyword">has</span> rw <span class="type">str</span> <span class="sigil">$nickname</span>;
+
+<span class="keyword">before</span> <span class="string">"bark"</span> <span class="keyword">func</span>(<span class="type">scalar</span> <span class="sigil">$self</span>) <span class="type">void</span> {
+    <span class="func">say</span>(<span class="string">"[preparing to bark]"</span>);
+}
+
+<span class="keyword">func</span> <span class="func">bark</span>(<span class="type">scalar</span> <span class="sigil">$self</span>) <span class="type">void</span> {
+    <span class="func">say</span>(<span class="sigil">$self</span>-><span class="func">name</span>() . <span class="string">" barks!"</span>);
+}
+
+<span class="keyword">after</span> <span class="string">"bark"</span> <span class="keyword">func</span>(<span class="type">scalar</span> <span class="sigil">$self</span>) <span class="type">void</span> {
+    <span class="func">say</span>(<span class="string">"[done barking]"</span>);
+}
+
+<span class="keyword">package</span> main;
+
+<span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
+    <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$d</span> = <span class="type">Dog</span>::<span class="func">new</span>(<span class="string">"name"</span>, <span class="string">"Rex"</span>, <span class="string">"species"</span>, <span class="string">"dog"</span>, <span class="string">"age"</span>, <span class="number">3</span>);
+    <span class="func">say</span>(<span class="sigil">$d</span>-><span class="func">name</span>());         <span class="comment"># "Rex"</span>
+    <span class="func">say</span>(<span class="sigil">$d</span>-><span class="func">age</span>());          <span class="comment"># 3</span>
+    <span class="sigil">$d</span>-><span class="func">set_age</span>(<span class="number">4</span>);          <span class="comment"># setter (rw)</span>
+    <span class="func">say</span>(<span class="sigil">$d</span>-><span class="func">age</span>());          <span class="comment"># 4</span>
+    <span class="func">say</span>(<span class="sigil">$d</span>-><span class="func">energy</span>());       <span class="comment"># 100 (inherited)</span>
+    <span class="sigil">$d</span>-><span class="func">set_energy</span>(<span class="number">80</span>);      <span class="comment"># inherited setter</span>
+    <span class="func">say</span>(<span class="sigil">$d</span>-><span class="func">energy</span>());       <span class="comment"># 80</span>
+    <span class="sigil">$d</span>-><span class="func">speak</span>();              <span class="comment"># "dog (energy: 80)" - inherited method</span>
+    <span class="sigil">$d</span>-><span class="func">bark</span>();               <span class="comment"># "[preparing to bark]" / "Rex barks!" / "[done barking]"</span>
+    <span class="func">say</span>(<span class="sigil">$d</span>-><span class="func">isa</span>(<span class="string">"Dog"</span>));     <span class="comment"># 1</span>
+    <span class="func">say</span>(<span class="sigil">$d</span>-><span class="func">isa</span>(<span class="string">"Animal"</span>));  <span class="comment"># 1</span>
+    <span class="keyword">return</span> <span class="number">0</span>;
+}</code></pre>
+
+            <div class="info-box">
+                <strong>Manual vs. Moose-Style OOP</strong>
+                <p>Strada supports two OOP approaches that can coexist in the same program:</p>
+                <ul>
+                    <li><strong>Manual OOP</strong> (shown earlier on this page): Write your own constructors, getters, and setters. Use <code>bless()</code> directly. Full control over object construction.</li>
+                    <li><strong>Moose-style OOP</strong>: Use <code>has</code>, <code>extends</code>, <code>with</code>, and method modifiers for a declarative approach. The compiler generates the boilerplate. Best for typical class hierarchies.</li>
+                </ul>
+                <p>Both styles produce the same blessed hash references at runtime. You can mix and match freely.</p>
+            </div>
+
             <h2>Best Practices</h2>
 
             <div class="info-box">
@@ -344,8 +651,10 @@
                     <li>Name constructors <code>new</code> by convention</li>
                     <li>First parameter of methods should be <code>scalar $self</code></li>
                     <li>Store instance data in the blessed hash</li>
+                    <li>Use <code>has</code> for simple attribute declarations with auto-generated accessors</li>
                     <li>Use getters/setters for controlled access to properties</li>
                     <li>Return <code>$self</code> from setters for method chaining</li>
+                    <li>Use <code>before</code>/<code>after</code> modifiers for cross-cutting concerns (logging, validation)</li>
                 </ul>
             </div>
 
@@ -354,9 +663,9 @@
                     <span class="label">&larr; Previous</span>
                     <span class="title">Control Flow</span>
                 </a>
-                <a href="reference.html" class="next">
+                <a href="regex.html" class="next">
                     <span class="label">Next &rarr;</span>
-                    <span class="title">Built-in Functions</span>
+                    <span class="title">Regular Expressions</span>
                 </a>
             </div>
         </main>

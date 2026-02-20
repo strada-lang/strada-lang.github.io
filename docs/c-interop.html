@@ -32,6 +32,7 @@
                 <li><a href="functions.html">Functions</a></li>
                 <li><a href="control-flow.html">Control Flow</a></li>
                 <li><a href="oop.html">Object-Oriented Programming</a></li>
+                <li><a href="regex.html">Regular Expressions</a></li>
             </ul>
             <h3>Advanced</h3>
             <ul>
@@ -350,13 +351,13 @@ mv MathLib.so lib/</code></pre>
 
             <h3>Manual FFI</h3>
 
-            <p>For more control, use the <code>sys::dl_*</code> functions directly:</p>
+            <p>For more control, use the <code>core::dl_*</code> functions directly:</p>
 
-            <pre><code><span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$lib</span> = <span class="func">sys::dl_open</span>(<span class="string">"./mylib.so"</span>);
-<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$fn</span> = <span class="func">sys::dl_sym</span>(<span class="sigil">$lib</span>, <span class="string">"MathLib_add"</span>);
-<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$result</span> = <span class="func">sys::dl_call_sv</span>(<span class="sigil">$fn</span>, [<span class="number">10</span>, <span class="number">32</span>]);
+            <pre><code><span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$lib</span> = <span class="func">core::dl_open</span>(<span class="string">"./mylib.so"</span>);
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$fn</span> = <span class="func">core::dl_sym</span>(<span class="sigil">$lib</span>, <span class="string">"MathLib_add"</span>);
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$result</span> = <span class="func">core::dl_call_sv</span>(<span class="sigil">$fn</span>, [<span class="number">10</span>, <span class="number">32</span>]);
 <span class="func">say</span>(<span class="sigil">$result</span>);  <span class="comment"># 42</span>
-<span class="func">sys::dl_close</span>(<span class="sigil">$lib</span>);</code></pre>
+<span class="func">core::dl_close</span>(<span class="sigil">$lib</span>);</code></pre>
 
             <h2>Extern Functions (C-Callable)</h2>
 

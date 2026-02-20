@@ -32,6 +32,7 @@
                 <li><a href="functions.html">Functions</a></li>
                 <li><a href="control-flow.html">Control Flow</a></li>
                 <li><a href="oop.html">Object-Oriented Programming</a></li>
+                <li><a href="regex.html">Regular Expressions</a></li>
             </ul>
             <h3>Advanced</h3>
             <ul>
@@ -100,6 +101,76 @@
                 </tbody>
             </table>
 
+            <h3>String Repetition Operator (x)</h3>
+
+            <p>The <code>x</code> operator repeats a string a given number of times. It has the same precedence as <code>*</code>, <code>/</code>, and <code>%</code>.</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$dashes</span> = <span class="string">"-"</span> x <span class="number">40</span>;
+<span class="func">say</span>(<span class="sigil">$dashes</span>);  <span class="comment"># "----------------------------------------"</span>
+
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$ab</span> = <span class="string">"ab"</span> x <span class="number">3</span>;
+<span class="func">say</span>(<span class="sigil">$ab</span>);  <span class="comment"># "ababab"</span>
+
+<span class="comment"># Useful for formatting</span>
+<span class="func">say</span>(<span class="string">"="</span> x <span class="number">60</span>);
+<span class="func">say</span>(<span class="string">"  Report Title"</span>);
+<span class="func">say</span>(<span class="string">"="</span> x <span class="number">60</span>);</code></pre>
+
+            <h3>Transliteration (tr///, y///)</h3>
+
+            <p>The <code>tr///</code> operator (alias <code>y///</code>) performs character-by-character transliteration. Unlike <code>s///</code>, it does not use regex &mdash; it maps individual characters from one set to another.</p>
+
+            <table>
+                <thead>
+                    <tr><th>Syntax</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>$str =~ tr/abc/xyz/;</code></td><td>Replace a with x, b with y, c with z (modifies in place)</td></tr>
+                    <tr><td><code>$str =~ y/abc/xyz/;</code></td><td>Same as <code>tr///</code> (Perl alias)</td></tr>
+                    <tr><td><code>my str $new = ($str =~ tr/abc/xyz/r);</code></td><td>Return new string instead of modifying (with <code>/r</code> flag)</td></tr>
+                </tbody>
+            </table>
+
+            <h4>Flags</h4>
+            <table>
+                <thead>
+                    <tr><th>Flag</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>c</code></td><td>Complement &mdash; transliterate characters NOT in the search list</td></tr>
+                    <tr><td><code>d</code></td><td>Delete &mdash; delete characters with no replacement</td></tr>
+                    <tr><td><code>s</code></td><td>Squeeze &mdash; collapse duplicate replaced characters into one</td></tr>
+                    <tr><td><code>r</code></td><td>Return &mdash; return new string, do not modify original</td></tr>
+                </tbody>
+            </table>
+
+            <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$text</span> = <span class="string">"Hello World"</span>;
+
+<span class="comment"># ROT13</span>
+<span class="sigil">$text</span> =~ tr/A-Za-z/N-ZA-Mn-za-m/;
+<span class="func">say</span>(<span class="sigil">$text</span>);  <span class="comment"># "Uryyb Jbeyq"</span>
+
+<span class="comment"># Lowercase to uppercase</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$upper</span> = <span class="string">"hello"</span>;
+<span class="sigil">$upper</span> =~ tr/a-z/A-Z/;
+<span class="func">say</span>(<span class="sigil">$upper</span>);  <span class="comment"># "HELLO"</span>
+
+<span class="comment"># Delete digits</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$nodigits</span> = <span class="string">"abc123def456"</span>;
+<span class="sigil">$nodigits</span> =~ tr/0-9//d;
+<span class="func">say</span>(<span class="sigil">$nodigits</span>);  <span class="comment"># "abcdef"</span>
+
+<span class="comment"># Squeeze repeated spaces</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$spaced</span> = <span class="string">"hello    world"</span>;
+<span class="sigil">$spaced</span> =~ tr/ / /s;
+<span class="func">say</span>(<span class="sigil">$spaced</span>);  <span class="comment"># "hello world"</span>
+
+<span class="comment"># Return modified copy (original unchanged)</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$original</span> = <span class="string">"hello"</span>;
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$copy</span> = (<span class="sigil">$original</span> =~ tr/a-z/A-Z/r);
+<span class="func">say</span>(<span class="sigil">$original</span>);  <span class="comment"># "hello" (unchanged)</span>
+<span class="func">say</span>(<span class="sigil">$copy</span>);      <span class="comment"># "HELLO"</span></code></pre>
+
             <h3>Examples</h3>
             <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$s</span> = <span class="string">"  Hello World  "</span>;
 <span class="func">say</span>(<span class="func">strlen</span>(<span class="sigil">$s</span>));           <span class="comment"># 15</span>
@@ -126,9 +197,32 @@
                     <tr><td><code>unshift(@arr, $val)</code></td><td>Add element to beginning</td></tr>
                     <tr><td><code>reverse(@arr)</code></td><td>Reverse array elements in place</td></tr>
                     <tr><td><code>sort(@arr)</code></td><td>Return sorted array</td></tr>
-                    <tr><td><code>splice(@arr, $off, $len)</code></td><td>Remove/replace elements</td></tr>
+                    <tr><td><code>splice(@arr, $off, $len)</code></td><td>Remove elements, return removed</td></tr>
+                    <tr><td><code>splice(@arr, $off, $len, @repl)</code></td><td>Remove and replace with @repl, return removed</td></tr>
                 </tbody>
             </table>
+
+            <h3>splice() in Detail</h3>
+
+            <p>The <code>splice()</code> function removes elements from an array and optionally replaces them. It returns an array of the removed elements.</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@data</span> = (<span class="number">10</span>, <span class="number">20</span>, <span class="number">30</span>, <span class="number">40</span>, <span class="number">50</span>);
+
+<span class="comment"># Remove 2 elements starting at index 1</span>
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@removed</span> = <span class="func">splice</span>(<span class="sigil">@data</span>, <span class="number">1</span>, <span class="number">2</span>);
+<span class="comment"># @removed = (20, 30), @data = (10, 40, 50)</span>
+
+<span class="comment"># Replace 1 element at index 1 with two new elements</span>
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@arr</span> = (<span class="string">"a"</span>, <span class="string">"b"</span>, <span class="string">"c"</span>, <span class="string">"d"</span>);
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@repl</span> = (<span class="string">"X"</span>, <span class="string">"Y"</span>);
+<span class="func">splice</span>(<span class="sigil">@arr</span>, <span class="number">1</span>, <span class="number">1</span>, <span class="sigil">@repl</span>);
+<span class="comment"># @arr = ("a", "X", "Y", "c", "d")</span>
+
+<span class="comment"># Insert without removing (len = 0)</span>
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@list</span> = (<span class="number">1</span>, <span class="number">2</span>, <span class="number">5</span>);
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@insert</span> = (<span class="number">3</span>, <span class="number">4</span>);
+<span class="func">splice</span>(<span class="sigil">@list</span>, <span class="number">2</span>, <span class="number">0</span>, <span class="sigil">@insert</span>);
+<span class="comment"># @list = (1, 2, 3, 4, 5)</span></code></pre>
 
             <h3>Array Memory Management</h3>
             <table>
@@ -136,9 +230,9 @@
                     <tr><th>Function</th><th>Description</th></tr>
                 </thead>
                 <tbody>
-                    <tr><td><code>sys::array_capacity(@arr)</code></td><td>Get current allocated capacity</td></tr>
-                    <tr><td><code>sys::array_reserve(@arr, $n)</code></td><td>Ensure capacity for at least $n elements</td></tr>
-                    <tr><td><code>sys::array_shrink(@arr)</code></td><td>Shrink capacity to match length</td></tr>
+                    <tr><td><code>core::array_capacity(@arr)</code></td><td>Get current allocated capacity</td></tr>
+                    <tr><td><code>core::array_reserve(@arr, $n)</code></td><td>Ensure capacity for at least $n elements</td></tr>
+                    <tr><td><code>core::array_shrink(@arr)</code></td><td>Shrink capacity to match length</td></tr>
                 </tbody>
             </table>
 
@@ -234,10 +328,30 @@
                     <tr><td><code>values(%hash)</code></td><td>Return array of values</td></tr>
                     <tr><td><code>exists(%hash, $key)</code></td><td>Check if key exists (returns 1/0)</td></tr>
                     <tr><td><code>delete(%hash, $key)</code></td><td>Remove key-value pair</td></tr>
-                    <tr><td><code>each(%hash)</code></td><td>Return next key-value pair</td></tr>
-                    <tr><td><code>sys::hash_default_capacity($n)</code></td><td>Set default capacity for new hashes</td></tr>
+                    <tr><td><code>each(%hash)</code></td><td>Return next [key, value] pair; empty array when done</td></tr>
+                    <tr><td><code>core::hash_default_capacity($n)</code></td><td>Set default capacity for new hashes</td></tr>
                 </tbody>
             </table>
+
+            <h3>each() Iterator</h3>
+
+            <p>The <code>each()</code> function returns the next key-value pair from a hash as a two-element array <code>[key, value]</code>. When all pairs have been returned, it returns an empty array. The iterator resets when all entries have been traversed.</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%config</span> = ();
+<span class="sigil">$config</span>{<span class="string">"host"</span>} = <span class="string">"localhost"</span>;
+<span class="sigil">$config</span>{<span class="string">"port"</span>} = <span class="number">8080</span>;
+<span class="sigil">$config</span>{<span class="string">"debug"</span>} = <span class="number">1</span>;
+
+<span class="comment"># Iterate with each()</span>
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@pair</span> = <span class="func">each</span>(<span class="sigil">%config</span>);
+<span class="keyword">while</span> (<span class="func">scalar</span>(<span class="sigil">@pair</span>) > <span class="number">0</span>) {
+    <span class="func">say</span>(<span class="sigil">$pair</span>[<span class="number">0</span>] . <span class="string">" = "</span> . <span class="sigil">$pair</span>[<span class="number">1</span>]);
+    <span class="sigil">@pair</span> = <span class="func">each</span>(<span class="sigil">%config</span>);
+}
+<span class="comment"># Output (order may vary):</span>
+<span class="comment">#   host = localhost</span>
+<span class="comment">#   port = 8080</span>
+<span class="comment">#   debug = 1</span></code></pre>
 
             <div class="info-box">
                 <h4>Pre-allocating Hashes</h4>
@@ -245,7 +359,7 @@
                 <pre><code><span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%cache</span>[<span class="number">500</span>];  <span class="comment"># Pre-allocate for ~500 entries</span>
 
 <span class="comment"># Or set default for all new hashes:</span>
-<span class="func">sys::hash_default_capacity</span>(<span class="number">1000</span>);</code></pre>
+<span class="func">core::hash_default_capacity</span>(<span class="number">1000</span>);</code></pre>
                 <p>Hashes automatically resize for O(1) average lookup time.</p>
             </div>
 
@@ -274,17 +388,35 @@
                 <tbody>
                     <tr><td><code>slurp($path)</code></td><td>Read entire file as string</td></tr>
                     <tr><td><code>spew($path, $data)</code></td><td>Write string to file</td></tr>
-                    <tr><td><code>sys::open($path, $mode)</code></td><td>Open file, return filehandle</td></tr>
-                    <tr><td><code>sys::readline($fh)</code></td><td>Read line from filehandle</td></tr>
-                    <tr><td><code>sys::read($fd, $len)</code></td><td>Read bytes from fd</td></tr>
-                    <tr><td><code>sys::write($fd, $data)</code></td><td>Write bytes to fd</td></tr>
-                    <tr><td><code>sys::close($fd)</code></td><td>Close file descriptor</td></tr>
-                    <tr><td><code>sys::seek($fd, $pos, $whence)</code></td><td>Seek in file</td></tr>
-                    <tr><td><code>sys::tell($fd)</code></td><td>Get current position</td></tr>
-                    <tr><td><code>sys::eof($fd)</code></td><td>Check if at end of file</td></tr>
-                    <tr><td><code>sys::flush($fd)</code></td><td>Flush file buffer</td></tr>
+                    <tr><td><code>core::open($path, $mode)</code></td><td>Open file, return filehandle</td></tr>
+                    <tr><td><code>core::readline($fh)</code></td><td>Read line from filehandle</td></tr>
+                    <tr><td><code>core::read($fd, $len)</code></td><td>Read bytes from fd</td></tr>
+                    <tr><td><code>core::write($fd, $data)</code></td><td>Write bytes to fd</td></tr>
+                    <tr><td><code>core::close($fd)</code></td><td>Close file descriptor</td></tr>
+                    <tr><td><code>core::seek($fd, $pos, $whence)</code></td><td>Seek in file</td></tr>
+                    <tr><td><code>core::tell($fd)</code></td><td>Get current position</td></tr>
+                    <tr><td><code>core::eof($fd)</code></td><td>Check if at end of file</td></tr>
+                    <tr><td><code>core::flush($fd)</code></td><td>Flush file buffer</td></tr>
+                    <tr><td><code>select($fh)</code></td><td>Set default filehandle for print/say</td></tr>
                 </tbody>
             </table>
+
+            <h3>select() &mdash; Default Filehandle</h3>
+
+            <p>The <code>select()</code> function sets the default output filehandle. After calling <code>select($fh)</code>, all <code>print()</code> and <code>say()</code> calls without an explicit filehandle will write to <code>$fh</code> instead of stdout.</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$fh</span> = <span class="func">core::open</span>(<span class="string">"output.log"</span>, <span class="string">"w"</span>);
+
+<span class="comment"># Redirect print/say to the file</span>
+<span class="func">select</span>(<span class="sigil">$fh</span>);
+<span class="func">say</span>(<span class="string">"This goes to output.log"</span>);
+<span class="func">print</span>(<span class="string">"So does this"</span>);
+
+<span class="comment"># Restore stdout (pass undef or no argument)</span>
+<span class="func">select</span>(undef);
+<span class="func">say</span>(<span class="string">"Back to stdout"</span>);
+
+<span class="func">core::close</span>(<span class="sigil">$fh</span>);</code></pre>
 
             <h3>Diamond Operator &lt;$fh&gt;</h3>
 
@@ -340,7 +472,7 @@
                 </tbody>
             </table>
 
-            <h2>System Functions (sys::)</h2>
+            <h2>System Functions (core::)</h2>
 
             <h3>Process Control</h3>
             <table>
@@ -348,15 +480,15 @@
                     <tr><th>Function</th><th>Description</th></tr>
                 </thead>
                 <tbody>
-                    <tr><td><code>sys::exit($code)</code></td><td>Exit with status code</td></tr>
-                    <tr><td><code>sys::fork()</code></td><td>Fork process</td></tr>
-                    <tr><td><code>sys::exec($cmd, @args)</code></td><td>Execute command</td></tr>
-                    <tr><td><code>sys::system($cmd)</code></td><td>Run shell command</td></tr>
-                    <tr><td><code>sys::wait()</code></td><td>Wait for child process</td></tr>
-                    <tr><td><code>sys::waitpid($pid)</code></td><td>Wait for specific process</td></tr>
-                    <tr><td><code>sys::getpid()</code></td><td>Get process ID</td></tr>
-                    <tr><td><code>sys::getppid()</code></td><td>Get parent process ID</td></tr>
-                    <tr><td><code>sys::kill($pid, $sig)</code></td><td>Send signal to process</td></tr>
+                    <tr><td><code>core::exit($code)</code></td><td>Exit with status code</td></tr>
+                    <tr><td><code>core::fork()</code></td><td>Fork process</td></tr>
+                    <tr><td><code>core::exec($cmd, @args)</code></td><td>Execute command</td></tr>
+                    <tr><td><code>core::system($cmd)</code></td><td>Run shell command</td></tr>
+                    <tr><td><code>core::wait()</code></td><td>Wait for child process</td></tr>
+                    <tr><td><code>core::waitpid($pid)</code></td><td>Wait for specific process</td></tr>
+                    <tr><td><code>core::getpid()</code></td><td>Get process ID</td></tr>
+                    <tr><td><code>core::getppid()</code></td><td>Get parent process ID</td></tr>
+                    <tr><td><code>core::kill($pid, $sig)</code></td><td>Send signal to process</td></tr>
                 </tbody>
             </table>
 
@@ -366,10 +498,10 @@
                     <tr><th>Function</th><th>Description</th></tr>
                 </thead>
                 <tbody>
-                    <tr><td><code>sys::getenv($name)</code></td><td>Get environment variable</td></tr>
-                    <tr><td><code>sys::setenv($name, $val)</code></td><td>Set environment variable</td></tr>
-                    <tr><td><code>sys::getcwd()</code></td><td>Get current directory</td></tr>
-                    <tr><td><code>sys::chdir($path)</code></td><td>Change directory</td></tr>
+                    <tr><td><code>core::getenv($name)</code></td><td>Get environment variable</td></tr>
+                    <tr><td><code>core::setenv($name, $val)</code></td><td>Set environment variable</td></tr>
+                    <tr><td><code>core::getcwd()</code></td><td>Get current directory</td></tr>
+                    <tr><td><code>core::chdir($path)</code></td><td>Change directory</td></tr>
                 </tbody>
             </table>
 
@@ -379,18 +511,18 @@
                     <tr><th>Function</th><th>Description</th></tr>
                 </thead>
                 <tbody>
-                    <tr><td><code>sys::stat($path)</code></td><td>Get file info</td></tr>
-                    <tr><td><code>sys::mkdir($path)</code></td><td>Create directory</td></tr>
-                    <tr><td><code>sys::rmdir($path)</code></td><td>Remove directory</td></tr>
-                    <tr><td><code>sys::unlink($path)</code></td><td>Delete file</td></tr>
-                    <tr><td><code>sys::rename($old, $new)</code></td><td>Rename file</td></tr>
-                    <tr><td><code>sys::readdir($path)</code></td><td>List directory</td></tr>
-                    <tr><td><code>sys::is_dir($path)</code></td><td>Check if directory</td></tr>
-                    <tr><td><code>sys::is_file($path)</code></td><td>Check if regular file</td></tr>
-                    <tr><td><code>sys::realpath($path)</code></td><td>Get absolute path</td></tr>
-                    <tr><td><code>sys::dirname($path)</code></td><td>Get directory part</td></tr>
-                    <tr><td><code>sys::basename($path)</code></td><td>Get filename part</td></tr>
-                    <tr><td><code>sys::glob($pattern)</code></td><td>Glob pattern matching</td></tr>
+                    <tr><td><code>core::stat($path)</code></td><td>Get file info</td></tr>
+                    <tr><td><code>core::mkdir($path)</code></td><td>Create directory</td></tr>
+                    <tr><td><code>core::rmdir($path)</code></td><td>Remove directory</td></tr>
+                    <tr><td><code>core::unlink($path)</code></td><td>Delete file</td></tr>
+                    <tr><td><code>core::rename($old, $new)</code></td><td>Rename file</td></tr>
+                    <tr><td><code>core::readdir($path)</code></td><td>List directory</td></tr>
+                    <tr><td><code>core::is_dir($path)</code></td><td>Check if directory</td></tr>
+                    <tr><td><code>core::is_file($path)</code></td><td>Check if regular file</td></tr>
+                    <tr><td><code>core::realpath($path)</code></td><td>Get absolute path</td></tr>
+                    <tr><td><code>core::dirname($path)</code></td><td>Get directory part</td></tr>
+                    <tr><td><code>core::basename($path)</code></td><td>Get filename part</td></tr>
+                    <tr><td><code>core::glob($pattern)</code></td><td>Glob pattern matching</td></tr>
                 </tbody>
             </table>
 
@@ -400,11 +532,11 @@
                     <tr><th>Function</th><th>Description</th></tr>
                 </thead>
                 <tbody>
-                    <tr><td><code>sys::time()</code></td><td>Unix timestamp</td></tr>
-                    <tr><td><code>sys::localtime($ts)</code></td><td>Convert to local time hash</td></tr>
-                    <tr><td><code>sys::gmtime($ts)</code></td><td>Convert to GMT hash</td></tr>
-                    <tr><td><code>sys::sleep($secs)</code></td><td>Sleep for seconds</td></tr>
-                    <tr><td><code>sys::usleep($usecs)</code></td><td>Sleep for microseconds</td></tr>
+                    <tr><td><code>core::time()</code></td><td>Unix timestamp</td></tr>
+                    <tr><td><code>core::localtime($ts)</code></td><td>Convert to local time hash</td></tr>
+                    <tr><td><code>core::gmtime($ts)</code></td><td>Convert to GMT hash</td></tr>
+                    <tr><td><code>core::sleep($secs)</code></td><td>Sleep for seconds</td></tr>
+                    <tr><td><code>core::usleep($usecs)</code></td><td>Sleep for microseconds</td></tr>
                 </tbody>
             </table>
 
@@ -414,7 +546,7 @@
                     <tr><th>Function</th><th>Description</th></tr>
                 </thead>
                 <tbody>
-                    <tr><td><code>sys::stack_trace()</code></td><td>Get current call stack as string</td></tr>
+                    <tr><td><code>core::stack_trace()</code></td><td>Get current call stack as string</td></tr>
                 </tbody>
             </table>
 
@@ -424,9 +556,9 @@
                     <tr><th>Function</th><th>Description</th></tr>
                 </thead>
                 <tbody>
-                    <tr><td><code>sys::wantarray()</code></td><td>Returns 1 if called in array context</td></tr>
-                    <tr><td><code>sys::wantscalar()</code></td><td>Returns 1 if called in scalar context (default)</td></tr>
-                    <tr><td><code>sys::wanthash()</code></td><td>Returns 1 if called in hash context</td></tr>
+                    <tr><td><code>core::wantarray()</code></td><td>Returns 1 if called in array context</td></tr>
+                    <tr><td><code>core::wantscalar()</code></td><td>Returns 1 if called in scalar context (default)</td></tr>
+                    <tr><td><code>core::wanthash()</code></td><td>Returns 1 if called in hash context</td></tr>
                 </tbody>
             </table>
 
@@ -436,13 +568,13 @@
                     <tr><th>Function</th><th>Description</th></tr>
                 </thead>
                 <tbody>
-                    <tr><td><code>sys::socket_server($port)</code></td><td>Create TCP server</td></tr>
-                    <tr><td><code>sys::socket_accept($fd)</code></td><td>Accept connection</td></tr>
-                    <tr><td><code>sys::socket_connect($host, $port)</code></td><td>Connect to server</td></tr>
-                    <tr><td><code>sys::gethostbyname($host)</code></td><td>Resolve hostname</td></tr>
-                    <tr><td><code>sys::gethostbyname_all($host)</code></td><td>Resolve hostname (all addresses)</td></tr>
-                    <tr><td><code>sys::gethostname()</code></td><td>Get local hostname</td></tr>
-                    <tr><td><code>sys::getaddrinfo($host, $port)</code></td><td>Advanced address resolution</td></tr>
+                    <tr><td><code>core::socket_server($port)</code></td><td>Create TCP server</td></tr>
+                    <tr><td><code>core::socket_accept($fd)</code></td><td>Accept connection</td></tr>
+                    <tr><td><code>core::socket_connect($host, $port)</code></td><td>Connect to server</td></tr>
+                    <tr><td><code>core::gethostbyname($host)</code></td><td>Resolve hostname</td></tr>
+                    <tr><td><code>core::gethostbyname_all($host)</code></td><td>Resolve hostname (all addresses)</td></tr>
+                    <tr><td><code>core::gethostname()</code></td><td>Get local hostname</td></tr>
+                    <tr><td><code>core::getaddrinfo($host, $port)</code></td><td>Advanced address resolution</td></tr>
                 </tbody>
             </table>
 
@@ -505,9 +637,9 @@
                     <tr><th>Function</th><th>Description</th></tr>
                 </thead>
                 <tbody>
-                    <tr><td><code>sys::signal($sig, \&handler)</code></td><td>Set signal handler</td></tr>
-                    <tr><td><code>sys::signal($sig, "IGNORE")</code></td><td>Ignore signal</td></tr>
-                    <tr><td><code>sys::signal($sig, "DEFAULT")</code></td><td>Reset to default</td></tr>
+                    <tr><td><code>core::signal($sig, \&handler)</code></td><td>Set signal handler</td></tr>
+                    <tr><td><code>core::signal($sig, "IGNORE")</code></td><td>Ignore signal</td></tr>
+                    <tr><td><code>core::signal($sig, "DEFAULT")</code></td><td>Reset to default</td></tr>
                 </tbody>
             </table>
 
@@ -517,22 +649,22 @@
                     <tr><th>Function</th><th>Description</th></tr>
                 </thead>
                 <tbody>
-                    <tr><td><code>sys::dl_open($lib)</code></td><td>Load shared library</td></tr>
-                    <tr><td><code>sys::dl_sym($handle, $name)</code></td><td>Get symbol address</td></tr>
-                    <tr><td><code>sys::dl_call_sv($fn, @args)</code></td><td>Call Strada function (returns StradaValue)</td></tr>
-                    <tr><td><code>sys::dl_call_int_sv($fn, @args)</code></td><td>Call Strada function (returns int)</td></tr>
-                    <tr><td><code>sys::dl_call_str_sv($fn, @args)</code></td><td>Call Strada function (returns str)</td></tr>
-                    <tr><td><code>sys::dl_call_void_sv($fn, @args)</code></td><td>Call Strada function (void return)</td></tr>
-                    <tr><td><code>sys::dl_call_version($fn)</code></td><td>Get library version string</td></tr>
-                    <tr><td><code>sys::dl_close($handle)</code></td><td>Unload library</td></tr>
+                    <tr><td><code>core::dl_open($lib)</code></td><td>Load shared library</td></tr>
+                    <tr><td><code>core::dl_sym($handle, $name)</code></td><td>Get symbol address</td></tr>
+                    <tr><td><code>core::dl_call_sv($fn, @args)</code></td><td>Call Strada function (returns StradaValue)</td></tr>
+                    <tr><td><code>core::dl_call_int_sv($fn, @args)</code></td><td>Call Strada function (returns int)</td></tr>
+                    <tr><td><code>core::dl_call_str_sv($fn, @args)</code></td><td>Call Strada function (returns str)</td></tr>
+                    <tr><td><code>core::dl_call_void_sv($fn, @args)</code></td><td>Call Strada function (void return)</td></tr>
+                    <tr><td><code>core::dl_call_version($fn)</code></td><td>Get library version string</td></tr>
+                    <tr><td><code>core::dl_close($handle)</code></td><td>Unload library</td></tr>
                 </tbody>
             </table>
 
             <h4>FFI Example</h4>
             <pre><code><span class="comment"># Load a Strada shared library</span>
-<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$lib</span> = <span class="func">sys::dl_open</span>(<span class="string">"./mylib.so"</span>);
-<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$fn</span> = <span class="func">sys::dl_sym</span>(<span class="sigil">$lib</span>, <span class="string">"my_function"</span>);
-<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$result</span> = <span class="func">sys::dl_call_sv</span>(<span class="sigil">$fn</span>, [<span class="sigil">$arg1</span>, <span class="sigil">$arg2</span>]);</code></pre>
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$lib</span> = <span class="func">core::dl_open</span>(<span class="string">"./mylib.so"</span>);
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$fn</span> = <span class="func">core::dl_sym</span>(<span class="sigil">$lib</span>, <span class="string">"my_function"</span>);
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$result</span> = <span class="func">core::dl_call_sv</span>(<span class="sigil">$fn</span>, [<span class="sigil">$arg1</span>, <span class="sigil">$arg2</span>]);</code></pre>
 
             <h4>Library Imports</h4>
             <p>For cleaner library imports, use <code>import_lib</code>, <code>import_object</code>, or <code>import_archive</code>:</p>
@@ -637,6 +769,7 @@
                     <tr><td><code>::func()</code></td><td>Call func in current package (compile-time)</td></tr>
                     <tr><td><code>.::func()</code></td><td>Alternate syntax for above</td></tr>
                     <tr><td><code>__PACKAGE__::func()</code></td><td>Explicit form of above</td></tr>
+                    <tr><td><code>use overload "+" =&gt; "method", ...;</code></td><td>Operator overloading for current package</td></tr>
                 </tbody>
             </table>
 
@@ -648,6 +781,63 @@
 <span class="keyword">func</span> <span class="func">compute</span>(<span class="type">int</span> <span class="sigil">$x</span>, <span class="type">int</span> <span class="sigil">$y</span>) <span class="type">int</span> {
     <span class="keyword">return</span> ::<span class="func">add</span>(<span class="sigil">$x</span>, <span class="sigil">$y</span>);  <span class="comment"># Calls Calculator_add</span>
 }</code></pre>
+
+            <h2>Moose-Style OOP Keywords</h2>
+
+            <p>Strada provides a declarative OOP system inspired by Perl's Moose. See the <a href="oop.html#moose-style">OOP page</a> for full details and examples.</p>
+
+            <table>
+                <thead>
+                    <tr><th>Syntax</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>has ro type $name;</code></td><td>Declare read-only attribute with getter</td></tr>
+                    <tr><td><code>has rw type $name;</code></td><td>Declare read-write attribute with getter and setter</td></tr>
+                    <tr><td><code>has ro type $name (required);</code></td><td>Required attribute (must be passed to constructor)</td></tr>
+                    <tr><td><code>has rw type $name = default;</code></td><td>Attribute with default value</td></tr>
+                    <tr><td><code>extends Parent;</code></td><td>Inherit from one or more parent classes</td></tr>
+                    <tr><td><code>extends Parent1, Parent2;</code></td><td>Multiple inheritance</td></tr>
+                    <tr><td><code>with Role;</code></td><td>Compose a role (mixin) into the class</td></tr>
+                    <tr><td><code>before "method" func($self) void { }</code></td><td>Run code before a method call</td></tr>
+                    <tr><td><code>after "method" func($self) void { }</code></td><td>Run code after a method call</td></tr>
+                    <tr><td><code>around "method" func($self) void { }</code></td><td>Wrap a method call entirely</td></tr>
+                </tbody>
+            </table>
+
+            <div class="info-box">
+                <strong>Auto-Generated Constructor</strong>
+                <p>When a package uses <code>has</code> declarations, the compiler automatically generates a <code>new()</code> constructor that accepts named arguments as alternating key-value pairs. If you define your own <code>new()</code>, the auto-generated one is skipped.</p>
+                <pre><code><span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$obj</span> = <span class="type">MyClass</span>::<span class="func">new</span>(<span class="string">"name"</span>, <span class="string">"value"</span>, <span class="string">"age"</span>, <span class="number">30</span>);</code></pre>
+            </div>
+
+            <h2>core:: Namespace Alias</h2>
+
+            <p>The <code>core::</code> namespace is the preferred way to call system functions. It is an alias for the older <code>sys::</code> namespace. The compiler normalizes <code>core::</code> to <code>sys::</code> at compile time, so there is zero overhead. Both namespaces work interchangeably.</p>
+
+            <table>
+                <thead>
+                    <tr><th>core:: Call (preferred)</th><th>Legacy sys:: Call</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>core::exit(0)</code></td><td><code>sys::exit(0)</code></td></tr>
+                    <tr><td><code>core::open($path, "r")</code></td><td><code>sys::open($path, "r")</code></td></tr>
+                    <tr><td><code>core::time()</code></td><td><code>sys::time()</code></td></tr>
+                    <tr><td><code>core::getenv("HOME")</code></td><td><code>sys::getenv("HOME")</code></td></tr>
+                    <tr><td><code>core::fork()</code></td><td><code>sys::fork()</code></td></tr>
+                </tbody>
+            </table>
+
+            <p>Use whichever namespace feels more natural. <code>core::</code> is recommended for new code as it reads more clearly as "core language functionality."</p>
+
+            <pre><code><span class="comment"># These are equivalent:</span>
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$pid</span> = <span class="func">core::fork</span>();
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$pid</span> = <span class="func">sys::fork</span>();
+
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$home</span> = <span class="func">core::getenv</span>(<span class="string">"HOME"</span>);
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$home</span> = <span class="func">sys::getenv</span>(<span class="string">"HOME"</span>);
+
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$now</span> = <span class="func">core::time</span>();
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$now</span> = <span class="func">sys::time</span>();</code></pre>
 
             <h2>Miscellaneous</h2>
 
@@ -661,8 +851,111 @@
                     <tr><td><code>eval($code)</code></td><td>Evaluate Strada code string</td></tr>
                     <tr><td><code>$obj->isa($class)</code></td><td>Check if object is instance of class</td></tr>
                     <tr><td><code>$obj->can($method)</code></td><td>Check if object has method</td></tr>
+                    <tr><td><code>local($var)</code></td><td>Dynamic scoping for <code>our</code> variables</td></tr>
                 </tbody>
             </table>
+
+            <h3>local() &mdash; Dynamic Scoping</h3>
+
+            <p>The <code>local()</code> function provides dynamic scoping for <code>our</code> (package-global) variables. It saves the current value and automatically restores it when the enclosing scope exits. This is useful for temporarily overriding globals without affecting the rest of the program.</p>
+
+            <pre><code><span class="keyword">our</span> <span class="type">int</span> <span class="sigil">$verbose</span> = <span class="number">0</span>;
+
+<span class="keyword">func</span> <span class="func">debug_section</span>() <span class="type">void</span> {
+    <span class="func">local</span>(<span class="sigil">$verbose</span>) = <span class="number">1</span>;  <span class="comment"># Temporarily set to 1</span>
+    <span class="func">do_work</span>();               <span class="comment"># $verbose is 1 here</span>
+    <span class="comment"># $verbose automatically restored to 0 on scope exit</span>
+}
+
+<span class="keyword">func</span> <span class="func">do_work</span>() <span class="type">void</span> {
+    <span class="keyword">if</span> (<span class="sigil">$verbose</span>) {
+        <span class="func">say</span>(<span class="string">"Doing work..."</span>);  <span class="comment"># Prints when called from debug_section</span>
+    }
+}
+
+<span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
+    <span class="func">do_work</span>();        <span class="comment"># $verbose is 0, nothing printed</span>
+    <span class="func">debug_section</span>(); <span class="comment"># $verbose is temporarily 1 inside</span>
+    <span class="func">do_work</span>();        <span class="comment"># $verbose is 0 again</span>
+    <span class="keyword">return</span> <span class="number">0</span>;
+}</code></pre>
+
+            <div class="info-box">
+                <strong>local() vs my</strong>
+                <p><code>local()</code> provides <em>dynamic</em> scoping &mdash; the localized value is visible in the current function and all functions called from it. <code>my</code> provides <em>lexical</em> scoping &mdash; the variable is only visible in the current block. <code>local()</code> only works with <code>our</code> variables (package globals).</p>
+            </div>
+
+            <h2>tie/untie/tied &mdash; Tied Hashes</h2>
+
+            <p>The <code>tie</code> mechanism binds a hash variable to a class, allowing custom behavior for hash operations. When a hash is tied, all accesses (read, write, delete, exists, iteration) are dispatched to methods in the tied class.</p>
+
+            <table>
+                <thead>
+                    <tr><th>Function</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>tie(%hash, "ClassName", @args)</code></td><td>Bind hash to class; calls <code>TIEHASH(@args)</code></td></tr>
+                    <tr><td><code>untie(%hash)</code></td><td>Unbind hash from class</td></tr>
+                    <tr><td><code>tied(%hash)</code></td><td>Return the tied object, or undef if not tied</td></tr>
+                </tbody>
+            </table>
+
+            <h3>TIEHASH Methods</h3>
+
+            <p>The tied class must implement these methods:</p>
+
+            <table>
+                <thead>
+                    <tr><th>Method</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>TIEHASH(@args)</code></td><td>Constructor &mdash; called by <code>tie()</code>, returns the tied object</td></tr>
+                    <tr><td><code>FETCH($self, $key)</code></td><td>Called when reading: <code>$hash{$key}</code></td></tr>
+                    <tr><td><code>STORE($self, $key, $val)</code></td><td>Called when writing: <code>$hash{$key} = $val</code></td></tr>
+                    <tr><td><code>DELETE($self, $key)</code></td><td>Called for: <code>delete($hash{$key})</code></td></tr>
+                    <tr><td><code>EXISTS($self, $key)</code></td><td>Called for: <code>exists($hash{$key})</code></td></tr>
+                    <tr><td><code>FIRSTKEY($self)</code></td><td>Called to start iteration (keys, each)</td></tr>
+                    <tr><td><code>NEXTKEY($self, $lastkey)</code></td><td>Called for subsequent keys during iteration</td></tr>
+                    <tr><td><code>CLEAR($self)</code></td><td>Called when hash is cleared</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Example: Case-Insensitive Hash</h3>
+
+            <pre><code><span class="keyword">package</span> <span class="type">CIHash</span>;
+
+<span class="keyword">func</span> <span class="func">TIEHASH</span>() <span class="type">scalar</span> {
+    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%self</span> = ();
+    <span class="sigil">$self</span>{<span class="string">"data"</span>} = {};
+    <span class="keyword">return</span> <span class="func">bless</span>(\<span class="sigil">%self</span>, <span class="string">"CIHash"</span>);
+}
+
+<span class="keyword">func</span> <span class="func">FETCH</span>(<span class="type">scalar</span> <span class="sigil">$self</span>, <span class="type">str</span> <span class="sigil">$key</span>) <span class="type">scalar</span> {
+    <span class="keyword">return</span> <span class="sigil">$self</span>->{<span class="string">"data"</span>}->{<span class="func">lc</span>(<span class="sigil">$key</span>)};
+}
+
+<span class="keyword">func</span> <span class="func">STORE</span>(<span class="type">scalar</span> <span class="sigil">$self</span>, <span class="type">str</span> <span class="sigil">$key</span>, <span class="type">scalar</span> <span class="sigil">$val</span>) <span class="type">void</span> {
+    <span class="sigil">$self</span>->{<span class="string">"data"</span>}->{<span class="func">lc</span>(<span class="sigil">$key</span>)} = <span class="sigil">$val</span>;
+}
+
+<span class="keyword">package</span> <span class="type">main</span>;
+
+<span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
+    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%h</span> = ();
+    <span class="func">tie</span>(<span class="sigil">%h</span>, <span class="string">"CIHash"</span>);
+
+    <span class="sigil">$h</span>{<span class="string">"Name"</span>} = <span class="string">"Alice"</span>;   <span class="comment"># Calls CIHash::STORE</span>
+    <span class="func">say</span>(<span class="sigil">$h</span>{<span class="string">"name"</span>});         <span class="comment"># Calls CIHash::FETCH -> "Alice"</span>
+    <span class="func">say</span>(<span class="sigil">$h</span>{<span class="string">"NAME"</span>});         <span class="comment"># "Alice" (case insensitive)</span>
+
+    <span class="func">untie</span>(<span class="sigil">%h</span>);              <span class="comment"># Unbind from class</span>
+    <span class="keyword">return</span> <span class="number">0</span>;
+}</code></pre>
+
+            <div class="info-box">
+                <strong>Zero Overhead</strong>
+                <p>When a hash is <em>not</em> tied, hash operations compile to the same code as before &mdash; no dispatch checks, no extra branches. The tied mechanism only adds overhead to hashes that are actually tied.</p>
+            </div>
 
             <h2>Compiler Flags</h2>
 

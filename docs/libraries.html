@@ -32,6 +32,7 @@
                 <li><a href="functions.html">Functions</a></li>
                 <li><a href="control-flow.html">Control Flow</a></li>
                 <li><a href="oop.html">Object-Oriented Programming</a></li>
+                <li><a href="regex.html">Regular Expressions</a></li>
             </ul>
             <h3>Advanced</h3>
             <ul>
@@ -333,9 +334,9 @@ mv MathLib.a lib/</code></pre>
 
             <p>Retrieve the version at runtime:</p>
 
-            <pre><code><span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$lib</span> = <span class="func">sys::dl_open</span>(<span class="string">"lib/JSON.so"</span>);
-<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$fn</span> = <span class="func">sys::dl_sym</span>(<span class="sigil">$lib</span>, <span class="string">"__strada_version"</span>);
-<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$version</span> = <span class="func">sys::dl_call_version</span>(<span class="sigil">$fn</span>);
+            <pre><code><span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$lib</span> = <span class="func">core::dl_open</span>(<span class="string">"lib/JSON.so"</span>);
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$fn</span> = <span class="func">core::dl_sym</span>(<span class="sigil">$lib</span>, <span class="string">"__strada_version"</span>);
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$version</span> = <span class="func">core::dl_call_version</span>(<span class="sigil">$fn</span>);
 <span class="func">say</span>(<span class="string">"JSON version: "</span> . <span class="sigil">$version</span>);  <span class="comment"># "2.1.0"</span></code></pre>
 
             <h2>Inspecting Libraries</h2>

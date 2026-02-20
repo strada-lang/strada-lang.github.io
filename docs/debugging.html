@@ -32,6 +32,7 @@
                 <li><a href="functions.html">Functions</a></li>
                 <li><a href="control-flow.html">Control Flow</a></li>
                 <li><a href="oop.html">Object-Oriented Programming</a></li>
+                <li><a href="regex.html">Regular Expressions</a></li>
             </ul>
             <h3>Advanced</h3>
             <ul>
@@ -153,19 +154,19 @@
 <span class="comment">#   at middle_function (test.strada)</span>
 <span class="comment">#   at main (test.strada)</span></code></pre>
 
-            <h3>sys::stack_trace() - Get Stack as String</h3>
+            <h3>core::stack_trace() - Get Stack as String</h3>
 
             <p>Returns the current call stack as a string for debugging or logging:</p>
 
             <pre><code><span class="keyword">func</span> <span class="func">debug_location</span>() <span class="type">void</span> {
-    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$trace</span> = <span class="func">sys::stack_trace</span>();
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$trace</span> = <span class="func">core::stack_trace</span>();
     <span class="func">say</span>(<span class="string">"Current location:\n"</span> . <span class="sigil">$trace</span>);
 }
 
 <span class="keyword">try</span> {
     <span class="func">risky_operation</span>();
 } <span class="keyword">catch</span> (<span class="sigil">$e</span>) {
-    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$trace</span> = <span class="func">sys::stack_trace</span>();
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$trace</span> = <span class="func">core::stack_trace</span>();
     <span class="func">log_error</span>(<span class="string">"Error: "</span> . <span class="sigil">$e</span> . <span class="string">"\nStack:\n"</span> . <span class="sigil">$trace</span>);
 }</code></pre>
 
@@ -207,12 +208,12 @@ gdb ./myprogram</code></pre>
             <h3>Enabling the Profiler</h3>
 
             <pre><code><span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
-    <span class="func">sys::profile_init</span>();  <span class="comment"># Initialize profiler</span>
+    <span class="func">core::profile_init</span>();  <span class="comment"># Initialize profiler</span>
 
     <span class="comment"># Your code here...</span>
     <span class="func">do_work</span>();
 
-    <span class="func">sys::profile_report</span>();  <span class="comment"># Print profiling report</span>
+    <span class="func">core::profile_report</span>();  <span class="comment"># Print profiling report</span>
     <span class="keyword">return</span> <span class="number">0</span>;
 }</code></pre>
 
@@ -221,11 +222,11 @@ gdb ./myprogram</code></pre>
             <p>For fine-grained control, manually instrument functions:</p>
 
             <pre><code><span class="keyword">func</span> <span class="func">expensive_operation</span>() <span class="type">void</span> {
-    <span class="func">sys::profile_enter</span>(<span class="string">"expensive_operation"</span>);
+    <span class="func">core::profile_enter</span>(<span class="string">"expensive_operation"</span>);
 
     <span class="comment"># ... do work ...</span>
 
-    <span class="func">sys::profile_exit</span>(<span class="string">"expensive_operation"</span>);
+    <span class="func">core::profile_exit</span>(<span class="string">"expensive_operation"</span>);
 }</code></pre>
 
             <h3>Profiler Output</h3>
@@ -255,12 +256,12 @@ gdb ./myprogram</code></pre>
             <p>Track memory allocations by type:</p>
 
             <pre><code><span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
-    <span class="func">sys::memprof_enable</span>();
+    <span class="func">core::memprof_enable</span>();
 
     <span class="comment"># Your code here...</span>
     <span class="func">process_data</span>();
 
-    <span class="func">sys::memprof_report</span>();  <span class="comment"># Print memory stats</span>
+    <span class="func">core::memprof_report</span>();  <span class="comment"># Print memory stats</span>
     <span class="keyword">return</span> <span class="number">0</span>;
 }</code></pre>
 
@@ -274,10 +275,10 @@ gdb ./myprogram</code></pre>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td><code>sys::memprof_enable()</code></td><td>Start tracking allocations</td></tr>
-                    <tr><td><code>sys::memprof_disable()</code></td><td>Stop tracking allocations</td></tr>
-                    <tr><td><code>sys::memprof_report()</code></td><td>Print allocation statistics</td></tr>
-                    <tr><td><code>sys::memprof_reset()</code></td><td>Clear all counters</td></tr>
+                    <tr><td><code>core::memprof_enable()</code></td><td>Start tracking allocations</td></tr>
+                    <tr><td><code>core::memprof_disable()</code></td><td>Stop tracking allocations</td></tr>
+                    <tr><td><code>core::memprof_report()</code></td><td>Print allocation statistics</td></tr>
+                    <tr><td><code>core::memprof_reset()</code></td><td>Clear all counters</td></tr>
                 </tbody>
             </table>
 

@@ -32,6 +32,7 @@
                 <li><a href="functions.html">Functions</a></li>
                 <li><a href="control-flow.html">Control Flow</a></li>
                 <li><a href="oop.html">Object-Oriented Programming</a></li>
+                <li><a href="regex.html">Regular Expressions</a></li>
             </ul>
             <h3>Advanced</h3>
             <ul>
@@ -153,7 +154,7 @@
 <span class="keyword">func</span> <span class="func">new</span>(<span class="type">str</span> <span class="sigil">$host</span>) <span class="type">scalar</span> {
     <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%self</span> = {
         <span class="string">"host"</span> => <span class="sigil">$host</span>,
-        <span class="string">"socket"</span> => <span class="func">sys::socket_client</span>(<span class="sigil">$host</span>, <span class="number">80</span>)
+        <span class="string">"socket"</span> => <span class="func">core::socket_client</span>(<span class="sigil">$host</span>, <span class="number">80</span>)
     };
     <span class="keyword">return</span> <span class="func">bless</span>(\<span class="sigil">%self</span>, <span class="string">"Connection"</span>);
 }
@@ -161,7 +162,7 @@
 <span class="keyword">func</span> <span class="func">DESTROY</span>(<span class="type">scalar</span> <span class="sigil">$self</span>) <span class="type">void</span> {
     <span class="comment"># Called automatically when object is freed</span>
     <span class="func">say</span>(<span class="string">"Closing connection to "</span> . <span class="sigil">$self</span>->{<span class="string">"host"</span>});
-    <span class="func">sys::close_fd</span>(<span class="sigil">$self</span>->{<span class="string">"socket"</span>});
+    <span class="func">core::close_fd</span>(<span class="sigil">$self</span>->{<span class="string">"socket"</span>});
 }
 
 <span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
@@ -206,7 +207,7 @@
 
 <span class="comment"># Method 2: Reserve after creation</span>
 <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@items</span> = [];
-<span class="func">sys::array_reserve</span>(<span class="sigil">@items</span>, <span class="number">5000</span>);
+<span class="func">core::array_reserve</span>(<span class="sigil">@items</span>, <span class="number">5000</span>);
 
 <span class="comment"># Now push() won't need to reallocate</span>
 <span class="keyword">for</span> (<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$i</span> = <span class="number">0</span>; <span class="sigil">$i</span> < <span class="number">5000</span>; <span class="sigil">$i</span>++) {
@@ -219,7 +220,7 @@
 <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%cache</span>[<span class="number">1000</span>];  <span class="comment"># Pre-allocate buckets for ~1000 keys</span>
 
 <span class="comment"># Or set default for all new hashes</span>
-<span class="func">sys::hash_default_capacity</span>(<span class="number">500</span>);</code></pre>
+<span class="func">core::hash_default_capacity</span>(<span class="number">500</span>);</code></pre>
 
             <h3>StringBuilder for String Building</h3>
 
@@ -248,9 +249,9 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td><code>sys::array_capacity(@arr)</code></td><td>Get current allocated capacity</td></tr>
-                    <tr><td><code>sys::array_reserve(@arr, $n)</code></td><td>Ensure capacity for at least $n elements</td></tr>
-                    <tr><td><code>sys::array_shrink(@arr)</code></td><td>Shrink capacity to match current length</td></tr>
+                    <tr><td><code>core::array_capacity(@arr)</code></td><td>Get current allocated capacity</td></tr>
+                    <tr><td><code>core::array_reserve(@arr, $n)</code></td><td>Ensure capacity for at least $n elements</td></tr>
+                    <tr><td><code>core::array_shrink(@arr)</code></td><td>Shrink capacity to match current length</td></tr>
                 </tbody>
             </table>
 
@@ -341,13 +342,13 @@
 
             <p>Enable memory profiling to track allocations:</p>
 
-            <pre><code><span class="func">sys::memprof_enable</span>();
+            <pre><code><span class="func">core::memprof_enable</span>();
 
 <span class="comment"># ... your code ...</span>
 
-<span class="func">sys::memprof_report</span>();  <span class="comment"># Print allocation stats</span>
-<span class="func">sys::memprof_reset</span>();   <span class="comment"># Clear counters</span>
-<span class="func">sys::memprof_disable</span>();</code></pre>
+<span class="func">core::memprof_report</span>();  <span class="comment"># Print allocation stats</span>
+<span class="func">core::memprof_reset</span>();   <span class="comment"># Clear counters</span>
+<span class="func">core::memprof_disable</span>();</code></pre>
 
             <h2>C Interop Memory</h2>
 

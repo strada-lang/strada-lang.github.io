@@ -32,6 +32,7 @@
                 <li><a href="functions.html">Functions</a></li>
                 <li><a href="control-flow.html">Control Flow</a></li>
                 <li><a href="oop.html">Object-Oriented Programming</a></li>
+                <li><a href="regex.html">Regular Expressions</a></li>
             </ul>
             <h3>Advanced</h3>
             <ul>
@@ -354,7 +355,7 @@
     <span class="comment"># Insert a post</span>
     <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$id</span> = <span class="type">DBI</span>::<span class="func">insert_get_id</span>(<span class="sigil">$dbh</span>,
         <span class="string">"INSERT INTO posts (title, body, created_at) VALUES (?, ?, ?)"</span>,
-        [<span class="string">"Hello World"</span>, <span class="string">"My first blog post!"</span>, <span class="func">sys::time</span>()]);
+        [<span class="string">"Hello World"</span>, <span class="string">"My first blog post!"</span>, <span class="func">core::time</span>()]);
     <span class="func">say</span>(<span class="string">"Created post ID: "</span> . <span class="sigil">$id</span>);
 
     <span class="comment"># Query all posts</span>

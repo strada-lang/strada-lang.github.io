@@ -32,6 +32,7 @@
                 <li><a href="functions.html" class="active">Functions</a></li>
                 <li><a href="control-flow.html">Control Flow</a></li>
                 <li><a href="oop.html">Object-Oriented Programming</a></li>
+                <li><a href="regex.html">Regular Expressions</a></li>
             </ul>
             <h3>Advanced</h3>
             <ul>
@@ -159,18 +160,18 @@
                     <tr><td><code>array</code></td><td>Returns array</td></tr>
                     <tr><td><code>hash</code></td><td>Returns hash</td></tr>
                     <tr><td><code>scalar</code></td><td>Returns any value</td></tr>
-                    <tr><td><code>dynamic</code></td><td>Context-sensitive return (use with <code>sys::wantarray()</code>)</td></tr>
+                    <tr><td><code>dynamic</code></td><td>Context-sensitive return (use with <code>core::wantarray()</code>)</td></tr>
                 </tbody>
             </table>
 
             <h3>Dynamic Return Type</h3>
             <p>The <code>dynamic</code> return type enables functions to check how their result will be used and return different types accordingly:</p>
 <pre><code>func flexible() dynamic {
-    if (sys::wantarray()) {
+    if (core::wantarray()) {
         my array @r = (1, 2, 3);
         return @r;    <span class="comment"># array context</span>
     }
-    if (sys::wanthash()) {
+    if (core::wanthash()) {
         my hash %h = ();
         $h{"key"} = "val";
         return %h;    <span class="comment"># hash context</span>
@@ -342,14 +343,14 @@ my int $v = flexible();    <span class="comment"># scalar context</span></code><
 
             <pre><code><span class="keyword">func</span> <span class="func">handle_sigint</span>() <span class="type">void</span> {
     <span class="func">say</span>(<span class="string">"Caught SIGINT!"</span>);
-    <span class="func">sys::exit</span>(<span class="number">0</span>);
+    <span class="func">core::exit</span>(<span class="number">0</span>);
 }
 
 <span class="comment"># Register the handler</span>
-<span class="func">sys::signal</span>(<span class="string">"INT"</span>, \&<span class="func">handle_sigint</span>);
+<span class="func">core::signal</span>(<span class="string">"INT"</span>, \&<span class="func">handle_sigint</span>);
 
 <span class="comment"># Or ignore signals</span>
-<span class="func">sys::signal</span>(<span class="string">"PIPE"</span>, <span class="string">"IGNORE"</span>);</code></pre>
+<span class="func">core::signal</span>(<span class="string">"PIPE"</span>, <span class="string">"IGNORE"</span>);</code></pre>
 
             <h2>UTF-8 Introspection (utf8::)</h2>
 

@@ -468,8 +468,8 @@
             </div>
             <div class="feature">
                 <div class="feature-icon">🧩</div>
-                <h3>OOP Support</h3>
-                <p>Clean object-oriented programming with packages, methods, inheritance via bless().</p>
+                <h3>Moose-Style OOP</h3>
+                <p>Declarative OOP with <code>has</code>, <code>extends</code>, <code>with</code>, and method modifiers (<code>before</code>/<code>after</code>/<code>around</code>). Auto-generated constructors and accessors.</p>
             </div>
             <div class="feature">
                 <div class="feature-icon">🌐</div>
@@ -630,20 +630,25 @@
             </div>
 
             <div class="example">
-                <div class="example-header">Object-Oriented Programming</div>
-                <pre><span class="keyword">package</span> <span class="type">Dog</span>;
+                <div class="example-header">Moose-Style OOP</div>
+                <pre><span class="keyword">package</span> <span class="type">Animal</span>;
+<span class="keyword">has</span> ro <span class="type">str</span> <span class="sigil">$species</span> (required);
+<span class="keyword">has</span> rw <span class="type">int</span> <span class="sigil">$energy</span> = <span class="number">100</span>;
 
-<span class="keyword">func</span> <span class="func">new</span>(<span class="type">str</span> <span class="sigil">$name</span>) <span class="type">scalar</span> {
-    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%self</span> = { <span class="string">"name"</span> => <span class="sigil">$name</span> };
-    <span class="keyword">return</span> <span class="func">bless</span>(\<span class="sigil">%self</span>, <span class="string">"Dog"</span>);
+<span class="keyword">package</span> <span class="type">Dog</span>;
+<span class="keyword">extends</span> <span class="type">Animal</span>;
+<span class="keyword">has</span> ro <span class="type">str</span> <span class="sigil">$name</span> (required);
+
+<span class="keyword">before</span> <span class="string">"bark"</span> <span class="keyword">func</span>(<span class="type">scalar</span> <span class="sigil">$self</span>) <span class="type">void</span> {
+    <span class="func">say</span>(<span class="string">"[get ready]"</span>);
+}
+<span class="keyword">func</span> <span class="func">bark</span>(<span class="type">scalar</span> <span class="sigil">$self</span>) <span class="type">void</span> {
+    <span class="func">say</span>(<span class="sigil">$self</span>-><span class="func">name</span>() . <span class="string">" barks!"</span>);
 }
 
-<span class="keyword">func</span> <span class="func">speak</span>(<span class="type">scalar</span> <span class="sigil">$self</span>) <span class="type">void</span> {
-    <span class="func">say</span>(<span class="sigil">$self</span>->{<span class="string">"name"</span>} . <span class="string">" says woof!"</span>);
-}
-
-<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$dog</span> = <span class="type">Dog</span>::<span class="func">new</span>(<span class="string">"Rex"</span>);
-<span class="sigil">$dog</span>-><span class="func">speak</span>();  <span class="comment"># Rex says woof!</span></pre>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$d</span> = <span class="type">Dog</span>::<span class="func">new</span>(<span class="string">"name"</span>, <span class="string">"Rex"</span>,
+    <span class="string">"species"</span>, <span class="string">"dog"</span>);
+<span class="sigil">$d</span>-><span class="func">bark</span>();  <span class="comment"># [get ready] / Rex barks!</span></pre>
             </div>
 
             <div class="example">
