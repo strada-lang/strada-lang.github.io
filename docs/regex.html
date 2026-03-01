@@ -60,7 +60,12 @@
             </div>
 
             <h1>Regular <span>Expressions</span></h1>
-            <p class="subtitle">Pattern matching, substitution, and text processing with regex.</p>
+            <p class="subtitle">Pattern matching, substitution, and text processing powered by PCRE2.</p>
+
+            <div class="info-box">
+                <strong>PCRE2-Powered</strong>
+                <p>Strada uses <strong>PCRE2</strong> (Perl Compatible Regular Expressions) for full Perl-style regex support, including lookahead, lookbehind, named captures, lazy quantifiers, and more. If PCRE2 is not available at build time, Strada falls back to POSIX Extended Regular Expressions with reduced functionality.</p>
+            </div>
 
             <h2>Pattern Matching</h2>
 
@@ -82,8 +87,6 @@
 
             <h2>Pattern Syntax</h2>
 
-            <p>Strada uses POSIX Extended Regular Expressions (ERE) with some Perl extensions.</p>
-
             <h3>Anchors</h3>
 
             <table>
@@ -94,9 +97,10 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td><code>^</code></td><td>Start of string</td></tr>
-                    <tr><td><code>$</code></td><td>End of string</td></tr>
+                    <tr><td><code>^</code></td><td>Start of string (or line in <code>/m</code> mode)</td></tr>
+                    <tr><td><code>$</code></td><td>End of string (or line in <code>/m</code> mode)</td></tr>
                     <tr><td><code>\b</code></td><td>Word boundary</td></tr>
+                    <tr><td><code>\B</code></td><td>Non-word boundary</td></tr>
                 </tbody>
             </table>
 
@@ -110,9 +114,9 @@
     <span class="func">say</span>(<span class="string">"Ends with world"</span>);
 }
 
-<span class="comment"># Both anchors for exact match</span>
-<span class="keyword">if</span> (<span class="string">"hello"</span> =~ <span class="string">/^hello$/</span>) {
-    <span class="func">say</span>(<span class="string">"Exact match"</span>);
+<span class="comment"># \b matches word boundaries</span>
+<span class="keyword">if</span> (<span class="string">"cat catalog"</span> =~ <span class="string">/\bcat\b/</span>) {
+    <span class="func">say</span>(<span class="string">"Found standalone 'cat'"</span>);
 }</code></pre>
 
             <h3>Character Classes</h3>
@@ -125,7 +129,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td><code>.</code></td><td>Any character except newline</td></tr>
+                    <tr><td><code>.</code></td><td>Any character except newline (unless <code>/s</code> flag)</td></tr>
                     <tr><td><code>\d</code></td><td>Digit (0-9)</td></tr>
                     <tr><td><code>\D</code></td><td>Non-digit</td></tr>
                     <tr><td><code>\w</code></td><td>Word character (a-z, A-Z, 0-9, _)</td></tr>
@@ -160,9 +164,12 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td><code>*</code></td><td>Zero or more</td></tr>
-                    <tr><td><code>+</code></td><td>One or more</td></tr>
-                    <tr><td><code>?</code></td><td>Zero or one</td></tr>
+                    <tr><td><code>*</code></td><td>Zero or more (greedy)</td></tr>
+                    <tr><td><code>+</code></td><td>One or more (greedy)</td></tr>
+                    <tr><td><code>?</code></td><td>Zero or one (greedy)</td></tr>
+                    <tr><td><code>*?</code></td><td>Zero or more (lazy/non-greedy)</td></tr>
+                    <tr><td><code>+?</code></td><td>One or more (lazy/non-greedy)</td></tr>
+                    <tr><td><code>??</code></td><td>Zero or one (lazy/non-greedy)</td></tr>
                     <tr><td><code>{n}</code></td><td>Exactly n times</td></tr>
                     <tr><td><code>{n,}</code></td><td>n or more times</td></tr>
                     <tr><td><code>{n,m}</code></td><td>Between n and m times</td></tr>
@@ -175,6 +182,11 @@
 
 <span class="keyword">if</span> (<span class="sigil">$text</span> =~ <span class="string">/\d{3}-\d{4}/</span>) {
     <span class="func">say</span>(<span class="string">"Phone number format"</span>);
+}
+
+<span class="comment"># Lazy quantifier: match shortest possible</span>
+<span class="keyword">if</span> (<span class="sigil">$html</span> =~ <span class="string">/&lt;.*?&gt;/</span>) {
+    <span class="func">say</span>(<span class="string">"Found first HTML tag"</span>);
 }</code></pre>
 
             <h3>Alternation and Grouping</h3>
@@ -190,6 +202,7 @@
                     <tr><td><code>|</code></td><td>Alternation (or)</td></tr>
                     <tr><td><code>(...)</code></td><td>Grouping and capture</td></tr>
                     <tr><td><code>(?:...)</code></td><td>Non-capturing group</td></tr>
+                    <tr><td><code>(?P&lt;name&gt;...)</code></td><td>Named capture group</td></tr>
                 </tbody>
             </table>
 
@@ -199,6 +212,50 @@
 
 <span class="keyword">if</span> (<span class="sigil">$text</span> =~ <span class="string">/(hello|hi) world/</span>) {
     <span class="func">say</span>(<span class="string">"Greeting found"</span>);
+}
+
+<span class="comment"># Non-capturing group (no capture overhead)</span>
+<span class="keyword">if</span> (<span class="sigil">$text</span> =~ <span class="string">/(?:https?|ftp):\/\//</span>) {
+    <span class="func">say</span>(<span class="string">"URL protocol found"</span>);
+}</code></pre>
+
+            <h3>Lookahead and Lookbehind</h3>
+
+            <p>Zero-width assertions that match a position without consuming characters:</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Pattern</th>
+                        <th>Meaning</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>(?=...)</code></td><td>Positive lookahead</td></tr>
+                    <tr><td><code>(?!...)</code></td><td>Negative lookahead</td></tr>
+                    <tr><td><code>(?&lt;=...)</code></td><td>Positive lookbehind</td></tr>
+                    <tr><td><code>(?&lt;!...)</code></td><td>Negative lookbehind</td></tr>
+                </tbody>
+            </table>
+
+            <pre><code><span class="comment"># Positive lookahead: digits followed by "px"</span>
+<span class="keyword">if</span> (<span class="string">"width: 100px"</span> =~ <span class="string">/\d+(?=px)/</span>) {
+    <span class="func">say</span>(<span class="string">"Found pixel value"</span>);
+}
+
+<span class="comment"># Negative lookahead: digits NOT followed by "px"</span>
+<span class="keyword">if</span> (<span class="string">"count: 42"</span> =~ <span class="string">/\d+(?!px)/</span>) {
+    <span class="func">say</span>(<span class="string">"Found non-pixel number"</span>);
+}
+
+<span class="comment"># Positive lookbehind: digits preceded by "$"</span>
+<span class="keyword">if</span> (<span class="string">"price: $99"</span> =~ <span class="string">/(?&lt;=\$)\d+/</span>) {
+    <span class="func">say</span>(<span class="string">"Found price amount"</span>);
+}
+
+<span class="comment"># Negative lookbehind: word NOT preceded by "un"</span>
+<span class="keyword">if</span> (<span class="string">"happy"</span> =~ <span class="string">/(?&lt;!un)happy/</span>) {
+    <span class="func">say</span>(<span class="string">"Not unhappy!"</span>);
 }</code></pre>
 
             <h2>Flags and Modifiers</h2>
@@ -215,8 +272,10 @@
                 <tbody>
                     <tr><td><code>i</code></td><td>Case-insensitive matching</td></tr>
                     <tr><td><code>m</code></td><td>Multi-line mode (<code>^</code> and <code>$</code> match line boundaries)</td></tr>
-                    <tr><td><code>s</code></td><td>Single-line mode (<code>.</code> matches newline)</td></tr>
+                    <tr><td><code>s</code></td><td>Single-line/dotall mode (<code>.</code> matches newline)</td></tr>
+                    <tr><td><code>x</code></td><td>Extended mode (whitespace and comments ignored in pattern)</td></tr>
                     <tr><td><code>g</code></td><td>Global (for substitution &mdash; replace all occurrences)</td></tr>
+                    <tr><td><code>e</code></td><td>Evaluate replacement as expression (substitution only)</td></tr>
                 </tbody>
             </table>
 
@@ -229,11 +288,46 @@
 <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$lines</span> = <span class="string">"line1\nline2"</span>;
 <span class="keyword">if</span> (<span class="sigil">$lines</span> =~ <span class="string">/^line2/m</span>) {
     <span class="func">say</span>(<span class="string">"Found line2 at start of line"</span>);
+}
+
+<span class="comment"># Dotall mode: . matches newlines</span>
+<span class="keyword">if</span> (<span class="sigil">$data</span> =~ <span class="string">/start.*end/s</span>) {
+    <span class="func">say</span>(<span class="string">"Matched across lines"</span>);
+}
+
+<span class="comment"># Extended mode: whitespace ignored, allows comments</span>
+<span class="keyword">if</span> (<span class="sigil">$text</span> =~ <span class="string">/
+    \d{4}   # year
+    -       # separator
+    \d{2}   # month
+    -       # separator
+    \d{2}   # day
+/x</span>) {
+    <span class="func">say</span>(<span class="string">"Date format matched"</span>);
 }</code></pre>
 
-            <h2>Capturing Groups</h2>
+            <h2>Capture Variables ($1 - $9)</h2>
 
-            <p>Use parentheses to capture parts of a match. Access the captured groups with the <code>captures()</code> function:</p>
+            <p>After a successful regex match, capture groups are available via <code>$1</code> through <code>$9</code>:</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$date</span> = <span class="string">"2024-01-15"</span>;
+
+<span class="keyword">if</span> (<span class="sigil">$date</span> =~ <span class="string">/(\d{4})-(\d{2})-(\d{2})/</span>) {
+    <span class="func">say</span>(<span class="string">"Year: "</span> . <span class="sigil">$1</span>);    <span class="comment"># 2024</span>
+    <span class="func">say</span>(<span class="string">"Month: "</span> . <span class="sigil">$2</span>);   <span class="comment"># 01</span>
+    <span class="func">say</span>(<span class="string">"Day: "</span> . <span class="sigil">$3</span>);     <span class="comment"># 15</span>
+}
+
+<span class="keyword">if</span> (<span class="string">"hello world"</span> =~ <span class="string">/(\w+)\s+(\w+)/</span>) {
+    <span class="func">say</span>(<span class="sigil">$1</span>);  <span class="comment"># "hello"</span>
+    <span class="func">say</span>(<span class="sigil">$2</span>);  <span class="comment"># "world"</span>
+}</code></pre>
+
+            <p><code>$1</code>&ndash;<code>$9</code> return <code>undef</code> if the group doesn't exist. They are syntactic sugar for <code>captures()[N]</code>.</p>
+
+            <h2>The captures() Function</h2>
+
+            <p>Use <code>captures()</code> to get all capture groups as an array. Use this when you need the full match or more than 9 groups:</p>
 
             <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$date</span> = <span class="string">"2024-01-15"</span>;
 
@@ -249,12 +343,12 @@
                 <strong>Capture Indices</strong>
                 <ul>
                     <li><code>captures()[0]</code> is the <strong>full match</strong> (entire matched string)</li>
-                    <li><code>captures()[1]</code> is the first capture group</li>
-                    <li><code>captures()[2]</code> is the second capture group, and so on</li>
+                    <li><code>captures()[1]</code> / <code>$1</code> is the first capture group</li>
+                    <li><code>captures()[2]</code> / <code>$2</code> is the second capture group, and so on</li>
                 </ul>
             </div>
 
-            <p>Always check that the pattern matched before calling <code>captures()</code>, and save the result immediately since captures are cleared on the next match:</p>
+            <p>Always check that the pattern matched before accessing captures, and save the result immediately since captures are cleared on the next match:</p>
 
             <pre><code><span class="keyword">if</span> (<span class="sigil">$text</span> =~ <span class="string">/(\w+)@(\w+)/</span>) {
     <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@saved</span> = <span class="func">captures</span>();  <span class="comment"># Save immediately</span>
@@ -262,6 +356,33 @@
     <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$domain</span> = <span class="sigil">$saved</span>[<span class="number">2</span>];
     <span class="func">say</span>(<span class="string">"User: "</span> . <span class="sigil">$user</span> . <span class="string">", Domain: "</span> . <span class="sigil">$domain</span>);
 }</code></pre>
+
+            <h2>Named Captures</h2>
+
+            <p>Use <code>(?P&lt;name&gt;...)</code> to create named capture groups, then retrieve them with <code>named_captures()</code>:</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$date</span> = <span class="string">"2024-01-15"</span>;
+
+<span class="keyword">if</span> (<span class="sigil">$date</span> =~ <span class="string">/(?P&lt;year&gt;\d{4})-(?P&lt;month&gt;\d{2})-(?P&lt;day&gt;\d{2})/</span>) {
+    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%nc</span> = <span class="func">named_captures</span>();
+    <span class="func">say</span>(<span class="string">"Year: "</span> . <span class="sigil">$nc</span>{<span class="string">"year"</span>});    <span class="comment"># 2024</span>
+    <span class="func">say</span>(<span class="string">"Month: "</span> . <span class="sigil">$nc</span>{<span class="string">"month"</span>});  <span class="comment"># 01</span>
+    <span class="func">say</span>(<span class="string">"Day: "</span> . <span class="sigil">$nc</span>{<span class="string">"day"</span>});      <span class="comment"># 15</span>
+}</code></pre>
+
+            <pre><code><span class="comment"># Parse a log line with named captures</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$log</span> = <span class="string">"[2024-01-15 10:30:45] ERROR: connection refused"</span>;
+
+<span class="keyword">if</span> (<span class="sigil">$log</span> =~ <span class="string">/\[(?P&lt;timestamp&gt;[^\]]+)\]\s+(?P&lt;level&gt;\w+):\s+(?P&lt;message&gt;.*)/</span>) {
+    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%nc</span> = <span class="func">named_captures</span>();
+    <span class="func">say</span>(<span class="string">"Time: "</span> . <span class="sigil">$nc</span>{<span class="string">"timestamp"</span>});
+    <span class="func">say</span>(<span class="string">"Level: "</span> . <span class="sigil">$nc</span>{<span class="string">"level"</span>});
+    <span class="func">say</span>(<span class="string">"Msg: "</span> . <span class="sigil">$nc</span>{<span class="string">"message"</span>});
+}</code></pre>
+
+            <div class="note">
+                <strong>Note:</strong> Named captures require PCRE2. If Strada was built with POSIX regex fallback, <code>named_captures()</code> returns an empty hash.
+            </div>
 
             <h2>Substitution</h2>
 
@@ -281,11 +402,36 @@
 <span class="comment"># Case-insensitive replacement</span>
 <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$greeting</span> = <span class="string">"HELLO world"</span>;
 <span class="sigil">$greeting</span> =~ s/hello/Hi/i;
-<span class="func">say</span>(<span class="sigil">$greeting</span>);  <span class="comment"># Hi world</span></code></pre>
+<span class="func">say</span>(<span class="sigil">$greeting</span>);  <span class="comment"># Hi world</span>
+
+<span class="comment"># Backreferences in replacement</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$swapped</span> = <span class="string">"John Smith"</span>;
+<span class="sigil">$swapped</span> =~ s/(\w+) (\w+)/$2, $1/;
+<span class="func">say</span>(<span class="sigil">$swapped</span>);  <span class="comment"># Smith, John</span></code></pre>
 
             <div class="note">
                 <strong>Case modification:</strong> Strada does not support <code>\U</code>, <code>\L</code>, or <code>\E</code> in replacement strings. Use the <code>uc()</code> and <code>lc()</code> functions instead.
             </div>
+
+            <h2>The /e Modifier &mdash; Evaluate Replacement</h2>
+
+            <p>The <code>/e</code> flag evaluates the replacement as an expression instead of a literal string:</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$text</span> = <span class="string">"apples: 3, oranges: 7"</span>;
+
+<span class="comment"># Double all numbers</span>
+<span class="sigil">$text</span> =~ s/(\d+)/<span class="sigil">$1</span> * 2/eg;
+<span class="func">say</span>(<span class="sigil">$text</span>);  <span class="comment"># "apples: 6, oranges: 14"</span>
+
+<span class="comment"># Uppercase matched words</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$words</span> = <span class="string">"hello world"</span>;
+<span class="sigil">$words</span> =~ s/(\w+)/uc(captures()[1])/eg;
+<span class="func">say</span>(<span class="sigil">$words</span>);  <span class="comment"># "HELLO WORLD"</span>
+
+<span class="comment"># /ei - evaluate with case-insensitive match</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$mixed</span> = <span class="string">"Hello HELLO hello"</span>;
+<span class="sigil">$mixed</span> =~ s/(hello)/lc(captures()[1])/eig;
+<span class="func">say</span>(<span class="sigil">$mixed</span>);  <span class="comment"># "hello hello hello"</span></code></pre>
 
             <h2>Variable Interpolation</h2>
 
@@ -347,7 +493,7 @@
 
             <h3>match()</h3>
 
-            <p>Simple pattern match that returns <code>1</code> or <code>0</code>:</p>
+            <p>Simple pattern match that returns <code>1</code> or <code>0</code>. Also sets capture variables.</p>
 
             <pre><code><span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$found</span> = <span class="func">match</span>(<span class="sigil">$text</span>, <span class="string">"pattern"</span>);
 
@@ -357,10 +503,31 @@
 
             <h3>capture()</h3>
 
-            <p>Get all capture groups as an array:</p>
+            <p>Get all capture groups as an array (pass the string and pattern as arguments):</p>
 
             <pre><code><span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@groups</span> = <span class="func">capture</span>(<span class="sigil">$text</span>, <span class="string">"(\\d+)-(\\d+)"</span>);
 <span class="comment"># @groups[0] = full match, @groups[1] = first group, etc.</span></code></pre>
+
+            <h3>captures()</h3>
+
+            <p>Returns capture groups from the last <code>=~</code> match as an array:</p>
+
+            <pre><code><span class="keyword">if</span> (<span class="sigil">$text</span> =~ <span class="string">/(\w+)\s+(\w+)/</span>) {
+    <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@all</span> = <span class="func">captures</span>();
+    <span class="func">say</span>(<span class="sigil">$all</span>[<span class="number">0</span>]);  <span class="comment"># Full match</span>
+    <span class="func">say</span>(<span class="sigil">$all</span>[<span class="number">1</span>]);  <span class="comment"># First group (same as $1)</span>
+    <span class="func">say</span>(<span class="sigil">$all</span>[<span class="number">2</span>]);  <span class="comment"># Second group (same as $2)</span>
+}</code></pre>
+
+            <h3>named_captures()</h3>
+
+            <p>Returns named capture groups from the last <code>=~</code> match as a hash:</p>
+
+            <pre><code><span class="keyword">if</span> (<span class="sigil">$text</span> =~ <span class="string">/(?P&lt;first&gt;\w+)\s+(?P&lt;last&gt;\w+)/</span>) {
+    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%nc</span> = <span class="func">named_captures</span>();
+    <span class="func">say</span>(<span class="sigil">$nc</span>{<span class="string">"first"</span>});  <span class="comment"># First name</span>
+    <span class="func">say</span>(<span class="sigil">$nc</span>{<span class="string">"last"</span>});   <span class="comment"># Last name</span>
+}</code></pre>
 
             <h3>split()</h3>
 
@@ -394,52 +561,20 @@
 
             <p>Functional alternatives to the <code>s///</code> operator:</p>
 
-            <pre><code><span class="comment"># Replace first match (returns new string)</span>
+            <pre><code><span class="comment"># replace() — regex replacement (returns new string)</span>
 <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$new</span> = <span class="func">replace</span>(<span class="sigil">$text</span>, <span class="string">"world"</span>, <span class="string">"Strada"</span>);
 
-<span class="comment"># Replace all matches (returns new string)</span>
-<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$cleaned</span> = <span class="func">replace_all</span>(<span class="sigil">$text</span>, <span class="string">"\\s+"</span>, <span class="string">" "</span>);</code></pre>
+<span class="comment"># replace_all() — plain string replacement (NOT regex)</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$cleaned</span> = <span class="func">replace_all</span>(<span class="sigil">$text</span>, <span class="string">"foo"</span>, <span class="string">"bar"</span>);</code></pre>
 
             <div class="note">
-                <strong>replace() vs s///:</strong> The <code>replace()</code> and <code>replace_all()</code> functions return a <strong>new string</strong> without modifying the original. The <code>s///</code> operator modifies the variable <strong>in place</strong>.
+                <strong>replace() vs replace_all() vs s///:</strong>
+                <ul>
+                    <li><code>replace()</code> uses <strong>regex</strong> and returns a new string (first match only). Supports <code>$1</code>, <code>$2</code> backreferences in the replacement.</li>
+                    <li><code>replace_all()</code> uses <strong>plain string</strong> matching (NOT regex) and returns a new string.</li>
+                    <li><code>s///</code> uses <strong>regex</strong> and modifies the variable <strong>in place</strong>. Add <code>/g</code> for global.</li>
+                </ul>
             </div>
-
-            <h2>Common Patterns</h2>
-
-            <h3>Email Validation</h3>
-
-            <pre><code><span class="keyword">func</span> <span class="func">is_valid_email</span>(<span class="type">str</span> <span class="sigil">$email</span>) <span class="type">int</span> {
-    <span class="keyword">return</span> <span class="func">match</span>(<span class="sigil">$email</span>, <span class="string">"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"</span>);
-}</code></pre>
-
-            <h3>Phone Number</h3>
-
-            <pre><code><span class="keyword">func</span> <span class="func">is_phone</span>(<span class="type">str</span> <span class="sigil">$phone</span>) <span class="type">int</span> {
-    <span class="keyword">return</span> <span class="func">match</span>(<span class="sigil">$phone</span>, <span class="string">"^\\d{3}[-.]?\\d{3}[-.]?\\d{4}$"</span>);
-}</code></pre>
-
-            <h3>URL Extraction</h3>
-
-            <pre><code><span class="keyword">func</span> <span class="func">extract_urls</span>(<span class="type">str</span> <span class="sigil">$text</span>) <span class="type">array</span> {
-    <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@urls</span> = ();
-    <span class="keyword">while</span> (<span class="sigil">$text</span> =~ <span class="string">/(https?:\/\/[^\s]+)/</span>) {
-        <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@cap</span> = <span class="func">captures</span>();
-        <span class="func">push</span>(<span class="sigil">@urls</span>, <span class="sigil">$cap</span>[<span class="number">1</span>]);
-        <span class="sigil">$text</span> =~ s/https?:\/\/[^\s]+//;
-    }
-    <span class="keyword">return</span> <span class="sigil">@urls</span>;
-}</code></pre>
-
-            <h3>Whitespace Cleanup</h3>
-
-            <pre><code><span class="comment"># Trim leading whitespace</span>
-<span class="sigil">$text</span> =~ s/^\s+//;
-
-<span class="comment"># Trim trailing whitespace</span>
-<span class="sigil">$text</span> =~ s/\s+$//;
-
-<span class="comment"># Collapse multiple spaces to a single space</span>
-<span class="sigil">$text</span> =~ s/\s+/ /g;</code></pre>
 
             <h2>Transliteration (tr///, y///)</h2>
 
@@ -501,12 +636,7 @@
             <pre><code><span class="comment"># Collapse repeated spaces</span>
 <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$spaced</span> = <span class="string">"hello    world    foo"</span>;
 <span class="sigil">$spaced</span> =~ tr/ / /s;
-<span class="func">say</span>(<span class="sigil">$spaced</span>);  <span class="comment"># "hello world foo"</span>
-
-<span class="comment"># Collapse repeated characters after replacement</span>
-<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$collapsed</span> = <span class="string">"Mississippi"</span>;
-<span class="sigil">$collapsed</span> =~ tr/sp/SP/s;
-<span class="func">say</span>(<span class="sigil">$collapsed</span>);  <span class="comment"># "MiSiSiPi"</span></code></pre>
+<span class="func">say</span>(<span class="sigil">$spaced</span>);  <span class="comment"># "hello world foo"</span></code></pre>
 
             <h4>Return (/r)</h4>
 
@@ -533,90 +663,83 @@
                 <p><code>tr///</code> maps characters one-to-one &mdash; it does not use regex and is much faster for simple character replacements. Use <code>s///</code> when you need regex patterns or variable-length replacements.</p>
             </div>
 
-            <h2>The /e Modifier &mdash; Evaluate Replacement</h2>
+            <h2>Common Patterns</h2>
 
-            <p>The <code>/e</code> flag on <code>s///</code> evaluates the replacement as an expression instead of treating it as a literal string. This is useful for computed replacements based on the matched text.</p>
+            <h3>Email Validation</h3>
 
-            <h3>Basic Usage</h3>
+            <pre><code><span class="keyword">func</span> <span class="func">is_valid_email</span>(<span class="type">str</span> <span class="sigil">$email</span>) <span class="type">int</span> {
+    <span class="keyword">return</span> <span class="func">match</span>(<span class="sigil">$email</span>, <span class="string">"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"</span>);
+}</code></pre>
 
-            <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$text</span> = <span class="string">"apples: 3, oranges: 7"</span>;
+            <h3>Phone Number</h3>
 
-<span class="comment"># Double all numbers</span>
-<span class="sigil">$text</span> =~ s/(\d+)/<span class="sigil">$1</span> * 2/eg;
-<span class="func">say</span>(<span class="sigil">$text</span>);  <span class="comment"># "apples: 6, oranges: 14"</span></code></pre>
+            <pre><code><span class="keyword">func</span> <span class="func">is_phone</span>(<span class="type">str</span> <span class="sigil">$phone</span>) <span class="type">int</span> {
+    <span class="keyword">return</span> <span class="func">match</span>(<span class="sigil">$phone</span>, <span class="string">"^\\d{3}[-.]?\\d{3}[-.]?\\d{4}$"</span>);
+}</code></pre>
 
-            <p>With <code>/e</code>, the replacement string is evaluated as a Strada expression. The <code>captures()</code> function is available inside the replacement to access captured groups.</p>
+            <h3>URL Extraction</h3>
 
-            <h3>Using captures() with /e</h3>
+            <pre><code><span class="keyword">func</span> <span class="func">extract_urls</span>(<span class="type">str</span> <span class="sigil">$text</span>) <span class="type">array</span> {
+    <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@urls</span> = ();
+    <span class="keyword">while</span> (<span class="sigil">$text</span> =~ <span class="string">/(https?:\/\/[^\s]+)/</span>) {
+        <span class="func">push</span>(<span class="sigil">@urls</span>, <span class="sigil">$1</span>);
+        <span class="sigil">$text</span> =~ s/https?:\/\/[^\s]+//;
+    }
+    <span class="keyword">return</span> <span class="sigil">@urls</span>;
+}</code></pre>
 
-            <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$data</span> = <span class="string">"width=100 height=200"</span>;
+            <h3>Whitespace Cleanup</h3>
 
-<span class="comment"># Convert pixels to em (divide by 16)</span>
-<span class="sigil">$data</span> =~ s/=(\d+)/= . (captures()[1] + 0) \/ 16 . "em"/eg;
+            <pre><code><span class="comment"># Trim leading whitespace</span>
+<span class="sigil">$text</span> =~ s/^\s+//;
 
-<span class="comment"># Uppercase matched words</span>
-<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$words</span> = <span class="string">"hello world"</span>;
-<span class="sigil">$words</span> =~ s/(\w+)/uc(captures()[1])/eg;
-<span class="func">say</span>(<span class="sigil">$words</span>);  <span class="comment"># "HELLO WORLD"</span></code></pre>
+<span class="comment"># Trim trailing whitespace</span>
+<span class="sigil">$text</span> =~ s/\s+$//;
 
-            <h3>Combining /e with Other Flags</h3>
+<span class="comment"># Collapse multiple spaces to a single space</span>
+<span class="sigil">$text</span> =~ s/\s+/ /g;</code></pre>
 
-            <pre><code><span class="comment"># /eg - evaluate and replace globally</span>
-<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$template</span> = <span class="string">"{{x}} + {{y}} = {{sum}}"</span>;
-<span class="comment"># Replace template variables with values from a hash</span>
-
-<span class="comment"># /ei - evaluate with case-insensitive match</span>
-<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$text</span> = <span class="string">"Hello HELLO hello"</span>;
-<span class="sigil">$text</span> =~ s/(hello)/lc(captures()[1])/eig;
-<span class="func">say</span>(<span class="sigil">$text</span>);  <span class="comment"># "hello hello hello"</span></code></pre>
-
-            <div class="note">
-                <strong>Note:</strong> The <code>/e</code> modifier requires PCRE2 support. Ensure your Strada build was configured with PCRE2 (<code>./configure</code> auto-detects it if <code>libpcre2-dev</code> is installed).
-            </div>
-
-            <h2>Important Notes</h2>
-
-            <h3>POSIX vs Perl Regex</h3>
-
-            <p>Strada uses POSIX Extended Regular Expressions. Some Perl features are <strong>not available</strong>:</p>
+            <h2>PCRE2 Feature Summary</h2>
 
             <table>
                 <thead>
                     <tr>
                         <th>Feature</th>
-                        <th>Perl Syntax</th>
-                        <th>Status in Strada</th>
+                        <th>Syntax</th>
+                        <th>Status</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td>Lookahead</td><td><code>(?=...)</code>, <code>(?!...)</code></td><td>Not supported</td></tr>
-                    <tr><td>Lookbehind</td><td><code>(?&lt;=...)</code>, <code>(?&lt;!...)</code></td><td>Not supported</td></tr>
-                    <tr><td>Named captures</td><td><code>(?&lt;name&gt;...)</code></td><td>Not supported</td></tr>
+                    <tr><td>Lazy quantifiers</td><td><code>*?</code>, <code>+?</code>, <code>??</code></td><td>Supported</td></tr>
+                    <tr><td>Non-capturing groups</td><td><code>(?:...)</code></td><td>Supported</td></tr>
+                    <tr><td>Named captures</td><td><code>(?P&lt;name&gt;...)</code></td><td>Supported</td></tr>
+                    <tr><td>Positive lookahead</td><td><code>(?=...)</code></td><td>Supported</td></tr>
+                    <tr><td>Negative lookahead</td><td><code>(?!...)</code></td><td>Supported</td></tr>
+                    <tr><td>Positive lookbehind</td><td><code>(?&lt;=...)</code></td><td>Supported</td></tr>
+                    <tr><td>Negative lookbehind</td><td><code>(?&lt;!...)</code></td><td>Supported</td></tr>
+                    <tr><td>Word boundaries</td><td><code>\b</code>, <code>\B</code></td><td>Supported</td></tr>
+                    <tr><td>Backreferences</td><td><code>$1</code>&ndash;<code>$9</code></td><td>Supported</td></tr>
+                    <tr><td>Character class shortcuts</td><td><code>\d</code>, <code>\w</code>, <code>\s</code></td><td>Supported</td></tr>
+                    <tr><td>Flags</td><td><code>/i</code>, <code>/m</code>, <code>/s</code>, <code>/x</code>, <code>/g</code>, <code>/e</code></td><td>Supported</td></tr>
                     <tr><td>Possessive quantifiers</td><td><code>*+</code>, <code>++</code></td><td>Not supported</td></tr>
                     <tr><td>Unicode properties</td><td><code>\p{...}</code></td><td>Not supported</td></tr>
-                    <tr><td>Non-capturing groups</td><td><code>(?:...)</code></td><td>Supported</td></tr>
-                    <tr><td>Character class shortcuts</td><td><code>\d</code>, <code>\w</code>, <code>\s</code></td><td>Supported</td></tr>
                 </tbody>
             </table>
 
-            <h3>$ Anchor Behavior</h3>
-
-            <p>The <code>$</code> end-of-line anchor works correctly in patterns. Variable interpolation only triggers when <code>$</code> is followed by a word character (a variable name). At the end of a pattern or before a non-word character, <code>$</code> is treated as the anchor.</p>
-
-            <h3>Performance Tips</h3>
+            <h2>Performance Tips</h2>
 
             <div class="info-box">
                 <strong>Regex Performance</strong>
                 <ul>
-                    <li>Regex patterns are compiled each time they are used</li>
-                    <li>For repeated matching with the same pattern, store it in a variable</li>
-                    <li>Complex patterns with many alternations can be slow</li>
+                    <li>Compiled PCRE2 patterns are cached (128-slot cache) for fast repeated matching</li>
                     <li>Use anchors (<code>^</code>, <code>$</code>) when possible to limit the search space</li>
                     <li>Prefer <code>index()</code> for simple substring searches (no regex overhead)</li>
+                    <li>Use <code>replace_all()</code> for literal string replacement (faster than regex)</li>
+                    <li>Use non-capturing groups <code>(?:...)</code> when you don't need the captured text</li>
                 </ul>
             </div>
 
-            <h3>Troubleshooting</h3>
+            <h2>Troubleshooting</h2>
 
             <p><strong>Pattern not matching?</strong></p>
             <ul>
@@ -628,9 +751,10 @@
 
             <p><strong>Captures not working?</strong></p>
             <ul>
-                <li>Ensure the pattern actually matched before calling <code>captures()</code></li>
+                <li>Ensure the pattern actually matched before calling <code>captures()</code> or using <code>$1</code>&ndash;<code>$9</code></li>
                 <li>Remember <code>captures()[0]</code> is the full match &mdash; groups start at index 1</li>
                 <li>Captures are cleared on each new match &mdash; save them immediately</li>
+                <li><code>$1</code>&ndash;<code>$9</code> return <code>undef</code> if the group doesn't exist</li>
             </ul>
 
             <pre><code><span class="keyword">if</span> (<span class="sigil">$text</span> =~ <span class="string">/(\w+)/</span>) {
