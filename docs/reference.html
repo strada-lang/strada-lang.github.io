@@ -376,6 +376,8 @@
                     <tr><td><code>ref($val)</code></td><td>Return reference type or empty string</td></tr>
                     <tr><td><code>typeof($val)</code></td><td>Return type as string</td></tr>
                     <tr><td><code>bless(\%h, $class)</code></td><td>Associate hash ref with class</td></tr>
+                    <tr><td><code>core::weaken($ref)</code></td><td>Make <code>$ref</code> a weak reference (break circular refs)</td></tr>
+                    <tr><td><code>core::isweak($ref)</code></td><td>Returns 1 if <code>$ref</code> is weak, 0 otherwise</td></tr>
                 </tbody>
             </table>
 
@@ -389,6 +391,9 @@
                     <tr><td><code>slurp($path)</code></td><td>Read entire file as string</td></tr>
                     <tr><td><code>spew($path, $data)</code></td><td>Write string to file</td></tr>
                     <tr><td><code>core::open($path, $mode)</code></td><td>Open file, return filehandle</td></tr>
+                    <tr><td><code>core::open(\$var, $mode)</code></td><td>Open in-memory handle (ref-style, writeback on close)</td></tr>
+                    <tr><td><code>core::open_str($content, $mode)</code></td><td>Open in-memory handle from string</td></tr>
+                    <tr><td><code>core::str_from_fh($fh)</code></td><td>Extract string from memstream</td></tr>
                     <tr><td><code>core::readline($fh)</code></td><td>Read line from filehandle</td></tr>
                     <tr><td><code>core::read($fd, $len)</code></td><td>Read bytes from fd</td></tr>
                     <tr><td><code>core::write($fd, $data)</code></td><td>Write bytes to fd</td></tr>
@@ -447,6 +452,25 @@
                     <tr><td><code>print($fh, $text)</code></td><td>Write text without newline to filehandle/socket</td></tr>
                 </tbody>
             </table>
+
+            <h3>In-Memory I/O</h3>
+
+            <p>Read from and write to strings using standard file handle operations. All I/O functions work transparently with in-memory handles.</p>
+
+            <pre><code><span class="comment"># Read from a string</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$fh</span> = <span class="func">core::open_str</span>(<span class="string">"line1\nline2\n"</span>, <span class="string">"r"</span>);
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$line</span> = &lt;<span class="sigil">$fh</span>&gt;;  <span class="comment"># "line1"</span>
+
+<span class="comment"># Write to a string buffer</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$wfh</span> = <span class="func">core::open_str</span>(<span class="string">""</span>, <span class="string">"w"</span>);
+<span class="func">say</span>(<span class="sigil">$wfh</span>, <span class="string">"hello"</span>);
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$result</span> = <span class="func">core::str_from_fh</span>(<span class="sigil">$wfh</span>);  <span class="comment"># "hello\n"</span>
+
+<span class="comment"># Reference-style (variable updated on close)</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$output</span> = <span class="string">""</span>;
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$wfh2</span> = <span class="func">core::open</span>(\<span class="sigil">$output</span>, <span class="string">"w"</span>);
+<span class="func">say</span>(<span class="sigil">$wfh2</span>, <span class="string">"data"</span>);
+<span class="func">core::close</span>(<span class="sigil">$wfh2</span>);  <span class="comment"># $output = "data\n"</span></code></pre>
 
             <h2>Math Functions (math::)</h2>
 
@@ -851,6 +875,7 @@
                     <tr><td><code>eval($code)</code></td><td>Evaluate Strada code string</td></tr>
                     <tr><td><code>$obj->isa($class)</code></td><td>Check if object is instance of class</td></tr>
                     <tr><td><code>$obj->can($method)</code></td><td>Check if object has method</td></tr>
+                    <tr><td><code>$obj->$method()</code></td><td>Dynamic method dispatch (name from variable)</td></tr>
                     <tr><td><code>local($var)</code></td><td>Dynamic scoping for <code>our</code> variables</td></tr>
                 </tbody>
             </table>

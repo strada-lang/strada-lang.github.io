@@ -365,6 +365,24 @@
                 </ul>
             </div>
 
+            <h2>Dynamic Method Dispatch</h2>
+
+            <p>Call methods where the method name is stored in a variable. This is useful for dispatch tables, plugin systems, and dynamic APIs.</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$method</span> = <span class="string">"speak"</span>;
+<span class="sigil">$obj</span>-><span class="sigil">$method</span>();              <span class="comment"># Calls $obj-&gt;speak()</span>
+<span class="sigil">$obj</span>-><span class="sigil">$method</span>(<span class="sigil">$arg1</span>);        <span class="comment"># With arguments</span>
+<span class="sigil">$obj</span>-><span class="sigil">$method</span>;                <span class="comment"># Without parens (accessor style)</span></code></pre>
+
+            <div class="info-box">
+                <strong>Dynamic Dispatch Details</strong>
+                <ul>
+                    <li>Uses the same runtime dispatch as static <code>$obj-&gt;method()</code></li>
+                    <li>All OOP features work: inheritance, AUTOLOAD, method modifiers</li>
+                    <li>Spread arguments supported: <code>$obj-&gt;$method(...@args)</code></li>
+                </ul>
+            </div>
+
             <h2>Operator Overloading</h2>
 
             <p>Strada supports Perl-style operator overloading via <code>use overload</code>. This lets classes define custom behavior for built-in operators like <code>+</code>, <code>-</code>, <code>*</code>, <code>.</code>, <code>""</code>, <code>==</code>, <code>&lt;=&gt;</code>, etc.</p>
@@ -655,6 +673,7 @@
                     <li>Use getters/setters for controlled access to properties</li>
                     <li>Return <code>$self</code> from setters for method chaining</li>
                     <li>Use <code>before</code>/<code>after</code> modifiers for cross-cutting concerns (logging, validation)</li>
+                    <li>Use <code>core::weaken()</code> on back-references (child&rarr;parent) to prevent circular reference leaks</li>
                 </ul>
             </div>
 

@@ -24,6 +24,7 @@
                 <li><a href="quickstart.html">QuickStart</a></li>
                 <li><a href="index.html">Documentation</a></li>
                 <li><a href="repl.html" class="active">REPL & Scripting</a></li>
+                <li><a href="interpreter.html">Interpreter</a></li>
             </ul>
             <h3>Language Guide</h3>
             <ul>
@@ -218,9 +219,22 @@ strada> <span class="func">fib</span>(<span class="number">20</span>)
 => <span class="number">6765</span>
 strada> .profile</code></pre>
 
+            <h2>Interpreter Backend</h2>
+
+            <p>The REPL is powered by the Strada tree-walking interpreter (<code>Strada::Interpreter</code>), which evaluates code directly from the AST without generating C. This means:</p>
+
+            <ul>
+                <li>No C compiler (gcc/tcc) is needed at runtime</li>
+                <li>The full Strada language is supported (except <code>__C__</code> blocks and async/await)</li>
+                <li>Variables, functions, and state persist across evaluations</li>
+                <li>Native shared libraries loaded via <code>import_lib</code> still work (via dlopen)</li>
+            </ul>
+
+            <p>For details on the interpreter architecture and the embedded eval API, see the <a href="interpreter.html">Interpreter</a> page.</p>
+
             <h2>Scripting</h2>
 
-            <p>Beyond interactive use, the REPL also serves as a scripting engine for quick tasks without the full compilation step. Scripts run directly through the REPL interpreter.</p>
+            <p>Beyond interactive use, the REPL also serves as a scripting engine for quick tasks without the full compilation step. Scripts run directly through the interpreter.</p>
 
             <h3>Running Scripts</h3>
 
@@ -255,7 +269,7 @@ strada> .profile</code></pre>
                 <thead>
                     <tr>
                         <th>Feature</th>
-                        <th>REPL Script</th>
+                        <th>Interpreter Script</th>
                         <th>Compiled Program</th>
                     </tr>
                 </thead>
@@ -267,8 +281,13 @@ strada> .profile</code></pre>
                     </tr>
                     <tr>
                         <td>Execution</td>
-                        <td>Interpreted via TCC</td>
+                        <td>Tree-walking interpreter</td>
                         <td>Native machine code</td>
+                    </tr>
+                    <tr>
+                        <td>Requires C compiler</td>
+                        <td>No</td>
+                        <td>Yes (gcc)</td>
                     </tr>
                     <tr>
                         <td>Best for</td>
@@ -279,6 +298,11 @@ strada> .profile</code></pre>
                         <td>No main() needed</td>
                         <td>Yes - top-level code runs</td>
                         <td>No - requires func main()</td>
+                    </tr>
+                    <tr>
+                        <td>__C__ blocks</td>
+                        <td>Skipped</td>
+                        <td>Fully supported</td>
                     </tr>
                 </tbody>
             </table>

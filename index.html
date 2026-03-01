@@ -383,6 +383,131 @@
             border-left-color: var(--secondary);
         }
 
+        .benchmarks {
+            background: var(--dark);
+            color: var(--light);
+            padding: 5rem 2rem;
+            max-width: none;
+        }
+
+        .benchmarks h2 {
+            color: var(--light);
+            text-align: center;
+        }
+
+        .bench-subtitle {
+            color: var(--gray);
+            font-size: 1.2rem;
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .bench-layout {
+            display: flex;
+            gap: 3rem;
+            max-width: 1000px;
+            margin: 0 auto;
+            align-items: center;
+        }
+
+        .bench-bars {
+            flex: 2;
+        }
+
+        .bench-group-title {
+            color: var(--gray);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 1.5rem;
+        }
+
+        .bench-bar-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .bench-label {
+            width: 90px;
+            font-size: 0.95rem;
+            color: var(--gray);
+            flex-shrink: 0;
+        }
+
+        .bench-track {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            height: 36px;
+            overflow: hidden;
+        }
+
+        .bench-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-dark) 100%);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 0.75rem;
+            min-width: 120px;
+            transition: width 0.6s ease;
+        }
+
+        .bench-value {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: white;
+            white-space: nowrap;
+        }
+
+        .bench-callout {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .bench-callout-number {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            line-height: 1;
+        }
+
+        .bench-callout-text {
+            font-size: 1.1rem;
+            color: var(--light);
+            margin-top: 0.5rem;
+        }
+
+        .bench-callout-detail {
+            font-size: 0.85rem;
+            color: var(--gray);
+            margin-top: 0.25rem;
+        }
+
+        .bench-footer {
+            max-width: 700px;
+            margin: 2.5rem auto 0;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--gray);
+            line-height: 1.6;
+        }
+
+        .bench-footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        .bench-footer a:hover {
+            text-decoration: underline;
+        }
+
         @media (max-width: 768px) {
             .hero h1 {
                 font-size: 2.5rem;
@@ -407,6 +532,14 @@
             .pipeline-arrow {
                 transform: rotate(90deg);
             }
+
+            .bench-layout {
+                flex-direction: column;
+            }
+
+            .bench-callout {
+                width: 100%;
+            }
         }
     </style>
 </head>
@@ -418,6 +551,7 @@
             <li><a href="docs/index.html">Docs</a></li>
             <li><a href="#features">Features</a></li>
             <li><a href="#examples">Examples</a></li>
+            <li><a href="#benchmarks">Benchmarks</a></li>
             <li><a href="https://github.com/strada-lang/strada-lang">GitHub</a></li>
         </ul>
     </nav>
@@ -449,7 +583,7 @@
             <div class="feature">
                 <div class="feature-icon">🚀</div>
                 <h3>Native Performance</h3>
-                <p>Compiles to C, then to native machine code via GCC. No VM, no interpreter overhead.</p>
+                <p>Compiles to C, then to native machine code via GCC. No VM overhead in production.</p>
             </div>
             <div class="feature">
                 <div class="feature-icon">🔒</div>
@@ -513,8 +647,8 @@
             </div>
             <div class="feature">
                 <div class="feature-icon">💻</div>
-                <h3>Interactive REPL</h3>
-                <p>Experiment interactively or run quick scripts without compilation. Memory and function profiling built-in.</p>
+                <h3>Interpreter & REPL</h3>
+                <p>Tree-walking interpreter for interactive REPL, quick scripts, and embedded eval &mdash; no C compiler needed at runtime.</p>
             </div>
             <div class="feature">
                 <div class="feature-icon">📖</div>
@@ -527,6 +661,43 @@
                 <p>Perl-style array transformations with $_ and blocks. Create lookup hashes with <code>map { $_ =&gt; 1 }</code>.</p>
             </div>
         </div>
+    </section>
+
+    <section class="benchmarks" id="benchmarks">
+        <h2>Performance <span>Benchmarks</span></h2>
+        <p class="bench-subtitle">Strada compiles to native machine code via GCC. Here's how it compares.</p>
+
+        <div class="bench-layout">
+            <div class="bench-bars">
+                <h3 class="bench-group-title">vs Perl</h3>
+                <div class="bench-bar-row">
+                    <span class="bench-label">Compute</span>
+                    <div class="bench-track">
+                        <div class="bench-fill" style="width: 100%;"><span class="bench-value">5.25x faster</span></div>
+                    </div>
+                </div>
+                <div class="bench-bar-row">
+                    <span class="bench-label">Functions</span>
+                    <div class="bench-track">
+                        <div class="bench-fill" style="width: 35%;"><span class="bench-value">1.86x faster</span></div>
+                    </div>
+                </div>
+                <div class="bench-bar-row">
+                    <span class="bench-label">OOP</span>
+                    <div class="bench-track">
+                        <div class="bench-fill" style="width: 20%;"><span class="bench-value">1.08x faster</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bench-callout">
+                <div class="bench-callout-number">467x</div>
+                <div class="bench-callout-text">faster than Python</div>
+                <div class="bench-callout-detail">String operations benchmark</div>
+            </div>
+        </div>
+
+        <p class="bench-footer">Strada is compiled to native code, so CPU-bound tasks are naturally fast. Perl and Python win at some string and hash workloads thanks to highly optimized C internals. <a href="https://github.com/strada-lang/strada-lang/tree/main/benchmarks">Run the benchmarks yourself.</a></p>
     </section>
 
     <section class="type-system">
@@ -753,6 +924,7 @@
 
         <div style="max-width: 600px; margin: 3rem auto 0; text-align: center;">
             <p style="color: #666;">The self-hosting compiler is written in Strada and compiles Strada source code to portable C, which is then compiled by GCC to produce fast, native executables with no runtime dependencies beyond the standard C library.</p>
+            <p style="color: #666; margin-top: 1rem;">Alternatively, the <a href="docs/interpreter.html" style="color: var(--primary);">tree-walking interpreter</a> can execute Strada programs directly from the AST without generating C code &mdash; ideal for interactive use and scripting.</p>
         </div>
     </section>
 
@@ -809,6 +981,7 @@
             <a href="docs/index.html">Documentation</a> &nbsp;|&nbsp;
             <a href="docs/quickstart.html">QuickStart</a> &nbsp;|&nbsp;
             <a href="docs/repl.html">REPL</a> &nbsp;|&nbsp;
+            <a href="docs/interpreter.html">Interpreter</a> &nbsp;|&nbsp;
             <a href="docs/reference.html">Reference</a> &nbsp;|&nbsp;
             <a href="docs/cannoli.html">Cannoli</a> &nbsp;|&nbsp;
             <a href="https://github.com/strada-lang/cannoli">Cannoli GitHub</a>

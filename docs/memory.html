@@ -318,25 +318,38 @@
 <span class="comment"># Now %b refcount = 1, %a refcount = 1</span>
 <span class="comment"># Both freed when scope exits</span></code></pre>
 
-            <h3>Weak References (Pattern)</h3>
+            <h3>Weak References</h3>
 
-            <p>For parent-child relationships, have children reference parents weakly:</p>
+            <p>A weak reference does not keep its target alive. When the target's last strong reference is dropped, the target is freed and all weak references to it become <code>undef</code>. Use <code>core::weaken()</code> to break circular references.</p>
 
-            <pre><code><span class="keyword">package</span> <span class="type">TreeNode</span>;
+            <pre><code><span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$parent</span> = { <span class="string">"name"</span> => <span class="string">"parent"</span> };
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$child</span> = { <span class="string">"name"</span> => <span class="string">"child"</span> };
+<span class="sigil">$parent</span>->{<span class="string">"child"</span>} = <span class="sigil">$child</span>;
+<span class="sigil">$child</span>->{<span class="string">"parent"</span>} = <span class="sigil">$parent</span>;
 
-<span class="keyword">func</span> <span class="func">new</span>(<span class="type">str</span> <span class="sigil">$value</span>) <span class="type">scalar</span> {
-    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%self</span> = {
-        <span class="string">"value"</span> => <span class="sigil">$value</span>,
-        <span class="string">"children"</span> => [],
-        <span class="string">"parent"</span> => <span class="func">undef</span>  <span class="comment"># Don't store ref to parent</span>
-    };
-    <span class="keyword">return</span> <span class="func">bless</span>(\<span class="sigil">%self</span>, <span class="string">"TreeNode"</span>);
-}
+<span class="func">core::weaken</span>(<span class="sigil">$child</span>->{<span class="string">"parent"</span>});  <span class="comment"># Break the cycle</span>
+<span class="func">say</span>(<span class="func">core::isweak</span>(<span class="sigil">$child</span>->{<span class="string">"parent"</span>}));  <span class="comment"># 1</span>
+<span class="func">say</span>(<span class="sigil">$child</span>->{<span class="string">"parent"</span>}->{<span class="string">"name"</span>});    <span class="comment"># "parent" (still accessible)</span></code></pre>
 
-<span class="keyword">func</span> <span class="func">add_child</span>(<span class="type">scalar</span> <span class="sigil">$self</span>, <span class="type">scalar</span> <span class="sigil">$child</span>) <span class="type">void</span> {
-    <span class="func">push</span>(<span class="sigil">$self</span>->{<span class="string">"children"</span>}, <span class="sigil">$child</span>);
-    <span class="comment"># Don't: $child->{"parent"} = $self;  # Creates cycle!</span>
-}</code></pre>
+            <table>
+                <thead>
+                    <tr><th>Function</th><th>Description</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>core::weaken($ref)</code></td><td>Make <code>$ref</code> a weak reference</td></tr>
+                    <tr><td><code>core::isweak($ref)</code></td><td>Returns 1 if weak, 0 otherwise</td></tr>
+                </tbody>
+            </table>
+
+            <div class="info-box">
+                <strong>Weak Reference Details</strong>
+                <ul>
+                    <li>Works on hash entry values: <code>core::weaken($hash-&gt;{"key"})</code></li>
+                    <li>Idempotent: calling <code>core::weaken()</code> on an already-weak ref is a safe no-op</li>
+                    <li>Multiple weak references to the same target are supported</li>
+                    <li>When the target is freed, dereferencing the weak ref returns <code>undef</code></li>
+                </ul>
+            </div>
 
             <h2>Memory Profiling</h2>
 

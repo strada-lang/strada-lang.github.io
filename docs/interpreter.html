@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interpreter - Strada</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <a href="../index.html" class="logo">Strada<span>Lang</span></a>
+        <ul>
+            <li><a href="quickstart.html">QuickStart</a></li>
+            <li><a href="index.html">Docs</a></li>
+            <li><a href="reference.html">Reference</a></li>
+            <li><a href="https://github.com/strada-lang/strada-lang">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h3>Getting Started</h3>
+            <ul>
+                <li><a href="quickstart.html">QuickStart</a></li>
+                <li><a href="index.html">Documentation</a></li>
+                <li><a href="repl.html">REPL & Scripting</a></li>
+                <li><a href="interpreter.html" class="active">Interpreter</a></li>
+            </ul>
+            <h3>Language Guide</h3>
+            <ul>
+                <li><a href="basics.html">Language Basics</a></li>
+                <li><a href="types.html">Types & Variables</a></li>
+                <li><a href="functions.html">Functions</a></li>
+                <li><a href="control-flow.html">Control Flow</a></li>
+                <li><a href="oop.html">Object-Oriented Programming</a></li>
+                <li><a href="regex.html">Regular Expressions</a></li>
+            </ul>
+            <h3>Advanced</h3>
+            <ul>
+                <li><a href="memory.html">Memory Management</a></li>
+                <li><a href="debugging.html">Debugging</a></li>
+                <li><a href="async.html">Async/Await</a></li>
+                <li><a href="c-interop.html">C Interoperability</a></li>
+                <li><a href="libraries.html">Libraries Guide</a></li>
+                <li><a href="perl-integration.html">Perl Integration</a></li>
+            </ul>
+            <h3>Reference</h3>
+            <ul>
+                <li><a href="reference.html">Built-in Functions</a></li>
+                <li><a href="cannoli.html">Cannoli Web Framework</a></li>
+                <li><a href="forma.html">Forma Template Engine</a></li>
+                <li><a href="dbi.html">DBI Database Interface</a></li>
+                <li><a href="nesso.html">Nesso ORM</a></li>
+                <li><a href="stradadoc.html">Documentation Tools</a></li>
+            </ul>
+        </aside>
+
+        <main class="content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a> / <a href="index.html">Documentation</a> / Interpreter
+            </div>
+
+            <h1>Strada <span>Interpreter</span></h1>
+            <p class="subtitle">A tree-walking interpreter that executes Strada programs directly from the AST, without generating C code.</p>
+
+            <div class="info-box">
+                <strong>No C compiler needed at runtime</strong>
+                The interpreter evaluates Strada code by walking the AST directly. This makes it ideal for interactive use, quick scripts, and environments where gcc or tcc are not available.
+            </div>
+
+            <h2>Overview</h2>
+
+            <p>Strada offers two execution paths for your code:</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Compiled (stradac)</th>
+                        <th>Interpreter (strada-interp)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>How it works</strong></td>
+                        <td>Generates C code, compiles to native binary</td>
+                        <td>Walks the AST directly at runtime</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Requires C compiler</strong></td>
+                        <td>Yes (gcc)</td>
+                        <td>No</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Startup time</strong></td>
+                        <td>Slow (compilation step)</td>
+                        <td>Fast (parse and run)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Runtime speed</strong></td>
+                        <td>Fastest (native code)</td>
+                        <td>Slower (interpreted)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Best for</strong></td>
+                        <td>Production, performance</td>
+                        <td>REPL, scripting, prototyping</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <p>Both paths share the same Lexer and Parser front-end, so valid Strada code works with either.</p>
+
+            <h2>Running Programs</h2>
+
+            <pre><code><span class="comment"># Build the interpreter</span>
+make interpreter
+
+<span class="comment"># Run a Strada program</span>
+./strada-interp program.strada
+
+<span class="comment"># With library search paths</span>
+./strada-interp -L lib program.strada
+
+<span class="comment"># Start the interactive REPL</span>
+./strada-interp</code></pre>
+
+            <h2>Interactive REPL</h2>
+
+            <p>When run without arguments, the interpreter starts an interactive REPL with readline support (line editing, history):</p>
+
+            <pre><code>strada> <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$x</span> = <span class="number">42</span>;
+strada> <span class="sigil">$x</span> * <span class="number">2</span>
+=> <span class="number">84</span>
+
+strada> <span class="keyword">func</span> <span class="func">square</span>(<span class="type">int</span> <span class="sigil">$n</span>) <span class="type">int</span> {
+...        <span class="keyword">return</span> <span class="sigil">$n</span> * <span class="sigil">$n</span>;
+...    }
+strada> <span class="func">square</span>(<span class="number">7</span>)
+=> <span class="number">49</span></code></pre>
+
+            <p>Variables and function definitions persist across evaluations. Multi-line input is detected automatically when braces, parentheses, or brackets are unbalanced.</p>
+
+            <p>See <a href="repl.html">REPL & Scripting</a> for REPL commands, scripting, and profiling features.</p>
+
+            <h2>Embedded Eval</h2>
+
+            <p>The interpreter can be embedded inside compiled Strada programs using the <code>Strada::Interpreter</code> library. This enables runtime code evaluation without needing a C compiler at runtime:</p>
+
+            <pre><code><span class="keyword">use lib</span> <span class="string">"lib"</span>;
+<span class="keyword">use</span> Strada::Interpreter;
+
+<span class="comment"># Initialize the interpreter engine</span>
+Strada::Interpreter::<span class="func">init</span>();
+
+<span class="comment"># Evaluate expressions</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$result</span> = Strada::Interpreter::<span class="func">eval_string</span>(<span class="string">"1 + 2"</span>);
+<span class="func">say</span>(<span class="sigil">$result</span>);  <span class="comment"># 3</span>
+
+<span class="comment"># Variables persist across calls</span>
+Strada::Interpreter::<span class="func">eval_string</span>(<span class="string">"my int \$x = 10;"</span>);
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$val</span> = Strada::Interpreter::<span class="func">eval_string</span>(<span class="string">"\$x * 5"</span>);
+<span class="func">say</span>(<span class="sigil">$val</span>);  <span class="comment"># 50</span>
+
+<span class="comment"># Function definitions persist</span>
+Strada::Interpreter::<span class="func">eval_string</span>(<span class="string">"func double(int \$n) int { return \$n * 2; }"</span>);
+<span class="func">say</span>(Strada::Interpreter::<span class="func">eval_string</span>(<span class="string">"double(21)"</span>));  <span class="comment"># 42</span>
+
+<span class="comment"># Reset all state</span>
+Strada::Interpreter::<span class="func">reset</span>();</code></pre>
+
+            <h3>Eval API</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Function</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>Strada::Interpreter::init()</code></td>
+                        <td>Initialize the shared interpreter instance (auto-called by eval_string if needed)</td>
+                    </tr>
+                    <tr>
+                        <td><code>Strada::Interpreter::eval_string($code)</code></td>
+                        <td>Evaluate Strada code, return the result (undef for void statements)</td>
+                    </tr>
+                    <tr>
+                        <td><code>Strada::Interpreter::reset()</code></td>
+                        <td>Clear all persisted state (variables, functions, enums, constants)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Interpreter vs JIT</h2>
+
+            <p>Strada also provides <code>Strada::JIT</code>, which evaluates code by compiling to a shared library at runtime. The two approaches serve different needs:</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Strada::Interpreter</th>
+                        <th>Strada::JIT</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Execution</strong></td>
+                        <td>Tree-walking AST eval</td>
+                        <td>Compile to .so, dlopen, execute</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Requires C compiler</strong></td>
+                        <td>No</td>
+                        <td>Yes (gcc or tcc)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>__C__ blocks</strong></td>
+                        <td>Skipped</td>
+                        <td>Supported</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Async/await</strong></td>
+                        <td>No</td>
+                        <td>Yes</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Per-eval overhead</strong></td>
+                        <td>Low (parse + walk)</td>
+                        <td>Higher (compile + link + load)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Execution speed</strong></td>
+                        <td>Slower (interpreted)</td>
+                        <td>Fast (native code)</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Best for</strong></td>
+                        <td>REPL, scripting, no-compiler envs</td>
+                        <td>Plugin systems, perf-sensitive eval</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Architecture</h2>
+
+            <p>The interpreter reuses the compiler's Lexer and Parser, then walks the resulting AST to execute programs:</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Component</th>
+                        <th>Source</th>
+                        <th>Purpose</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Lexer</td>
+                        <td><code>compiler/Lexer.strada</code></td>
+                        <td>Tokenizes source (shared with compiler)</td>
+                    </tr>
+                    <tr>
+                        <td>Parser</td>
+                        <td><code>compiler/Parser.strada</code></td>
+                        <td>Builds AST (shared with compiler)</td>
+                    </tr>
+                    <tr>
+                        <td>Interpreter</td>
+                        <td><code>lib/Strada/Interpreter.strada</code></td>
+                        <td>Tree-walking AST evaluator</td>
+                    </tr>
+                    <tr>
+                        <td>Driver</td>
+                        <td><code>interpreter/Main.strada</code></td>
+                        <td>File execution and REPL</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>Scoping</h3>
+
+            <p>The interpreter maintains a chain of environment hashes for lexical scoping. Each scope has a <code>vars</code> hash and a <code>parent</code> pointer. Variable lookup walks from innermost to outermost scope. <code>my</code> creates in the current scope; assignments update the nearest scope containing the variable.</p>
+
+            <h3>Control Flow</h3>
+
+            <p>Loop control (<code>next</code>, <code>last</code>, <code>redo</code>) and <code>return</code> are implemented as exception-based signals caught by the enclosing loop or function call handler. Labeled loops match signals by label name.</p>
+
+            <h2>Supported Features</h2>
+
+            <p>The interpreter supports the full Strada language:</p>
+
+            <ul>
+                <li><strong>Types</strong>: int, num, str, scalar, array, hash, undef</li>
+                <li><strong>Variables</strong>: <code>my</code>, <code>our</code>, <code>local</code>, <code>const</code>, <code>enum</code></li>
+                <li><strong>Operators</strong>: arithmetic, string (<code>.</code>, <code>x</code>), comparison, logical, assignment, ternary</li>
+                <li><strong>Control flow</strong>: if/elsif/else, unless, while, until, for, foreach, do-while, loop labels, statement modifiers</li>
+                <li><strong>Functions</strong>: <code>func</code>/<code>fn</code>, closures, variadic (<code>...@args</code>), spread operator</li>
+                <li><strong>OOP</strong>: packages, <code>extends</code>, <code>has ro|rw</code>, <code>before</code>/<code>after</code>/<code>around</code>, <code>isa</code>, <code>can</code>, <code>AUTOLOAD</code>, <code>bless</code>, <code>use overload</code></li>
+                <li><strong>Exceptions</strong>: try/catch (typed and catch-all), throw, die</li>
+                <li><strong>Regex</strong>: <code>=~</code>, <code>!~</code>, <code>s///</code>, <code>tr///</code>/<code>y///</code>, captures, named captures, <code>/e</code> modifier</li>
+                <li><strong>I/O</strong>: say, print, printf, sprintf, core::open, core::close, diamond operator, core::slurp, core::spew</li>
+                <li><strong>Modules</strong>: <code>use</code> (source inclusion), <code>import_lib</code> (native .so via dlopen)</li>
+                <li><strong>BEGIN/END blocks</strong>, <strong>tie/untie/tied</strong>, <strong>BigInt/BigFloat</strong>, <strong>DateTime</strong></li>
+                <li><strong>Namespaces</strong>: <code>core::</code>, <code>math::</code>, <code>utf8::</code></li>
+            </ul>
+
+            <h2>Limitations</h2>
+
+            <div class="info-box warning">
+                <strong>Not supported in the interpreter</strong>
+                <ul style="margin: 0.5rem 0 0 1rem;">
+                    <li><code>__C__</code> blocks are skipped (programs relying on inline C won't work)</li>
+                    <li>Async/await (requires compiled thread pool runtime)</li>
+                    <li><code>c::</code> namespace functions (<code>c::alloc</code>, <code>c::free</code>, etc.)</li>
+                </ul>
+            </div>
+
+            <p>Native shared libraries loaded via <code>import_lib</code> still work &mdash; they are called through dlopen/dlsym regardless of execution mode.</p>
+
+            <h2>Building</h2>
+
+            <pre><code><span class="comment"># Build the interpreter</span>
+make interpreter
+
+<span class="comment"># The interpreter binary</span>
+./strada-interp --help
+
+<span class="comment"># Usage</span>
+Strada Interpreter v0.2
+Usage:
+  strada-interp                          Interactive REPL
+  strada-interp [OPTIONS] &lt;file.strada&gt;  Execute file
+
+Options:
+  -L PATH       Add library search path
+  -h, --help    Show this help message</code></pre>
+
+            <div class="page-nav">
+                <a href="repl.html">
+                    <span class="label">&larr; Previous</span>
+                    <span class="title">REPL & Scripting</span>
+                </a>
+                <a href="basics.html" class="next">
+                    <span class="label">Next &rarr;</span>
+                    <span class="title">Language Basics</span>
+                </a>
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <p><a href="../index.html">Strada</a> - A strongly-typed language inspired by Perl</p>
+        <p style="margin-top: 0.5rem; font-size: 0.85rem;">Licensed under <a href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html">GPLv2</a> | <a href="https://github.com/strada-lang/strada-lang">GitHub</a></p>
+    </footer>
+</body>
+</html>

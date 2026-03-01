@@ -24,6 +24,7 @@
                 <li><a href="quickstart.html">QuickStart</a></li>
                 <li><a href="index.html" class="active">Documentation</a></li>
                 <li><a href="repl.html">REPL & Scripting</a></li>
+                <li><a href="interpreter.html">Interpreter</a></li>
             </ul>
             <h3>Language Guide</h3>
             <ul>
@@ -79,6 +80,11 @@
                     <h4>Language Basics</h4>
                     <p>Learn syntax, operators, and fundamental concepts.</p>
                     <p><a href="basics.html">Learn basics &rarr;</a></p>
+                </div>
+                <div class="card">
+                    <h4>Interpreter</h4>
+                    <p>Tree-walking interpreter for scripts and embedded eval &mdash; no C compiler needed.</p>
+                    <p><a href="interpreter.html">Learn more &rarr;</a></p>
                 </div>
             </div>
 
@@ -204,6 +210,10 @@ gcc -o output output.c runtime/strada_runtime.c -Iruntime -ldl -lm
                     <tr>
                         <td><code>bootstrap/</code></td>
                         <td>Bootstrap compiler in C (used only to build self-hosting compiler)</td>
+                    </tr>
+                    <tr>
+                        <td><code>interpreter/</code></td>
+                        <td>Tree-walking interpreter driver (REPL and file execution)</td>
                     </tr>
                     <tr>
                         <td><code>examples/</code></td>
