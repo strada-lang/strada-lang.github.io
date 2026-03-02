@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Strada - A Strongly-Typed Language Inspired by Perl</title>
+    <title>Strada - A Perl-Inspired Language That Compiles to Native Code</title>
+    <meta name="description" content="Strada is a strongly-typed language inspired by Perl that compiles to native executables via C. Familiar Perl syntax with strong typing, up to 5.7x faster performance, and single-binary deployment.">
     <style>
         :root {
             --primary: #e63946;
@@ -508,7 +509,79 @@
             text-decoration: underline;
         }
 
+        .compiled-perl {
+            background: white;
+            padding: 4rem 2rem;
+        }
+
+        .compiled-perl-inner {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .compiled-perl h2 {
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .compiled-perl .section-subtitle {
+            text-align: center;
+        }
+
+        .compiled-perl-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .compiled-perl-card {
+            background: var(--light);
+            border-radius: 10px;
+            padding: 1.5rem;
+        }
+
+        .compiled-perl-card h3 {
+            color: var(--dark);
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .compiled-perl-card p {
+            color: #555;
+            font-size: 0.95rem;
+        }
+
+        .compiled-perl-card code {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 0.15rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+
+        .compiled-perl-cta {
+            text-align: center;
+            margin-top: 2rem;
+            color: #555;
+            font-size: 0.95rem;
+        }
+
+        .compiled-perl-cta a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .compiled-perl-cta a:hover {
+            text-decoration: underline;
+        }
+
         @media (max-width: 768px) {
+            .compiled-perl-grid {
+                grid-template-columns: 1fr;
+            }
             .hero h1 {
                 font-size: 2.5rem;
             }
@@ -558,7 +631,7 @@
 
     <section class="hero">
         <h1>Strada<span>Lang</span></h1>
-        <p class="tagline">A strongly-typed programming language inspired by Perl that compiles to C for blazing-fast native executables.</p>
+        <p class="tagline">A strongly-typed language inspired by Perl that compiles to native executables via C.</p>
 
         <div class="hero-code">
             <pre><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$greeting</span> = <span class="string">"Hello, Strada!"</span>;
@@ -660,6 +733,36 @@
                 <h3>Map, Grep, Sort</h3>
                 <p>Perl-style array transformations with $_ and blocks. Create lookup hashes with <code>map { $_ =&gt; 1 }</code>.</p>
             </div>
+        </div>
+    </section>
+
+    <section class="compiled-perl" id="compiled-perl">
+        <div class="compiled-perl-inner">
+            <h2>For <span>Perl</span> Developers</h2>
+            <p class="section-subtitle">Strada is its own language, but if you know Perl, you'll feel right at home.</p>
+
+            <p style="max-width: 700px; margin: 0 auto 2rem; text-align: center; color: #555;">Strada draws heavily from Perl's syntax &mdash; sigils, regular expressions, hashes, Moose-style OOP &mdash; and compiles it all to C and then to native machine code. The result is a single binary with no interpreter, no VM, and no runtime dependencies.</p>
+
+            <div class="compiled-perl-grid">
+                <div class="compiled-perl-card">
+                    <h3>Familiar syntax</h3>
+                    <p>Sigils (<code>$</code>, <code>@</code>, <code>%</code>), regex (<code>=~</code>, <code>s///</code>), <code>foreach</code>, <code>map</code>, <code>grep</code>, <code>push</code>/<code>pop</code> &mdash; the idioms you know from Perl work in Strada with the addition of strong typing.</p>
+                </div>
+                <div class="compiled-perl-card">
+                    <h3>Perl-to-Strada converter</h3>
+                    <p>The included <code>perl2strada</code> tool translates Perl scripts and modules to Strada source as a starting point. Port your existing code and start compiling it.</p>
+                </div>
+                <div class="compiled-perl-card">
+                    <h3>Up to 5.7x faster</h3>
+                    <p>No interpreter dispatch loop, no symbol table lookups, no bytecode overhead. Function calls compile to a single <code>call</code> instruction. Integer arithmetic uses zero heap allocation.</p>
+                </div>
+                <div class="compiled-perl-card">
+                    <h3>Single-binary deployment</h3>
+                    <p>Compile your program once and distribute a standalone native executable. No language runtime required on the target machine.</p>
+                </div>
+            </div>
+
+            <p class="compiled-perl-cta">Coming from Perl? <a href="docs/perl-integration.html">See the Perl integration guide</a> or try <code>perl2strada</code> on your codebase.</p>
         </div>
     </section>
 
@@ -993,7 +1096,7 @@
             <a href="docs/cannoli.html">Cannoli</a> &nbsp;|&nbsp;
             <a href="https://github.com/strada-lang/cannoli">Cannoli GitHub</a>
         </p>
-        <p style="margin-top: 2rem; font-size: 0.9rem;">A strongly-typed language inspired by Perl, compiling to C.</p>
+        <p style="margin-top: 2rem; font-size: 0.9rem;">Strada &mdash; a strongly-typed language inspired by Perl that compiles to native code via C.</p>
     </footer>
 </body>
 </html>
