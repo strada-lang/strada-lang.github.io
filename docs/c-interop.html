@@ -133,6 +133,10 @@
                 <strong>Variable Naming</strong>: Inside <code>__C__</code> blocks, Strada variables are available by their name <em>without</em> the sigil. So <code>$x</code> becomes just <code>x</code>, and it's a <code>StradaValue*</code>.
             </div>
 
+            <div class="info-box">
+                <strong>Tagged Integers</strong>: Integer values may be passed as tagged pointers (with the low bit set) rather than heap-allocated <code>StradaValue*</code> structs. Always use <code>strada_to_int()</code> to extract integer values &mdash; it handles both tagged and heap-allocated integers transparently. Never dereference a <code>StradaValue*</code> directly to read its integer field; use the accessor functions.
+            </div>
+
             <h2>Runtime Functions</h2>
 
             <p>The Strada runtime provides functions to convert between C types and <code>StradaValue*</code>:</p>
@@ -144,7 +148,7 @@
                     <tr><th>Function</th><th>Returns</th><th>Description</th></tr>
                 </thead>
                 <tbody>
-                    <tr><td><code>strada_to_int(sv)</code></td><td><code>int64_t</code></td><td>Extract integer value</td></tr>
+                    <tr><td><code>strada_to_int(sv)</code></td><td><code>int64_t</code></td><td>Extract integer value (handles both tagged and heap ints)</td></tr>
                     <tr><td><code>strada_to_num(sv)</code></td><td><code>double</code></td><td>Extract floating-point value</td></tr>
                     <tr><td><code>strada_to_str(sv)</code></td><td><code>char*</code></td><td>Extract string (<strong>caller must free!</strong>)</td></tr>
                     <tr><td><code>strada_to_bool(sv)</code></td><td><code>int</code></td><td>Extract boolean (0 or 1)</td></tr>

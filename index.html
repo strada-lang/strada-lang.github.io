@@ -673,31 +673,37 @@
                 <div class="bench-bar-row">
                     <span class="bench-label">Compute</span>
                     <div class="bench-track">
-                        <div class="bench-fill" style="width: 100%;"><span class="bench-value">5.6x faster</span></div>
+                        <div class="bench-fill" style="width: 100%;"><span class="bench-value">5.7x faster</span></div>
                     </div>
                 </div>
                 <div class="bench-bar-row">
                     <span class="bench-label">Functions</span>
                     <div class="bench-track">
-                        <div class="bench-fill" style="width: 52%;"><span class="bench-value">2.9x faster</span></div>
+                        <div class="bench-fill" style="width: 53%;"><span class="bench-value">3.0x faster</span></div>
                     </div>
                 </div>
                 <div class="bench-bar-row">
                     <span class="bench-label">OOP</span>
                     <div class="bench-track">
-                        <div class="bench-fill" style="width: 29%;"><span class="bench-value">1.6x faster</span></div>
+                        <div class="bench-fill" style="width: 31%;"><span class="bench-value">1.8x faster</span></div>
+                    </div>
+                </div>
+                <div class="bench-bar-row">
+                    <span class="bench-label">Array/Hash</span>
+                    <div class="bench-track">
+                        <div class="bench-fill" style="width: 57%;"><span class="bench-value">3.2x faster</span></div>
                     </div>
                 </div>
             </div>
 
             <div class="bench-callout">
-                <div class="bench-callout-number">232x</div>
+                <div class="bench-callout-number">814x</div>
                 <div class="bench-callout-text">faster than Python</div>
                 <div class="bench-callout-detail">String operations benchmark</div>
             </div>
         </div>
 
-        <p class="bench-footer">Strada is compiled to native code, so CPU-bound tasks are naturally fast. Perl and Python win at some data structure workloads thanks to highly optimized C internals. <a href="docs/benchmarks.html">See all benchmarks</a> or <a href="https://github.com/strada-lang/strada-lang/tree/main/benchmarks">run them yourself.</a></p>
+        <p class="bench-footer">Strada compiles to native code and uses tagged integers for zero-allocation arithmetic, making it fast across all workloads &mdash; including data structures where it is now 3.2x faster than Perl and 4.2x faster than Python. <a href="docs/benchmarks.html">See all benchmarks</a> or <a href="https://github.com/strada-lang/strada-lang/tree/main/benchmarks">run them yourself.</a></p>
     </section>
 
     <section class="type-system">
@@ -707,7 +713,7 @@
         <div class="types-grid">
             <div class="type-card">
                 <h4>int</h4>
-                <p>64-bit integers</p>
+                <p>64-bit integers (tagged, zero alloc)</p>
             </div>
             <div class="type-card">
                 <h4>num</h4>

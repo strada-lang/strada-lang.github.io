@@ -76,7 +76,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td><code>int</code></td><td>64-bit signed integer</td><td><code>42</code>, <code>-17</code></td></tr>
+                    <tr><td><code>int</code></td><td>64-bit signed integer (tagged pointer, zero heap allocation)</td><td><code>42</code>, <code>-17</code></td></tr>
                     <tr><td><code>num</code></td><td>64-bit floating point</td><td><code>3.14</code>, <code>-0.5</code></td></tr>
                     <tr><td><code>str</code></td><td>UTF-8 string</td><td><code>"hello"</code></td></tr>
                     <tr><td><code>array</code></td><td>Dynamic array</td><td><code>[1, 2, 3]</code></td></tr>
@@ -208,6 +208,8 @@ my int $val = flexible();    # 42</code></pre>
             </div>
 
             <h2>Integers (int)</h2>
+
+            <p>Integers use <strong>tagged pointer representation</strong>: they are encoded directly in the pointer with zero heap allocation. This makes integer arithmetic, comparisons, loop counters, and array indexing extremely fast with no memory management overhead.</p>
 
             <pre><code><span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$a</span> = <span class="number">42</span>;
 <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$b</span> = -<span class="number">17</span>;

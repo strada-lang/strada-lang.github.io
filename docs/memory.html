@@ -65,13 +65,16 @@
 
             <div class="info-box success">
                 <strong>Key Concept</strong>
-                Strada uses automatic reference counting. Memory is freed when no references remain.
-                You rarely need to think about memory, but understanding the model helps write efficient code.
+                Strada uses automatic reference counting for most values, with a key optimization: <strong>small integers are encoded directly in pointers</strong> (tagged integers) with zero heap allocation. You rarely need to think about memory, but understanding the model helps write efficient code.
             </div>
+
+            <h2>Tagged Integers</h2>
+
+            <p>Integers that fit in 63 bits are stored directly inside the pointer itself, not on the heap. The low bit of the pointer is set to indicate a tagged integer. This means integer operations &mdash; arithmetic, comparisons, loop counters, array indexing &mdash; require <strong>no memory allocation and no reference counting</strong>. This optimization is completely transparent: all runtime functions like <code>strada_to_int()</code> handle both tagged and heap-allocated integers automatically.</p>
 
             <h2>Automatic Reference Counting</h2>
 
-            <p>Every value in Strada has a reference count. When a value is assigned to a variable or passed to a function, the count increases. When a variable goes out of scope, the count decreases. When the count reaches zero, the memory is freed.</p>
+            <p>Non-integer values (strings, arrays, hashes, references) use reference counting. When a value is assigned to a variable or passed to a function, the count increases. When a variable goes out of scope, the count decreases. When the count reaches zero, the memory is freed.</p>
 
             <pre><code><span class="keyword">func</span> <span class="func">example</span>() <span class="type">void</span> {
     <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$s</span> = <span class="string">"hello"</span>;   <span class="comment"># refcount = 1</span>

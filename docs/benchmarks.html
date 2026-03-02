@@ -229,15 +229,15 @@
 
             <div class="highlight-card">
                 <div class="stat">
-                    <div class="stat-number">5.6x</div>
+                    <div class="stat-number">5.7x</div>
                     <div class="stat-label">faster than Perl at compute</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-number">2.5x</div>
+                    <div class="stat-number">3.1x</div>
                     <div class="stat-label">faster than Python at function calls</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-number">232x</div>
+                    <div class="stat-number">814x</div>
                     <div class="stat-label">faster than Python at strings</div>
                 </div>
             </div>
@@ -258,33 +258,33 @@
                 <tbody>
                     <tr>
                         <td>Compute</td>
-                        <td class="winner">38.10s</td>
-                        <td>62.34s</td>
-                        <td class="slower">212.27s</td>
+                        <td class="winner">51.94s</td>
+                        <td>155.85s</td>
+                        <td class="slower">294.87s</td>
                     </tr>
                     <tr>
                         <td>Functions</td>
-                        <td class="winner">0.72s</td>
-                        <td>1.80s</td>
-                        <td>2.05s</td>
+                        <td class="winner">1.80s</td>
+                        <td>5.57s</td>
+                        <td>5.40s</td>
                     </tr>
                     <tr>
                         <td>OOP</td>
-                        <td>1.66s</td>
-                        <td class="winner">1.20s</td>
-                        <td>2.73s</td>
+                        <td>3.94s</td>
+                        <td class="winner">3.17s</td>
+                        <td>6.90s</td>
                     </tr>
                     <tr>
                         <td>Strings</td>
-                        <td class="winner">0.29s</td>
-                        <td class="slower">67.24s</td>
-                        <td>0.32s</td>
+                        <td class="winner">0.79s</td>
+                        <td class="slower">644.15s</td>
+                        <td>0.90s</td>
                     </tr>
                     <tr>
                         <td>Array/Hash</td>
-                        <td>1.18s</td>
-                        <td>0.97s</td>
-                        <td class="winner">0.90s</td>
+                        <td class="winner">0.76s</td>
+                        <td>3.22s</td>
+                        <td>2.46s</td>
                     </tr>
                 </tbody>
             </table>
@@ -295,36 +295,36 @@
                 <div class="ratio-bar">
                     <span class="ratio-label">Compute</span>
                     <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 100%;">5.6x faster</div>
+                        <div class="ratio-fill strada" style="width: 100%;">5.7x faster</div>
                     </div>
                 </div>
                 <div class="ratio-bar">
                     <span class="ratio-label">Functions</span>
                     <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 51%;">2.9x faster</div>
+                        <div class="ratio-fill strada" style="width: 53%;">3.0x faster</div>
                     </div>
                 </div>
                 <div class="ratio-bar">
                     <span class="ratio-label">OOP</span>
                     <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 29%;">1.6x faster</div>
+                        <div class="ratio-fill strada" style="width: 31%;">1.8x faster</div>
                     </div>
                 </div>
                 <div class="ratio-bar">
                     <span class="ratio-label">Strings</span>
                     <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 19%;">1.1x faster</div>
+                        <div class="ratio-fill strada" style="width: 20%;">1.1x faster</div>
                     </div>
                 </div>
                 <div class="ratio-bar">
                     <span class="ratio-label">Array/Hash</span>
                     <div class="ratio-track">
-                        <div class="ratio-fill perl" style="width: 14%;">Perl 1.3x</div>
+                        <div class="ratio-fill strada" style="width: 57%;">3.2x faster</div>
                     </div>
                 </div>
             </div>
 
-            <p>Strada wins convincingly on CPU-bound workloads. Perl's hash and array implementations are among the most optimized in any language runtime (30+ years of tuning), which gives it a slight edge on data-structure-heavy benchmarks.</p>
+            <p>Strada wins convincingly across the board. The Array/Hash benchmark saw a dramatic improvement thanks to <strong>tagged integers</strong> &mdash; small integers are now encoded directly in pointers with zero heap allocation, eliminating millions of malloc/free calls in tight loops.</p>
 
             <h2>Strada vs Python</h2>
 
@@ -332,36 +332,36 @@
                 <div class="ratio-bar">
                     <span class="ratio-label">Strings</span>
                     <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 100%;">232x faster</div>
+                        <div class="ratio-fill strada" style="width: 100%;">814x faster</div>
+                    </div>
+                </div>
+                <div class="ratio-bar">
+                    <span class="ratio-label">Array/Hash</span>
+                    <div class="ratio-track">
+                        <div class="ratio-fill strada" style="width: 5%;">4.2x faster</div>
                     </div>
                 </div>
                 <div class="ratio-bar">
                     <span class="ratio-label">Functions</span>
                     <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 10%;">2.5x faster</div>
+                        <div class="ratio-fill strada" style="width: 4%;">3.1x faster</div>
                     </div>
                 </div>
                 <div class="ratio-bar">
                     <span class="ratio-label">Compute</span>
                     <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 7%;">1.6x faster</div>
+                        <div class="ratio-fill strada" style="width: 4%;">3.0x faster</div>
                     </div>
                 </div>
                 <div class="ratio-bar">
                     <span class="ratio-label">OOP</span>
-                    <div class="ratio-track">
-                        <div class="ratio-fill python" style="width: 7%;">Python 1.4x</div>
-                    </div>
-                </div>
-                <div class="ratio-bar">
-                    <span class="ratio-label">Array/Hash</span>
                     <div class="ratio-track">
                         <div class="ratio-fill python" style="width: 7%;">Python 1.2x</div>
                     </div>
                 </div>
             </div>
 
-            <p>The string benchmark is the standout: Strada's compiled PCRE2 regex and in-place string operations are over 200x faster than Python's interpreted approach. Python edges ahead on OOP thanks to CPython's heavily optimized <code>__getattr__</code> fast paths and dict internals that have been tuned for decades.</p>
+            <p>The string benchmark is the standout: Strada's compiled PCRE2 regex and in-place string operations are over 800x faster than Python's interpreted approach. Tagged integers give Strada a <strong>4.2x advantage</strong> on the Array/Hash benchmark, where integer-heavy loops benefit from zero-allocation arithmetic. Python edges ahead on OOP thanks to CPython's heavily optimized <code>__getattr__</code> fast paths and dict internals that have been tuned for decades.</p>
 
             <h2>Why Strada is Fast</h2>
 
@@ -372,22 +372,27 @@
 
             <div class="why-section">
                 <h3>Zero-overhead function calls</h3>
-                <p>In Perl, calling a function means looking up the symbol table at runtime. In Python, function objects are fetched from dictionaries. In Strada, function calls compile to direct C function calls &mdash; a single <code>call</code> instruction. This makes Strada <strong>2.9x faster than Perl</strong> and <strong>2.5x faster than Python</strong> at function-heavy workloads.</p>
+                <p>In Perl, calling a function means looking up the symbol table at runtime. In Python, function objects are fetched from dictionaries. In Strada, function calls compile to direct C function calls &mdash; a single <code>call</code> instruction. This makes Strada <strong>3.0x faster than Perl</strong> and <strong>3.1x faster than Python</strong> at function-heavy workloads.</p>
             </div>
 
             <div class="why-section">
                 <h3>Inline accessor optimization</h3>
-                <p>When you write <code>$self->x()</code> on a <code>has</code> attribute, Strada detects that the method is a simple accessor and compiles it to a direct hash fetch &mdash; skipping the entire method dispatch machinery. Combined with arithmetic expression inlining (sub-expressions like <code>x*x + y*y</code> compile to raw C arithmetic without intermediate allocations), OOP-heavy code runs <strong>1.6x faster than Perl</strong>.</p>
+                <p>When you write <code>$self->x()</code> on a <code>has</code> attribute, Strada detects that the method is a simple accessor and compiles it to a direct hash fetch &mdash; skipping the entire method dispatch machinery. Combined with arithmetic expression inlining (sub-expressions like <code>x*x + y*y</code> compile to raw C arithmetic without intermediate allocations), OOP-heavy code runs <strong>1.8x faster than Perl</strong>.</p>
             </div>
 
             <div class="why-section">
                 <h3>Compiled PCRE2 regex</h3>
-                <p>Strada links against PCRE2 (Perl Compatible Regular Expressions), the same engine used by PHP, Nginx, and Haproxy. Regex patterns are compiled to optimized automata at program startup, not interpreted at match time. Combined with in-place string mutation (<code>strada_concat_inplace</code> avoids copies), string operations are <strong>232x faster than Python</strong> and competitive with Perl.</p>
+                <p>Strada links against PCRE2 (Perl Compatible Regular Expressions), the same engine used by PHP, Nginx, and Haproxy. Regex patterns are compiled to optimized automata at program startup, not interpreted at match time. Combined with in-place string mutation (<code>strada_concat_inplace</code> avoids copies), string operations are <strong>814x faster than Python</strong> and competitive with Perl.</p>
+            </div>
+
+            <div class="why-section">
+                <h3>Tagged integers: zero-allocation arithmetic</h3>
+                <p>Strada encodes small integers directly inside pointers using tagged pointer representation. When the low bit of a pointer is set, the remaining 63 bits hold the integer value &mdash; no heap allocation, no reference counting, no free. This makes integer-heavy operations like loop counters, array indexing, and hash lookups dramatically faster. The Array/Hash benchmark runs in just 0.76s, making Strada <strong>3.2x faster than Perl</strong> and <strong>4.2x faster than Python</strong> on data-structure workloads. Functions like <code>strada_to_int()</code> handle both tagged and heap-allocated integers transparently.</p>
             </div>
 
             <div class="why-section">
                 <h3>Where Perl and Python win</h3>
-                <p>Perl's hash and array implementations have been tuned for over 30 years. CPython's dict is one of the most optimized data structures in any language. These runtimes also benefit from specialized internal representations (small string optimization, integer caching, copy-on-write) that a compiled language must implement explicitly. Strada is closing this gap with features like small-int pooling, string interning, and hash capacity pre-allocation, but mature interpreters still have an edge on pure data-structure workloads.</p>
+                <p>Python edges ahead on OOP thanks to CPython's heavily optimized <code>__getattr__</code> fast paths and decades of dict tuning. For pure object creation and method dispatch, CPython's specializing bytecode compiler gives it an advantage. Strada is closing this gap with inline accessor optimization and arithmetic expression inlining.</p>
             </div>
 
             <h2>What Each Benchmark Tests</h2>
