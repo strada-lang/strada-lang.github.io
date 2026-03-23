@@ -252,6 +252,68 @@ gdb ./myprogram</code></pre>
 <span class="comment"># CodeGen:    23.4ms</span>
 <span class="comment"># Total:      81.3ms</span></code></pre>
 
+            <h2>Line-Level Profiling (Full Profile)</h2>
+
+            <p>Strada includes a comprehensive line-level profiler (similar to Perl's Devel::NYTProf) for detailed performance analysis.</p>
+
+            <h3>Quick Start</h3>
+
+            <pre><code><span class="comment"># Compile with full profiling instrumentation</span>
+./strada --full-profile myprogram.strada
+
+<span class="comment"># Run the program (writes strada-prof.out on exit)</span>
+./myprogram
+
+<span class="comment"># Generate a text report</span>
+strada-proftext strada-prof.out
+
+<span class="comment"># Generate an HTML report with sortable tables and heat-colored source</span>
+strada-profhtml strada-prof.out profhtml/
+open profhtml/index.html</code></pre>
+
+            <h3>Difference from -p / --profile</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Flag</th>
+                        <th>Granularity</th>
+                        <th>Output</th>
+                        <th>Use Case</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><code>-p, --profile</code></td><td>Function-level</td><td>Printed to stderr at exit</td><td>Quick overview of hot functions</td></tr>
+                    <tr><td><code>--full-profile</code></td><td>Line-level</td><td>Binary file (<code>strada-prof.out</code>)</td><td>Detailed analysis with report tools</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Report Tools</h3>
+
+            <p><strong>strada-proftext</strong> generates a text report to stdout:</p>
+
+            <pre><code>strada-proftext strada-prof.out           <span class="comment"># Full report (functions + lines)</span>
+strada-proftext -f strada-prof.out        <span class="comment"># Functions only</span>
+strada-proftext -l strada-prof.out        <span class="comment"># Lines only</span>
+strada-proftext --top 20 strada-prof.out  <span class="comment"># Show top 20 entries</span></code></pre>
+
+            <p><strong>strada-profhtml</strong> generates an HTML report directory:</p>
+
+            <pre><code>strada-profhtml strada-prof.out              <span class="comment"># Output to profhtml/ (default)</span>
+strada-profhtml strada-prof.out my-report/   <span class="comment"># Custom output directory</span></code></pre>
+
+            <h3>Programmatic API</h3>
+
+            <p>Enable and disable profiling at runtime for targeted analysis:</p>
+
+            <pre><code><span class="comment"># Start profiling mid-program with a custom output file</span>
+<span class="func">core::full_profile_start</span>(<span class="string">"hotpath.prof"</span>);
+
+<span class="comment"># ... code to profile ...</span>
+
+<span class="comment"># Stop profiling and flush data</span>
+<span class="func">core::full_profile_stop</span>();</code></pre>
+
             <h2>Memory Profiling</h2>
 
             <p>Track memory allocations by type:</p>
@@ -388,6 +450,8 @@ gdb ./myprogram
                     <tr><td><code>caller($level)</code></td><td>Get caller function name</td></tr>
                     <tr><td><code>warn($msg)</code></td><td>Print warning to stderr</td></tr>
                     <tr><td><code>die($msg)</code></td><td>Print error and exit</td></tr>
+                    <tr><td><code>core::full_profile_start($file)</code></td><td>Start line-level profiling to file</td></tr>
+                    <tr><td><code>core::full_profile_stop()</code></td><td>Stop profiling and flush data</td></tr>
                 </tbody>
             </table>
 

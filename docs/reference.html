@@ -571,6 +571,8 @@
                 </thead>
                 <tbody>
                     <tr><td><code>core::stack_trace()</code></td><td>Get current call stack as string</td></tr>
+                    <tr><td><code>core::full_profile_start($file)</code></td><td>Start line-level profiling, writing output to <code>$file</code></td></tr>
+                    <tr><td><code>core::full_profile_stop()</code></td><td>Stop line-level profiling and flush data to disk</td></tr>
                 </tbody>
             </table>
 
@@ -994,7 +996,8 @@
                     <tr><td><code>-r, --run</code></td><td>Compile and run immediately</td></tr>
                     <tr><td><code>-c, --keep-c</code></td><td>Keep generated .c file</td></tr>
                     <tr><td><code>-g, --debug</code></td><td>Include debug symbols</td></tr>
-                    <tr><td><code>-p, --profile</code></td><td>Enable function profiling</td></tr>
+                    <tr><td><code>-p, --profile</code></td><td>Enable function profiling (report to stderr at exit)</td></tr>
+                    <tr><td><code>--full-profile</code></td><td>Line-level profiling (writes <code>strada-prof.out</code>; implies <code>-g</code>)</td></tr>
                     <tr><td><code>-w, --warnings</code></td><td>Show compiler warnings</td></tr>
                     <tr><td><code>-t, --timing</code></td><td>Show compilation phase timing</td></tr>
                     <tr><td><code>--shared</code></td><td>Compile as shared library (.so)</td></tr>
@@ -1010,9 +1013,15 @@
 <span class="comment"># Compile with debugging</span>
 ./strada -g program.strada
 
-<span class="comment"># Compile with profiling</span>
+<span class="comment"># Compile with function profiling</span>
 ./strada -p program.strada
 ./program  <span class="comment"># Prints profiling report on exit</span>
+
+<span class="comment"># Compile with line-level profiling</span>
+./strada --full-profile program.strada
+./program                                    <span class="comment"># Writes strada-prof.out</span>
+strada-proftext strada-prof.out              <span class="comment"># Text report</span>
+strada-profhtml strada-prof.out profhtml/    <span class="comment"># HTML report</span>
 
 <span class="comment"># Check for warnings</span>
 ./strada -w program.strada
