@@ -66,28 +66,36 @@
 
             <h2>Basic Function Definition</h2>
 
-            <p>Functions are declared with <code>func</code> (or <code>fn</code> shorthand), parameters with types, and a return type. <code>fn</code> can be used anywhere <code>func</code> is used.</p>
+            <p>Functions are declared with <code>func</code> (or <code>fn</code> shorthand). Type annotations for parameters and return types are optional &mdash; they default to <code>scalar</code> when omitted.</p>
 
-            <pre><code><span class="keyword">func</span> <span class="func">greet</span>(<span class="type">str</span> <span class="sigil">$name</span>) <span class="type">str</span> {
+            <pre><code><span class="comment"># With explicit types</span>
+<span class="keyword">func</span> <span class="func">greet</span>(<span class="type">str</span> <span class="sigil">$name</span>) <span class="type">str</span> {
     <span class="keyword">return</span> <span class="string">"Hello, "</span> . <span class="sigil">$name</span> . <span class="string">"!"</span>;
 }
 
-<span class="keyword">func</span> <span class="func">add</span>(<span class="type">int</span> <span class="sigil">$a</span>, <span class="type">int</span> <span class="sigil">$b</span>) <span class="type">int</span> {
+<span class="comment"># Types are optional (params and return type default to scalar)</span>
+<span class="keyword">func</span> <span class="func">add</span>(<span class="sigil">$a</span>, <span class="sigil">$b</span>) {
     <span class="keyword">return</span> <span class="sigil">$a</span> + <span class="sigil">$b</span>;
 }
 
+<span class="comment"># Explicit void return type for side-effect functions</span>
 <span class="keyword">func</span> <span class="func">print_message</span>(<span class="type">str</span> <span class="sigil">$msg</span>) <span class="type">void</span> {
     <span class="func">say</span>(<span class="sigil">$msg</span>);
-    <span class="comment"># No return needed for void functions</span>
 }</code></pre>
 
             <h2>Calling Functions</h2>
 
-            <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$greeting</span> = <span class="func">greet</span>(<span class="string">"World"</span>);
-<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$sum</span> = <span class="func">add</span>(<span class="number">10</span>, <span class="number">20</span>);
+            <pre><code><span class="keyword">my</span> <span class="sigil">$greeting</span> = <span class="func">greet</span>(<span class="string">"World"</span>);
+<span class="keyword">my</span> <span class="sigil">$sum</span> = <span class="func">add</span>(<span class="number">10</span>, <span class="number">20</span>);
 <span class="func">print_message</span>(<span class="string">"Hello!"</span>);</code></pre>
 
             <h2>Parameter Types</h2>
+
+            <div class="info-box">
+                <strong>Types are optional but recommended for API clarity</strong>
+                Parameter and return types default to <code>scalar</code> when omitted. Explicit types improve readability,
+                especially for library functions: <code>func add(int $a, int $b) int</code>.
+            </div>
 
             <h3>Scalar Parameters</h3>
 
@@ -388,6 +396,44 @@ my int $v = flexible();    <span class="comment"># scalar context</span></code><
             <div class="info-box">
                 <strong>Strada String Model</strong>
                 <p>Unlike Perl, Strada does not have an internal "UTF-8 flag" on strings. All strings are raw byte sequences. The <code>utf8::</code> functions validate byte sequences as UTF-8 but do not change internal representation. <code>utf8::encode()</code> and <code>utf8::upgrade()</code> are no-ops provided for Perl compatibility.</p>
+            </div>
+
+            <h2>No-Parens Functions (Implicit <code>@_</code>)</h2>
+
+            <p>For a Perl-like style, you can omit the parameter list entirely. All arguments are available in <code>@_</code>, and the return type defaults to <code>scalar</code>:</p>
+
+            <pre><code><span class="comment"># No parentheses — args available via @_</span>
+<span class="keyword">func</span> <span class="func">greet</span> {
+    <span class="func">say</span>(<span class="string">"Hello, "</span> . <span class="sigil">$_</span>[<span class="number">0</span>] . <span class="string">"!"</span>);
+}
+
+<span class="func">greet</span>(<span class="string">"World"</span>);  <span class="comment"># Hello, World!</span>
+
+<span class="comment"># Sum any number of arguments</span>
+<span class="keyword">func</span> <span class="func">sum_all</span> {
+    <span class="keyword">my</span> <span class="sigil">$total</span> = <span class="number">0</span>;
+    <span class="keyword">my</span> <span class="sigil">$i</span> = <span class="number">0</span>;
+    <span class="keyword">while</span> (<span class="sigil">$i</span> < <span class="func">size</span>(<span class="sigil">@_</span>)) {
+        <span class="sigil">$total</span> = <span class="sigil">$total</span> + <span class="sigil">$_</span>[<span class="sigil">$i</span>];
+        <span class="sigil">$i</span> = <span class="sigil">$i</span> + <span class="number">1</span>;
+    }
+    <span class="keyword">return</span> <span class="sigil">$total</span>;
+}
+
+<span class="func">say</span>(<span class="func">sum_all</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>));  <span class="comment"># 6</span>
+
+<span class="comment"># Use shift() to consume arguments</span>
+<span class="keyword">func</span> <span class="func">log_msg</span> {
+    <span class="keyword">my</span> <span class="sigil">$level</span> = <span class="func">shift</span>(<span class="sigil">@_</span>);
+    <span class="keyword">my</span> <span class="sigil">$msg</span> = <span class="func">shift</span>(<span class="sigil">@_</span>);
+    <span class="func">say</span>(<span class="string">"["</span> . <span class="sigil">$level</span> . <span class="string">"] "</span> . <span class="sigil">$msg</span>);
+}
+
+<span class="func">log_msg</span>(<span class="string">"INFO"</span>, <span class="string">"Server started"</span>);  <span class="comment"># [INFO] Server started</span></code></pre>
+
+            <div class="info-box">
+                <strong>When to use no-parens functions</strong>
+                <p>No-parens functions are useful for quick utility functions and Perl-style code. For public APIs and library functions, explicit parameter lists with types are recommended for clarity and documentation.</p>
             </div>
 
             <h2>Best Practices</h2>

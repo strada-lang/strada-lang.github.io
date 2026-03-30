@@ -335,10 +335,25 @@ Strada Interpreter v0.2
 Usage:
   strada-interp                          Interactive REPL
   strada-interp [OPTIONS] &lt;file.strada&gt;  Execute file
+  strada-interp -e 'code'                Execute code string
 
 Options:
+  -e CODE       Execute code (wraps in main() if needed)
   -L PATH       Add library search path
   -h, --help    Show this help message</code></pre>
+
+            <h3>One-Liner Execution</h3>
+
+            <p>Use <code>-e</code> to evaluate Strada code directly from the command line:</p>
+
+            <pre><code><span class="comment"># Simple expression</span>
+strada-interp -e <span class="string">'say("hello world")'</span>
+
+<span class="comment"># Multiple -e flags are concatenated</span>
+strada-interp -e <span class="string">'my $x = 6;'</span> -e <span class="string">'say($x * 7)'</span>
+
+<span class="comment"># No func main() boilerplate needed</span>
+strada-interp -e <span class="string">'my @nums = (1, 2, 3); foreach (@nums) { say($_); }'</span></code></pre>
 
             <div class="page-nav">
                 <a href="repl.html">

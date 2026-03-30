@@ -158,6 +158,11 @@
     <span class="func">say</span>(<span class="sigil">$item</span>);
 }
 
+<span class="comment"># Implicit $_ (no variable specified)</span>
+<span class="keyword">foreach</span> (<span class="sigil">@fruits</span>) {
+    <span class="func">say</span>(<span class="sigil">$_</span>);
+}
+
 <span class="comment"># "for" works like "foreach" with arrays</span>
 <span class="keyword">for</span> <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$fruit</span> (<span class="sigil">@fruits</span>) {
     <span class="func">say</span>(<span class="sigil">$fruit</span>);
