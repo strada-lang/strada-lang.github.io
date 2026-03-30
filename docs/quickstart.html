@@ -172,19 +172,33 @@ cd strada-lang</code></pre>
 
             <h2>Functions</h2>
 
-            <p>Functions are declared with <code>func</code> (or <code>fn</code> shorthand), parameter types, and return type:</p>
+            <p>Functions are declared with <code>func</code> (or <code>fn</code>). Type annotations are optional:</p>
 
-            <pre><code><span class="keyword">func</span> <span class="func">greet</span>(<span class="type">str</span> <span class="sigil">$name</span>) <span class="type">str</span> {
+            <pre><code><span class="comment"># Types are optional — params and return default to scalar</span>
+<span class="keyword">func</span> <span class="func">greet</span>(<span class="sigil">$name</span>) {
     <span class="keyword">return</span> <span class="string">"Hello, "</span> . <span class="sigil">$name</span> . <span class="string">"!"</span>;
 }
 
-<span class="keyword">func</span> <span class="func">add</span>(<span class="type">int</span> <span class="sigil">$a</span>, <span class="type">int</span> <span class="sigil">$b</span>) <span class="type">int</span> {
+<span class="keyword">func</span> <span class="func">add</span>(<span class="sigil">$a</span>, <span class="sigil">$b</span>) {
     <span class="keyword">return</span> <span class="sigil">$a</span> + <span class="sigil">$b</span>;
 }
 
+<span class="comment"># No-parens form — args available as @_ (like Perl subs)</span>
+<span class="keyword">func</span> <span class="func">sum_all</span> {
+    <span class="keyword">my</span> <span class="sigil">$total</span> = <span class="number">0</span>;
+    <span class="keyword">foreach</span> (<span class="sigil">@_</span>) { <span class="sigil">$total</span> += <span class="sigil">$_</span>; }
+    <span class="keyword">return</span> <span class="sigil">$total</span>;
+}
+
+<span class="comment"># With explicit types (for APIs and documentation)</span>
+<span class="keyword">func</span> <span class="func">distance</span>(<span class="type">num</span> <span class="sigil">$x1</span>, <span class="type">num</span> <span class="sigil">$y1</span>, <span class="type">num</span> <span class="sigil">$x2</span>, <span class="type">num</span> <span class="sigil">$y2</span>) <span class="type">num</span> {
+    <span class="keyword">return</span> <span class="func">math::sqrt</span>((<span class="sigil">$x2</span> - <span class="sigil">$x1</span>) ** <span class="number">2</span> + (<span class="sigil">$y2</span> - <span class="sigil">$y1</span>) ** <span class="number">2</span>);
+}
+
 <span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
-    <span class="func">say</span>(<span class="func">greet</span>(<span class="string">"World"</span>));  <span class="comment"># Hello, World!</span>
-    <span class="func">say</span>(<span class="func">add</span>(<span class="number">10</span>, <span class="number">20</span>));       <span class="comment"># 30</span>
+    <span class="func">say</span>(<span class="func">greet</span>(<span class="string">"World"</span>));        <span class="comment"># Hello, World!</span>
+    <span class="func">say</span>(<span class="func">add</span>(<span class="number">10</span>, <span class="number">20</span>));            <span class="comment"># 30</span>
+    <span class="func">say</span>(<span class="func">sum_all</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>));  <span class="comment"># 15</span>
     <span class="keyword">return</span> <span class="number">0</span>;
 }</code></pre>
 
