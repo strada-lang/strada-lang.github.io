@@ -70,7 +70,7 @@
 
             <pre><code><span class="comment"># Comments start with #</span>
 
-<span class="keyword">func</span> <span class="func">helper</span>() <span class="type">void</span> {
+<span class="keyword">func</span> <span class="func">helper</span>() {
     <span class="func">say</span>(<span class="string">"I'm a helper function"</span>);
 }
 
@@ -80,13 +80,55 @@
     <span class="keyword">return</span> <span class="number">0</span>;
 }</code></pre>
 
+            <h2>Variables</h2>
+
+            <p>Variables use Perl-style sigils. Type annotations are optional &mdash; the sigil determines the default type:</p>
+
+            <pre><code><span class="keyword">my</span> <span class="sigil">$name</span> = <span class="string">"Strada"</span>;          <span class="comment"># scalar (any value)</span>
+<span class="keyword">my</span> <span class="sigil">$count</span> = <span class="number">42</span>;                <span class="comment"># scalar</span>
+<span class="keyword">my</span> <span class="sigil">$pi</span> = <span class="number">3.14159</span>;              <span class="comment"># scalar</span>
+<span class="keyword">my</span> <span class="sigil">@colors</span> = (<span class="string">"red"</span>, <span class="string">"green"</span>, <span class="string">"blue"</span>);  <span class="comment"># array</span>
+<span class="keyword">my</span> <span class="sigil">%config</span> = (<span class="string">"debug"</span> => <span class="number">1</span>, <span class="string">"port"</span> => <span class="number">8080</span>);  <span class="comment"># hash</span>
+
+<span class="comment"># You can add explicit types for documentation:</span>
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$count</span> = <span class="number">42</span>;
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$name</span> = <span class="string">"Strada"</span>;
+<span class="keyword">my</span> <span class="type">num</span> <span class="sigil">$pi</span> = <span class="number">3.14159</span>;</code></pre>
+
+            <h2>Functions</h2>
+
+            <p>Functions are defined with <code>func</code> (or <code>fn</code>). Types are optional:</p>
+
+            <pre><code><span class="comment"># Simple function — no type annotations needed</span>
+<span class="keyword">func</span> <span class="func">greet</span>(<span class="sigil">$name</span>) {
+    <span class="func">say</span>(<span class="string">"Hello, "</span> . <span class="sigil">$name</span> . <span class="string">"!"</span>);
+}
+
+<span class="keyword">func</span> <span class="func">add</span>(<span class="sigil">$a</span>, <span class="sigil">$b</span>) {
+    <span class="keyword">return</span> <span class="sigil">$a</span> + <span class="sigil">$b</span>;
+}
+
+<span class="comment"># No-parens form — args available as @_ (like Perl subs)</span>
+<span class="keyword">func</span> <span class="func">log_msg</span> {
+    <span class="keyword">my</span> <span class="sigil">$level</span> = <span class="sigil">$_</span>[<span class="number">0</span>];
+    <span class="keyword">my</span> <span class="sigil">$msg</span> = <span class="sigil">$_</span>[<span class="number">1</span>];
+    <span class="func">say</span>(<span class="string">"["</span> . <span class="sigil">$level</span> . <span class="string">"] "</span> . <span class="sigil">$msg</span>);
+}
+
+<span class="comment"># With explicit types (for APIs, libraries, documentation)</span>
+<span class="keyword">func</span> <span class="func">distance</span>(<span class="type">num</span> <span class="sigil">$x1</span>, <span class="type">num</span> <span class="sigil">$y1</span>, <span class="type">num</span> <span class="sigil">$x2</span>, <span class="type">num</span> <span class="sigil">$y2</span>) <span class="type">num</span> {
+    <span class="keyword">return</span> <span class="func">math::sqrt</span>((<span class="sigil">$x2</span> - <span class="sigil">$x1</span>) ** <span class="number">2</span> + (<span class="sigil">$y2</span> - <span class="sigil">$y1</span>) ** <span class="number">2</span>);
+}</code></pre>
+
+            <p>See the <a href="functions.html">Functions</a> page for closures, variadic functions, default parameters, and more.</p>
+
             <h2>Statements</h2>
 
             <p>Statements end with semicolons:</p>
 
-            <pre><code><span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$x</span> = <span class="number">10</span>;       <span class="comment"># With explicit type</span>
-<span class="keyword">my</span> <span class="sigil">$y</span> = <span class="number">20</span>;            <span class="comment"># Type annotation optional (defaults to scalar)</span>
-<span class="func">say</span>(<span class="sigil">$x</span>);
+            <pre><code><span class="keyword">my</span> <span class="sigil">$x</span> = <span class="number">10</span>;
+<span class="keyword">my</span> <span class="sigil">$y</span> = <span class="number">20</span>;
+<span class="func">say</span>(<span class="sigil">$x</span> + <span class="sigil">$y</span>);
 <span class="sigil">$x</span> = <span class="sigil">$x</span> + <span class="number">1</span>;</code></pre>
 
             <h2>Comments</h2>
@@ -365,8 +407,8 @@
 <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@lines</span> = &lt;<span class="sigil">$fh</span>&gt;;    <span class="comment"># Reads entire file!</span>
 <span class="func">core::close</span>(<span class="sigil">$fh</span>);
 
-<span class="keyword">foreach</span> <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$line</span> (<span class="sigil">@lines</span>) {
-    <span class="func">say</span>(<span class="sigil">$line</span>);
+<span class="keyword">foreach</span> (<span class="sigil">@lines</span>) {    <span class="comment"># Implicit $_ loop variable</span>
+    <span class="func">say</span>(<span class="sigil">$_</span>);
 }</code></pre>
 
             <h3>Print/Say to Filehandle</h3>
