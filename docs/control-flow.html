@@ -88,9 +88,11 @@
     <span class="func">say</span>(<span class="string">"Please log in"</span>);
 }
 
-<span class="comment"># With else (no elsif allowed with unless)</span>
+<span class="comment"># With elsif and else</span>
 <span class="keyword">unless</span> (<span class="sigil">$logged_in</span>) {
     <span class="func">say</span>(<span class="string">"Please log in"</span>);
+} <span class="keyword">elsif</span> (<span class="sigil">$is_guest</span>) {
+    <span class="func">say</span>(<span class="string">"Welcome, guest"</span>);
 } <span class="keyword">else</span> {
     <span class="func">say</span>(<span class="string">"Welcome back"</span>);
 }

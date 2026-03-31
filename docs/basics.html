@@ -376,6 +376,31 @@
             <pre><code><span class="func">say</span>(<span class="string">"With newline"</span>);      <span class="comment"># Prints with newline</span>
 <span class="func">print</span>(<span class="string">"No newline"</span>);      <span class="comment"># Prints without newline</span></code></pre>
 
+            <h3>Heredocs</h3>
+
+            <p>Multi-line string literals using heredoc syntax:</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$text</span> = &lt;&lt;EOT;
+This is a multi-line
+string literal.
+EOT
+
+<span class="comment"># Single-quoted: no escape sequences</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$raw</span> = &lt;&lt;'EOT';
+Backslash-n stays literal: \n
+EOT</code></pre>
+
+            <div class="note">
+                <strong>Note:</strong> The semicolon goes on the <code>&lt;&lt;EOT;</code> line. Supports bare <code>&lt;&lt;EOT</code>, single-quoted <code>&lt;&lt;'EOT'</code>, and double-quoted <code>&lt;&lt;"EOT"</code>.
+            </div>
+
+            <h3>chomp</h3>
+
+            <p><code>chomp()</code> strips trailing <code>\n</code> (or <code>\r\n</code>) from a variable in-place and returns the modified string:</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$line</span> = <span class="string">"hello\n"</span>;
+<span class="func">chomp</span>(<span class="sigil">$line</span>);   <span class="comment"># $line is now "hello"</span></code></pre>
+
             <h3>File I/O</h3>
 
             <pre><code><span class="comment"># Read entire file</span>
