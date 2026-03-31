@@ -102,17 +102,39 @@
     <span class="sigil">$self</span>->{<span class="string">"age"</span>} = <span class="sigil">$age</span>;
 }</code></pre>
 
+            <div class="info-box">
+                <strong>Type annotations are optional in methods</strong>
+                <p>The example above uses explicit types for clarity. You can also write methods with optional types or the no-parens Perl style:</p>
+            </div>
+
+            <pre><code><span class="keyword">package</span> <span class="type">Cat</span>;
+
+<span class="comment"># Optional types — params default to scalar</span>
+<span class="keyword">func</span> <span class="func">new</span>(<span class="sigil">$name</span>) {
+    <span class="keyword">my</span> <span class="sigil">%self</span> = (<span class="string">"name"</span> => <span class="sigil">$name</span>);
+    <span class="keyword">return</span> <span class="func">bless</span>(\<span class="sigil">%self</span>, <span class="string">"Cat"</span>);
+}
+
+<span class="comment"># No-parens style — args in @_, $self is $_[0]</span>
+<span class="keyword">func</span> <span class="func">speak</span> {
+    <span class="keyword">my</span> <span class="sigil">$self</span> = <span class="func">shift</span>;
+    <span class="func">say</span>(<span class="sigil">$self</span>->{<span class="string">"name"</span>} . <span class="string">" says meow!"</span>);
+}
+
+<span class="comment"># fn is shorthand for func</span>
+<span class="keyword">fn</span> <span class="func">get_name</span>(<span class="sigil">$self</span>) { <span class="keyword">return</span> <span class="sigil">$self</span>->{<span class="string">"name"</span>}; }</code></pre>
+
             <h2>Creating and Using Objects</h2>
 
             <pre><code><span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
-    <span class="comment"># Create object using constructor</span>
-    <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$dog</span> = <span class="type">Dog</span>::<span class="func">new</span>(<span class="string">"Rex"</span>, <span class="number">3</span>);
+    <span class="comment"># Create object</span>
+    <span class="keyword">my</span> <span class="sigil">$dog</span> = <span class="type">Dog</span>::<span class="func">new</span>(<span class="string">"Rex"</span>, <span class="number">3</span>);
 
     <span class="comment"># Call methods with arrow syntax</span>
     <span class="sigil">$dog</span>-><span class="func">speak</span>();           <span class="comment"># "Rex says woof!"</span>
 
     <span class="comment"># Access properties</span>
-    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$name</span> = <span class="sigil">$dog</span>-><span class="func">get_name</span>();
+    <span class="keyword">my</span> <span class="sigil">$name</span> = <span class="sigil">$dog</span>-><span class="func">get_name</span>();
     <span class="func">say</span>(<span class="string">"Dog's name: "</span> . <span class="sigil">$name</span>);
 
     <span class="comment"># Modify properties</span>
@@ -669,7 +691,9 @@
                 <ul>
                     <li>Always use <code>package</code> to define classes</li>
                     <li>Name constructors <code>new</code> by convention</li>
-                    <li>First parameter of methods should be <code>scalar $self</code></li>
+                    <li>First parameter of methods should be <code>$self</code> (or <code>scalar $self</code> with explicit type)</li>
+                    <li>Use no-parens methods (<code>func method { my $self = shift; }</code>) for quick Perl-style code</li>
+                    <li>Use <code>fn</code> as shorthand for <code>func</code></li>
                     <li>Store instance data in the blessed hash</li>
                     <li>Use <code>has</code> for simple attribute declarations with auto-generated accessors</li>
                     <li>Use getters/setters for controlled access to properties</li>
