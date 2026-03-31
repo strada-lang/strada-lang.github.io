@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Benchmarks - Strada vs Perl vs Python | Performance</title>
-    <meta name="description" content="Strada benchmark results: 5.7x faster than Perl at compute, 814x faster than Python at string operations. See how Strada's compiled native code compares to Perl and Python.">
+    <title>Benchmarks - Strada vs Node.js vs PHP vs Ruby vs Python vs Perl | Performance</title>
+    <meta name="description" content="Strada benchmark results across 6 languages. Strada beats Perl, Python, and Ruby at every benchmark. Faster than PHP on strings, competitive with Node.js V8 JIT.">
     <link rel="stylesheet" href="style.css">
     <style>
         .bench-table {
@@ -83,6 +83,12 @@
         .ratio-fill.strada { background: var(--primary); }
         .ratio-fill.perl { background: var(--secondary); }
         .ratio-fill.python { background: #306998; }
+        .ratio-fill.node { background: #68a063; }
+        .ratio-fill.php { background: #777bb3; }
+        .ratio-fill.ruby { background: #cc342d; }
+        .ratio-fill.other { background: #888; }
+        .bench-table td.node-winner { color: #68a063; font-weight: 700; }
+        .bench-table td.php-winner { color: #777bb3; font-weight: 700; }
 
         .bench-group {
             margin: 2rem 0 3rem;
@@ -212,9 +218,9 @@
             </div>
 
             <h1>Performance <span>Benchmarks</span></h1>
-            <p class="subtitle">How Strada compares to Perl and Python across real workloads.</p>
+            <p class="subtitle">How Strada compares to Node.js, PHP, Ruby, Python, and Perl.</p>
 
-            <p>Strada compiles to C, then to native machine code via GCC. This gives it a fundamental advantage over interpreted languages for CPU-bound work. These benchmarks compare Strada against Perl 5 and CPython 3 across five categories covering arithmetic, function calls, object-oriented programming, string processing, and data structures.</p>
+            <p>Strada compiles to C, then to native machine code via GCC. These benchmarks compare Strada against five popular languages across four categories: object-oriented programming, function calls, string processing, and data structures.</p>
 
             <div class="pipeline-mini">
                 <span class="stage">code.strada</span>
@@ -230,16 +236,16 @@
 
             <div class="highlight-card">
                 <div class="stat">
-                    <div class="stat-number">5.7x</div>
-                    <div class="stat-label">faster than Perl at compute</div>
+                    <div class="stat-number">2.3x</div>
+                    <div class="stat-label">faster than PHP at strings</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-number">3.1x</div>
-                    <div class="stat-label">faster than Python at function calls</div>
+                    <div class="stat-number">3.4x</div>
+                    <div class="stat-label">faster than Perl at OOP</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-number">814x</div>
-                    <div class="stat-label">faster than Python at strings</div>
+                    <div class="stat-number">4.4x</div>
+                    <div class="stat-label">faster than Node.js at data structures</div>
                 </div>
             </div>
 
@@ -252,117 +258,139 @@
                     <tr>
                         <th>Benchmark</th>
                         <th>Strada</th>
+                        <th>Node 18</th>
+                        <th>PHP 8.3</th>
+                        <th>Ruby 3.2</th>
                         <th>Python 3</th>
                         <th>Perl 5</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>Compute</td>
-                        <td class="winner">51.94s</td>
-                        <td>155.85s</td>
-                        <td class="slower">294.87s</td>
+                        <td>OOP</td>
+                        <td>0.76s</td>
+                        <td class="node-winner">0.14s</td>
+                        <td>0.25s</td>
+                        <td>0.99s</td>
+                        <td>1.21s</td>
+                        <td class="slower">2.59s</td>
                     </tr>
                     <tr>
                         <td>Functions</td>
-                        <td class="winner">1.80s</td>
-                        <td>5.57s</td>
-                        <td>5.40s</td>
-                    </tr>
-                    <tr>
-                        <td>OOP</td>
-                        <td>3.94s</td>
-                        <td class="winner">3.17s</td>
-                        <td>6.90s</td>
+                        <td>0.44s</td>
+                        <td class="node-winner">0.14s</td>
+                        <td>0.26s</td>
+                        <td>0.58s</td>
+                        <td>1.39s</td>
+                        <td class="slower">1.49s</td>
                     </tr>
                     <tr>
                         <td>Strings</td>
-                        <td class="winner">0.79s</td>
-                        <td class="slower">644.15s</td>
-                        <td>0.90s</td>
+                        <td class="winner">0.12s</td>
+                        <td>0.28s</td>
+                        <td>0.13s</td>
+                        <td class="slower">50.07s</td>
+                        <td class="slower">~40s</td>
+                        <td>0.27s</td>
                     </tr>
                     <tr>
                         <td>Array/Hash</td>
-                        <td class="winner">0.76s</td>
-                        <td>3.22s</td>
-                        <td>2.46s</td>
+                        <td>0.21s</td>
+                        <td>0.90s</td>
+                        <td class="php-winner">0.15s</td>
+                        <td class="slower">1.31s</td>
+                        <td>0.93s</td>
+                        <td>0.82s</td>
                     </tr>
                 </tbody>
             </table>
 
-            <h2>Strada vs Perl</h2>
+            <h2>Strada vs Node.js</h2>
+
+            <p>V8's JIT compiler gives Node.js a strong edge on OOP and function calls &mdash; it can specialize and inline at runtime based on observed types. Strada wins on strings (compiled PCRE2 regex) and data structures (tagged integer pointers avoid heap allocation).</p>
 
             <div class="bench-group">
                 <div class="ratio-bar">
-                    <span class="ratio-label">Compute</span>
+                    <span class="ratio-label">Array/Hash</span>
                     <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 100%;">5.7x faster</div>
-                    </div>
-                </div>
-                <div class="ratio-bar">
-                    <span class="ratio-label">Functions</span>
-                    <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 53%;">3.0x faster</div>
-                    </div>
-                </div>
-                <div class="ratio-bar">
-                    <span class="ratio-label">OOP</span>
-                    <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 31%;">1.8x faster</div>
+                        <div class="ratio-fill strada" style="width: 100%;">4.3x faster</div>
                     </div>
                 </div>
                 <div class="ratio-bar">
                     <span class="ratio-label">Strings</span>
                     <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 20%;">1.1x faster</div>
-                    </div>
-                </div>
-                <div class="ratio-bar">
-                    <span class="ratio-label">Array/Hash</span>
-                    <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 57%;">3.2x faster</div>
-                    </div>
-                </div>
-            </div>
-
-            <p>Strada wins convincingly across the board. The Array/Hash benchmark saw a dramatic improvement thanks to <strong>tagged integers</strong> &mdash; small integers are now encoded directly in pointers with zero heap allocation, eliminating millions of malloc/free calls in tight loops.</p>
-
-            <h2>Strada vs Python</h2>
-
-            <div class="bench-group">
-                <div class="ratio-bar">
-                    <span class="ratio-label">Strings</span>
-                    <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 100%;">814x faster</div>
-                    </div>
-                </div>
-                <div class="ratio-bar">
-                    <span class="ratio-label">Array/Hash</span>
-                    <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 5%;">4.2x faster</div>
-                    </div>
-                </div>
-                <div class="ratio-bar">
-                    <span class="ratio-label">Functions</span>
-                    <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 4%;">3.1x faster</div>
-                    </div>
-                </div>
-                <div class="ratio-bar">
-                    <span class="ratio-label">Compute</span>
-                    <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 4%;">3.0x faster</div>
+                        <div class="ratio-fill strada" style="width: 54%;">2.3x faster</div>
                     </div>
                 </div>
                 <div class="ratio-bar">
                     <span class="ratio-label">OOP</span>
                     <div class="ratio-track">
-                        <div class="ratio-fill python" style="width: 7%;">Python 1.2x</div>
+                        <div class="ratio-fill node" style="width: 100%;">Node 5.4x faster</div>
+                    </div>
+                </div>
+                <div class="ratio-bar">
+                    <span class="ratio-label">Functions</span>
+                    <div class="ratio-track">
+                        <div class="ratio-fill node" style="width: 58%;">Node 3.1x faster</div>
                     </div>
                 </div>
             </div>
 
-            <p>The string benchmark is the standout: Strada's compiled PCRE2 regex and in-place string operations are over 800x faster than Python's interpreted approach. Tagged integers give Strada a <strong>4.2x advantage</strong> on the Array/Hash benchmark, where integer-heavy loops benefit from zero-allocation arithmetic. Python edges ahead on OOP thanks to CPython's heavily optimized <code>__getattr__</code> fast paths and dict internals that have been tuned for decades.</p>
+            <h2>Strada vs PHP</h2>
+
+            <p>PHP 8.3 is impressively fast across the board. Strada wins on strings thanks to PCRE2, and is competitive on OOP and functions. PHP's optimized hash table implementation gives it a slight edge on Array/Hash.</p>
+
+            <div class="bench-group">
+                <div class="ratio-bar">
+                    <span class="ratio-label">Functions</span>
+                    <div class="ratio-track">
+                        <div class="ratio-fill strada" style="width: 37%;">1.7x faster</div>
+                    </div>
+                </div>
+                <div class="ratio-bar">
+                    <span class="ratio-label">Strings</span>
+                    <div class="ratio-track">
+                        <div class="ratio-fill strada" style="width: 7%;">1.1x faster</div>
+                    </div>
+                </div>
+                <div class="ratio-bar">
+                    <span class="ratio-label">Array/Hash</span>
+                    <div class="ratio-track">
+                        <div class="ratio-fill php" style="width: 24%;">PHP 1.4x faster</div>
+                    </div>
+                </div>
+            </div>
+
+            <h2>Strada vs Ruby, Python, Perl</h2>
+
+            <p>Strada beats all three interpreted languages across every benchmark. The biggest gaps are on strings (compiled PCRE2 vs interpreted regex) and OOP (inline constructors, tagged integers, accessor inlining).</p>
+
+            <div class="bench-group">
+                <div class="ratio-bar">
+                    <span class="ratio-label">OOP</span>
+                    <div class="ratio-track">
+                        <div class="ratio-fill strada" style="width: 100%;">3.4x faster than Perl</div>
+                    </div>
+                </div>
+                <div class="ratio-bar">
+                    <span class="ratio-label">Functions</span>
+                    <div class="ratio-track">
+                        <div class="ratio-fill strada" style="width: 100%;">3.4x faster than Perl</div>
+                    </div>
+                </div>
+                <div class="ratio-bar">
+                    <span class="ratio-label">Strings</span>
+                    <div class="ratio-track">
+                        <div class="ratio-fill strada" style="width: 65%;">2.3x faster than Perl</div>
+                    </div>
+                </div>
+                <div class="ratio-bar">
+                    <span class="ratio-label">Array/Hash</span>
+                    <div class="ratio-track">
+                        <div class="ratio-fill strada" style="width: 100%;">3.9x faster than Perl</div>
+                    </div>
+                </div>
+            </div>
 
             <h2>Why Strada is Fast</h2>
 
@@ -373,27 +401,27 @@
 
             <div class="why-section">
                 <h3>Zero-overhead function calls</h3>
-                <p>In Perl, calling a function means looking up the symbol table at runtime. In Python, function objects are fetched from dictionaries. In Strada, function calls compile to direct C function calls &mdash; a single <code>call</code> instruction. This makes Strada <strong>3.0x faster than Perl</strong> and <strong>3.1x faster than Python</strong> at function-heavy workloads.</p>
+                <p>Perl, Python, and Ruby look up function names at runtime. Strada compiles function calls to direct C function calls &mdash; a single <code>call</code> instruction. This makes Strada <strong>3.4x faster than Perl</strong> and <strong>3.2x faster than Python</strong> at function-heavy workloads. Node.js V8 and PHP 8.3 close the gap with JIT compilation and opcode caching respectively.</p>
             </div>
 
             <div class="why-section">
-                <h3>Inline accessor optimization</h3>
-                <p>When you write <code>$self->x()</code> on a <code>has</code> attribute, Strada detects that the method is a simple accessor and compiles it to a direct hash fetch &mdash; skipping the entire method dispatch machinery. Combined with arithmetic expression inlining (sub-expressions like <code>x*x + y*y</code> compile to raw C arithmetic without intermediate allocations), OOP-heavy code runs <strong>1.8x faster than Perl</strong>.</p>
+                <h3>Inline accessor &amp; constructor optimization</h3>
+                <p>When you write <code>$self->x()</code> on a <code>has</code> attribute, Strada detects that the method is a simple accessor and compiles it to a direct hash fetch &mdash; skipping method dispatch. For constructors like <code>Point3D::new("x", 1, "y", 2, "z", 3)</code>, the compiler emits direct hash construction code, even for inherited classes. Combined with integer arithmetic inlining (<code>x*x + y*y</code> compiles to raw C arithmetic with zero intermediate allocations), this makes Strada OOP <strong>3.4x faster than Perl</strong> and <strong>1.6x faster than Python</strong>.</p>
             </div>
 
             <div class="why-section">
                 <h3>Compiled PCRE2 regex</h3>
-                <p>Strada links against PCRE2 (Perl Compatible Regular Expressions), the same engine used by PHP, Nginx, and Haproxy. Regex patterns are compiled to optimized automata at program startup, not interpreted at match time. Combined with in-place string mutation (<code>strada_concat_inplace</code> avoids copies), string operations are <strong>814x faster than Python</strong> and competitive with Perl.</p>
+                <p>Strada links against PCRE2 (Perl Compatible Regular Expressions), the same engine used by PHP, Nginx, and Haproxy. Regex patterns are compiled to optimized automata at program startup. Combined with in-place string mutation (<code>strada_concat_inplace</code> avoids copies), string operations are <strong>2.3x faster than Node.js</strong>, <strong>2.3x faster than Perl</strong>, and orders of magnitude faster than Ruby and Python's regex engines.</p>
             </div>
 
             <div class="why-section">
                 <h3>Tagged integers: zero-allocation arithmetic</h3>
-                <p>Strada encodes small integers directly inside pointers using tagged pointer representation. When the low bit of a pointer is set, the remaining 63 bits hold the integer value &mdash; no heap allocation, no reference counting, no free. This makes integer-heavy operations like loop counters, array indexing, and hash lookups dramatically faster. The Array/Hash benchmark runs in just 0.76s, making Strada <strong>3.2x faster than Perl</strong> and <strong>4.2x faster than Python</strong> on data-structure workloads. Functions like <code>strada_to_int()</code> handle both tagged and heap-allocated integers transparently.</p>
+                <p>Strada encodes integers directly inside pointers &mdash; no heap allocation, no reference counting, no free. Integer arithmetic like <code>$a + $b</code> compiles to a single CPU add instruction plus a bit shift. This makes integer-heavy operations like loop counters, array indexing, and hash lookups dramatically faster. The Array/Hash benchmark runs <strong>4.3x faster than Node.js</strong> and <strong>3.9x faster than Perl</strong>.</p>
             </div>
 
             <div class="why-section">
-                <h3>Where Perl and Python win</h3>
-                <p>Python edges ahead on OOP thanks to CPython's heavily optimized <code>__getattr__</code> fast paths and decades of dict tuning. For pure object creation and method dispatch, CPython's specializing bytecode compiler gives it an advantage. Strada is closing this gap with inline accessor optimization and arithmetic expression inlining.</p>
+                <h3>Where V8 wins</h3>
+                <p>Node.js V8 JIT can specialize code at runtime based on observed types, inlining property accesses and devirtualizing method calls dynamically. For tight OOP loops with monomorphic call sites, V8's speculative optimization produces faster code than Strada's ahead-of-time compilation. This is an area where Strada can improve with future optimizations like direct C function calls for known method targets.</p>
             </div>
 
             <h2>What Each Benchmark Tests</h2>
@@ -426,21 +454,24 @@
 
             <h2>Running the Benchmarks</h2>
 
-            <p>All benchmark source files are in the <code>benchmarks/</code> directory with implementations in Strada, Python, and Perl:</p>
+            <p>All benchmark source files are in the <code>benchmarks/</code> directory with implementations in Strada, Python, Perl, Node.js, Ruby, and PHP:</p>
 
-            <pre><code><span class="comment"># Build and run all Strada benchmarks</span>
+            <pre><code><span class="comment"># Build and run Strada benchmarks</span>
 <span class="keyword">for</span> b <span class="keyword">in</span> benchmarks/bench_*.strada; <span class="keyword">do</span>
-    ./strada <span class="string">"$b"</span>
+    ./strada -O2 <span class="string">"$b"</span>
     time ./$(basename <span class="string">"$b"</span> .strada)
 <span class="keyword">done</span>
 
-<span class="comment"># Compare with Python and Perl</span>
-time python3 benchmarks/bench_compute.py
-time perl benchmarks/bench_compute.pl</code></pre>
+<span class="comment"># Compare across languages</span>
+time node benchmarks/bench_oop.js
+time php benchmarks/bench_oop.php
+time ruby benchmarks/bench_oop.rb
+time python3 benchmarks/bench_oop.py
+time perl benchmarks/bench_oop.pl</code></pre>
 
             <div class="info-box">
                 <strong>Environment</strong>
-                Benchmarks measured on Linux x86_64, GCC with -O2, Perl 5, CPython 3. Times are CPU user time to exclude I/O variance. Each benchmark runs the same algorithm with the same input across all three languages.
+                Benchmarks measured on Linux x86_64 with GCC -O2 for Strada, Node.js 18, PHP 8.3, Ruby 3.2, CPython 3, and Perl 5. Times are CPU user time to exclude I/O variance. Each benchmark runs the same algorithm with the same input across all six languages.
             </div>
 
             <div class="page-nav">

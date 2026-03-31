@@ -412,7 +412,22 @@ EOT</code></pre>
 <span class="comment"># Low-level file operations</span>
 <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$fh</span> = <span class="func">core::open</span>(<span class="string">"file.txt"</span>, <span class="string">"r"</span>);
 <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$data</span> = <span class="func">core::readline</span>(<span class="sigil">$fh</span>);
-<span class="func">core::close</span>(<span class="sigil">$fh</span>);</code></pre>
+<span class="func">core::close</span>(<span class="sigil">$fh</span>);
+
+<span class="comment"># Perl-style open modes</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$fh</span> = <span class="func">core::open</span>(<span class="string">"file.txt"</span>, <span class="string">"&lt;"</span>);   <span class="comment"># read</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$fh</span> = <span class="func">core::open</span>(<span class="string">"file.txt"</span>, <span class="string">"&gt;"</span>);   <span class="comment"># write</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$fh</span> = <span class="func">core::open</span>(<span class="string">"file.txt"</span>, <span class="string">"&gt;&gt;"</span>);  <span class="comment"># append</span>
+
+<span class="comment"># STDIN, STDOUT, STDERR barewords</span>
+<span class="func">say</span>(STDOUT, <span class="string">"to stdout"</span>);
+<span class="func">say</span>(STDERR, <span class="string">"error output"</span>);
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$line</span> = &lt;STDIN&gt;;
+
+<span class="comment"># File test operators</span>
+<span class="keyword">if</span> (-e <span class="sigil">$path</span>) { <span class="func">say</span>(<span class="string">"exists"</span>); }
+<span class="keyword">if</span> (-f <span class="sigil">$path</span>) { <span class="func">say</span>(<span class="string">"is a file"</span>); }
+<span class="keyword">if</span> (-d <span class="sigil">$path</span>) { <span class="func">say</span>(<span class="string">"is a directory"</span>); }</code></pre>
 
             <h3>Diamond Operator &lt;$fh&gt;</h3>
 

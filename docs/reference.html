@@ -392,7 +392,7 @@
                 <tbody>
                     <tr><td><code>slurp($path)</code></td><td>Read entire file as string</td></tr>
                     <tr><td><code>spew($path, $data)</code></td><td>Write string to file</td></tr>
-                    <tr><td><code>core::open($path, $mode)</code></td><td>Open file, return filehandle</td></tr>
+                    <tr><td><code>core::open($path, $mode)</code></td><td>Open file, return filehandle (modes: <code>"r"</code>/<code>"&lt;"</code>, <code>"w"</code>/<code>"&gt;"</code>, <code>"a"</code>/<code>"&gt;&gt;"</code>)</td></tr>
                     <tr><td><code>core::open(\$var, $mode)</code></td><td>Open in-memory handle (ref-style, writeback on close)</td></tr>
                     <tr><td><code>core::open_str($content, $mode)</code></td><td>Open in-memory handle from string</td></tr>
                     <tr><td><code>core::str_from_fh($fh)</code></td><td>Extract string from memstream</td></tr>
@@ -549,6 +549,9 @@
                     <tr><td><code>core::dirname($path)</code></td><td>Get directory part</td></tr>
                     <tr><td><code>core::basename($path)</code></td><td>Get filename part</td></tr>
                     <tr><td><code>core::glob($pattern)</code></td><td>Glob pattern matching</td></tr>
+                    <tr><td><code>-e $path</code></td><td>File test: exists (file or directory)</td></tr>
+                    <tr><td><code>-f $path</code></td><td>File test: is a regular file</td></tr>
+                    <tr><td><code>-d $path</code></td><td>File test: is a directory</td></tr>
                 </tbody>
             </table>
 
@@ -573,6 +576,8 @@
                 </thead>
                 <tbody>
                     <tr><td><code>core::stack_trace()</code></td><td>Get current call stack as string</td></tr>
+                    <tr><td><code>core::caller()</code></td><td>Returns hash with <code>function</code>, <code>file</code>, <code>line</code> of calling frame</td></tr>
+                    <tr><td><code>core::caller($level)</code></td><td>Same, but <code>$level</code> frames up (0 = immediate, 1 = grandparent)</td></tr>
                     <tr><td><code>core::full_profile_start($file)</code></td><td>Start line-level profiling, writing output to <code>$file</code></td></tr>
                     <tr><td><code>core::full_profile_stop()</code></td><td>Stop line-level profiling and flush data to disk</td></tr>
                 </tbody>
