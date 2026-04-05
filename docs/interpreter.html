@@ -62,68 +62,77 @@
             </div>
 
             <h1>Strada <span>Interpreter</span></h1>
-            <p class="subtitle">A tree-walking interpreter that executes Strada programs directly from the AST, without generating C code.</p>
+            <p class="subtitle">A bytecode VM that compiles Strada's AST to bytecode and executes it via a computed goto dispatch loop. 4-5x faster than Perl 5.38.</p>
 
             <div class="info-box">
                 <strong>No C compiler needed at runtime</strong>
-                The interpreter evaluates Strada code by walking the AST directly. This makes it ideal for interactive use, quick scripts, and environments where gcc or tcc are not available.
+                The interpreter compiles Strada code to bytecode and runs it on the VM. No gcc or tcc required (except for <code>__C__</code> blocks, which are JIT-compiled and cached). A tree-walking backend is available as a fallback via <code>--tree-walk</code>.
             </div>
 
             <h2>Overview</h2>
 
-            <p>Strada offers two execution paths for your code:</p>
+            <p>Strada offers three execution paths for your code:</p>
 
             <table>
                 <thead>
                     <tr>
                         <th></th>
                         <th>Compiled (stradac)</th>
-                        <th>Interpreter (strada-interp)</th>
+                        <th>VM (strada-interp)</th>
+                        <th>Tree-Walk (--tree-walk)</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
                         <td><strong>How it works</strong></td>
                         <td>Generates C code, compiles to native binary</td>
+                        <td>AST &rarr; bytecode &rarr; VM dispatch</td>
                         <td>Walks the AST directly at runtime</td>
                     </tr>
                     <tr>
                         <td><strong>Requires C compiler</strong></td>
                         <td>Yes (gcc)</td>
+                        <td>No (except <code>__C__</code> blocks)</td>
                         <td>No</td>
                     </tr>
                     <tr>
                         <td><strong>Startup time</strong></td>
                         <td>Slow (compilation step)</td>
+                        <td>Fast (parse + bytecode compile)</td>
                         <td>Fast (parse and run)</td>
                     </tr>
                     <tr>
                         <td><strong>Runtime speed</strong></td>
                         <td>Fastest (native code)</td>
+                        <td>Fast (4-5x faster than Perl 5.38)</td>
                         <td>Slower (interpreted)</td>
                     </tr>
                     <tr>
                         <td><strong>Best for</strong></td>
                         <td>Production, performance</td>
-                        <td>REPL, scripting, prototyping</td>
+                        <td>Scripts, file execution</td>
+                        <td>REPL, legacy fallback</td>
                     </tr>
                 </tbody>
             </table>
 
-            <p>Both paths share the same Lexer and Parser front-end, so valid Strada code works with either.</p>
+            <p>All paths share the same Lexer and Parser front-end, so valid Strada code works with any of them.</p>
 
             <h2>Running Programs</h2>
 
             <pre><code><span class="comment"># Build the interpreter</span>
 make interpreter
 
-<span class="comment"># Run a Strada program</span>
+<span class="comment"># Run a Strada program (uses bytecode VM by default)</span>
 ./strada-interp program.strada
+
+<span class="comment"># Use tree-walking backend instead</span>
+./strada-interp --tree-walk program.strada
 
 <span class="comment"># With library search paths</span>
 ./strada-interp -L lib program.strada
 
-<span class="comment"># Start the interactive REPL</span>
+<span class="comment"># Start the interactive REPL (uses tree-walk)</span>
 ./strada-interp</code></pre>
 
             <h2>Interactive REPL</h2>

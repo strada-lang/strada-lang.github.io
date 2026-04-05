@@ -62,18 +62,21 @@
             </div>
 
             <h1>Strada <span>REPL &amp; Scripting</span></h1>
-            <p class="subtitle">Interactive shell, command-line evaluation, and script execution &mdash; powered by the tree-walking interpreter. No C compiler needed at runtime.</p>
+            <p class="subtitle">Interactive shell, command-line evaluation, and script execution. File execution uses the bytecode VM (4-5x faster than Perl). The REPL uses the tree-walking backend. No C compiler needed at runtime.</p>
 
             <h2>Quick Start</h2>
 
-            <pre><code><span class="comment"># Interactive REPL</span>
+            <pre><code><span class="comment"># Interactive REPL (uses tree-walking backend)</span>
 strada --repl
 
 <span class="comment"># Evaluate code from the command line</span>
 strada-interp -e <span class="string">'say("hello world")'</span>
 
-<span class="comment"># Run a script file</span>
+<span class="comment"># Run a script file (uses bytecode VM by default)</span>
 strada-interp program.strada
+
+<span class="comment"># Use tree-walking backend instead</span>
+strada-interp --tree-walk program.strada
 strada --script program.strada</code></pre>
 
             <h2>Command-Line Evaluation</h2>
@@ -104,7 +107,7 @@ strada-interp -e <span class="string">'my int $sum = 0;'</span> \
             <p>The REPL supports readline with line editing, history, and arrow keys:</p>
 
             <pre><code>$ strada --repl
-Strada Interpreter v0.2 (tree-walking)
+Strada Interpreter v0.3 (tree-walking REPL, VM file execution)
 Type expressions or statements. Enter .help for commands, .quit to exit.
 
 strada> <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$x</span> = <span class="number">42</span>;
@@ -207,7 +210,7 @@ strada --script program.strada</code></pre>
                 <thead>
                     <tr>
                         <th>Feature</th>
-                        <th>Interpreter</th>
+                        <th>Interpreter (VM)</th>
                         <th>Compiled</th>
                     </tr>
                 </thead>
@@ -219,17 +222,17 @@ strada --script program.strada</code></pre>
                     </tr>
                     <tr>
                         <td>Execution speed</td>
-                        <td>Tree-walking interpreter</td>
+                        <td>Bytecode VM (4-5x faster than Perl 5.38)</td>
                         <td>Native machine code</td>
                     </tr>
                     <tr>
                         <td>Requires C compiler</td>
-                        <td>No</td>
+                        <td>No (except <code>__C__</code> blocks)</td>
                         <td>Yes (gcc)</td>
                     </tr>
                     <tr>
                         <td><code>__C__</code> blocks</td>
-                        <td>Skipped</td>
+                        <td>JIT-compiled and cached (VM); skipped (tree-walk)</td>
                         <td>Fully supported</td>
                     </tr>
                     <tr>
@@ -239,7 +242,7 @@ strada --script program.strada</code></pre>
                     </tr>
                     <tr>
                         <td>Best for</td>
-                        <td>Quick tasks, REPL, prototyping</td>
+                        <td>Quick tasks, REPL, scripting</td>
                         <td>Production, performance</td>
                     </tr>
                 </tbody>
@@ -266,6 +269,14 @@ strada --script program.strada</code></pre>
                     <tr>
                         <td><code>-h, --help</code></td>
                         <td>Show help message</td>
+                    </tr>
+                    <tr>
+                        <td><code>--vm</code></td>
+                        <td>Use bytecode VM backend (default for file execution)</td>
+                    </tr>
+                    <tr>
+                        <td><code>--tree-walk</code></td>
+                        <td>Use tree-walking backend (default for REPL)</td>
                     </tr>
                     <tr>
                         <td><code>--</code></td>
