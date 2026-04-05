@@ -219,7 +219,7 @@ Strada::Interpreter::<span class="func">reset</span>();</code></pre>
                 <tbody>
                     <tr>
                         <td><strong>Execution</strong></td>
-                        <td>Tree-walking AST eval</td>
+                        <td>Bytecode VM (default) or tree-walk</td>
                         <td>Compile to .so, dlopen, execute</td>
                     </tr>
                     <tr>
@@ -229,7 +229,7 @@ Strada::Interpreter::<span class="func">reset</span>();</code></pre>
                     </tr>
                     <tr>
                         <td><strong>__C__ blocks</strong></td>
-                        <td>Skipped</td>
+                        <td>JIT-compiled and cached</td>
                         <td>Supported</td>
                     </tr>
                     <tr>
@@ -239,13 +239,13 @@ Strada::Interpreter::<span class="func">reset</span>();</code></pre>
                     </tr>
                     <tr>
                         <td><strong>Per-eval overhead</strong></td>
-                        <td>Low (parse + walk)</td>
+                        <td>Low (parse + bytecode compile)</td>
                         <td>Higher (compile + link + load)</td>
                     </tr>
                     <tr>
                         <td><strong>Execution speed</strong></td>
-                        <td>Slower (interpreted)</td>
-                        <td>Fast (native code)</td>
+                        <td>Fast (bytecode VM)</td>
+                        <td>Fastest (native code)</td>
                     </tr>
                     <tr>
                         <td><strong>Best for</strong></td>
@@ -257,7 +257,7 @@ Strada::Interpreter::<span class="func">reset</span>();</code></pre>
 
             <h2>Architecture</h2>
 
-            <p>The interpreter reuses the compiler's Lexer and Parser, then walks the resulting AST to execute programs:</p>
+            <p>The interpreter reuses the compiler's Lexer and Parser front-end. By default, the AST is compiled to bytecode and executed on a register-based VM. A tree-walking backend is available as a fallback via <code>--tree-walk</code>.</p>
 
             <table>
                 <thead>
@@ -279,9 +279,19 @@ Strada::Interpreter::<span class="func">reset</span>();</code></pre>
                         <td>Builds AST (shared with compiler)</td>
                     </tr>
                     <tr>
-                        <td>Interpreter</td>
+                        <td>VM Compiler</td>
+                        <td><code>interpreter/vm_compiler.c</code></td>
+                        <td>Compiles AST to bytecode</td>
+                    </tr>
+                    <tr>
+                        <td>Bytecode VM</td>
+                        <td><code>interpreter/vm.c</code></td>
+                        <td>Register-based VM with JIT for <code>__C__</code> blocks</td>
+                    </tr>
+                    <tr>
+                        <td>Tree-walker</td>
                         <td><code>lib/Strada/Interpreter.strada</code></td>
-                        <td>Tree-walking AST evaluator</td>
+                        <td>Fallback AST evaluator (<code>--tree-walk</code>)</td>
                     </tr>
                     <tr>
                         <td>Driver</td>
@@ -323,7 +333,6 @@ Strada::Interpreter::<span class="func">reset</span>();</code></pre>
             <div class="info-box warning">
                 <strong>Not supported in the interpreter</strong>
                 <ul style="margin: 0.5rem 0 0 1rem;">
-                    <li><code>__C__</code> blocks are skipped (programs relying on inline C won't work)</li>
                     <li>Async/await (requires compiled thread pool runtime)</li>
                     <li><code>c::</code> namespace functions (<code>c::alloc</code>, <code>c::free</code>, etc.)</li>
                 </ul>
