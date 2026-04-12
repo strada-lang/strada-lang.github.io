@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Strada - A Perl-Inspired Language That Compiles to Native Code</title>
-    <meta name="description" content="Strada is a Perl-inspired language that compiles to native executables via C. Familiar Perl syntax with optional type annotations. Up to 56x faster than Perl and 29x faster than Python.">
+    <meta name="description" content="Strada is a Perl-inspired language that compiles to native executables via C. Familiar Perl syntax with optional type annotations. Up to 94x faster than Perl and 29x faster than Python.">
     <style>
         :root {
             --primary: #cd212a;
@@ -759,7 +759,7 @@
                     <p>The included <code>perl2strada</code> tool translates Perl scripts and modules to Strada source as a starting point. Port your existing code and start compiling it.</p>
                 </div>
                 <div class="compiled-perl-card">
-                    <h3>Up to 4.3x faster</h3>
+                    <h3>Up to 94x faster</h3>
                     <p>No interpreter dispatch loop, no symbol table lookups, no bytecode overhead. Function calls compile to a single <code>call</code> instruction. Integer arithmetic uses zero heap allocation.</p>
                 </div>
                 <div class="compiled-perl-card">
@@ -780,39 +780,45 @@
             <div class="bench-bars">
                 <h3 class="bench-group-title">vs Perl</h3>
                 <div class="bench-bar-row">
-                    <span class="bench-label">Compute</span>
-                    <div class="bench-track">
-                        <div class="bench-fill" style="width: 100%;"><span class="bench-value">56x faster</span></div>
-                    </div>
-                </div>
-                <div class="bench-bar-row">
                     <span class="bench-label">Functions</span>
                     <div class="bench-track">
-                        <div class="bench-fill" style="width: 47%;"><span class="bench-value">27x faster</span></div>
+                        <div class="bench-fill" style="width: 100%;"><span class="bench-value">94x faster</span></div>
                     </div>
                 </div>
                 <div class="bench-bar-row">
-                    <span class="bench-label">OOP</span>
+                    <span class="bench-label">Compute</span>
                     <div class="bench-track">
-                        <div class="bench-fill" style="width: 7%;"><span class="bench-value">3.8x faster</span></div>
+                        <div class="bench-fill" style="width: 81%;"><span class="bench-value">76x faster</span></div>
                     </div>
                 </div>
                 <div class="bench-bar-row">
                     <span class="bench-label">Array/Hash</span>
                     <div class="bench-track">
-                        <div class="bench-fill" style="width: 6%;"><span class="bench-value">3.4x faster</span></div>
+                        <div class="bench-fill" style="width: 5%;"><span class="bench-value">4.9x faster</span></div>
+                    </div>
+                </div>
+                <div class="bench-bar-row">
+                    <span class="bench-label">OOP</span>
+                    <div class="bench-track">
+                        <div class="bench-fill" style="width: 3%;"><span class="bench-value">3.2x faster</span></div>
+                    </div>
+                </div>
+                <div class="bench-bar-row">
+                    <span class="bench-label">Strings</span>
+                    <div class="bench-track">
+                        <div class="bench-fill" style="width: 3%;"><span class="bench-value">3.2x faster</span></div>
                     </div>
                 </div>
             </div>
 
             <div class="bench-callout">
-                <div class="bench-callout-number">56x</div>
+                <div class="bench-callout-number">94x</div>
                 <div class="bench-callout-text">faster than Perl</div>
-                <div class="bench-callout-detail">on compute benchmarks</div>
+                <div class="bench-callout-detail">on function call benchmarks</div>
             </div>
         </div>
 
-        <p class="bench-footer">Benchmarked against Python 3.12 and Perl 5.38. Strada beats both across every benchmark &mdash; from 1.9x on strings to 56x on compute. <a href="docs/benchmarks.html">See all benchmarks</a> or <a href="https://github.com/strada-lang/strada-lang/tree/main/benchmarks">run them yourself.</a></p>
+        <p class="bench-footer">Benchmarked against Python 3.12 and Perl 5.38. Strada beats both across every benchmark &mdash; from 3.2x on strings to 94x on function calls. <a href="docs/benchmarks.html">See all benchmarks</a> or <a href="https://github.com/strada-lang/strada-lang/tree/main/benchmarks">run them yourself.</a></p>
     </section>
 
     <section class="type-system">

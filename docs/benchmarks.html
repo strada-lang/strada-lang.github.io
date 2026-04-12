@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Benchmarks - Strada vs Python vs Perl | Performance</title>
-    <meta name="description" content="Strada benchmark results compared to Python and Perl. Strada is 56x faster than Perl at compute, 29x faster than Python at functions, and beats both across every benchmark.">
+    <meta name="description" content="Strada benchmark results compared to Python and Perl. Strada is 94x faster than Perl at function calls, 76x faster at compute, and beats both across every benchmark.">
     <link rel="stylesheet" href="style.css">
     <style>
         .bench-table {
@@ -212,7 +212,7 @@
             </div>
 
             <h1>Performance <span>Benchmarks</span></h1>
-            <p class="subtitle">How Strada compares to Python and Perl.</p>
+            <p class="subtitle">How Strada compares to Perl and Python.</p>
 
             <p>Strada compiles to C, then to native machine code via GCC with link-time optimization. These benchmarks compare Strada against Python and Perl across five categories: compute, functions, strings, data structures, and object-oriented programming.</p>
 
@@ -230,16 +230,16 @@
 
             <div class="highlight-card">
                 <div class="stat">
-                    <div class="stat-number">56x</div>
+                    <div class="stat-number">94x</div>
+                    <div class="stat-label">faster than Perl at functions</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">76x</div>
                     <div class="stat-label">faster than Perl at compute</div>
                 </div>
                 <div class="stat">
                     <div class="stat-number">29x</div>
                     <div class="stat-label">faster than Python at functions</div>
-                </div>
-                <div class="stat">
-                    <div class="stat-number">16x</div>
-                    <div class="stat-label">faster than Python at compute</div>
                 </div>
             </div>
 
@@ -252,77 +252,77 @@
                     <tr>
                         <th>Benchmark</th>
                         <th>Strada</th>
-                        <th>Python 3</th>
                         <th>Perl 5</th>
+                        <th>Speedup</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>Compute</td>
-                        <td class="winner">1.64s</td>
-                        <td class="slower">26.69s</td>
-                        <td class="slower">92.10s</td>
-                    </tr>
-                    <tr>
                         <td>Functions</td>
-                        <td class="winner">0.03s</td>
-                        <td class="slower">0.89s</td>
-                        <td class="slower">0.83s</td>
+                        <td class="winner">0.02s</td>
+                        <td class="slower">2.16s</td>
+                        <td class="winner">94x</td>
                     </tr>
                     <tr>
-                        <td>Strings</td>
-                        <td class="winner">0.07s</td>
-                        <td class="slower">~228s</td>
-                        <td class="slower">0.13s</td>
+                        <td>Compute</td>
+                        <td class="winner">2.37s</td>
+                        <td class="slower">180.34s</td>
+                        <td class="winner">76x</td>
                     </tr>
                     <tr>
                         <td>Array/Hash</td>
-                        <td class="winner">0.17s</td>
-                        <td class="slower">0.52s</td>
-                        <td class="slower">0.59s</td>
+                        <td class="winner">0.19s</td>
+                        <td class="slower">0.92s</td>
+                        <td class="winner">4.9x</td>
+                    </tr>
+                    <tr>
+                        <td>Strings</td>
+                        <td class="winner">0.09s</td>
+                        <td class="slower">0.29s</td>
+                        <td class="winner">3.2x</td>
                     </tr>
                     <tr>
                         <td>OOP</td>
-                        <td class="winner">0.23s</td>
-                        <td class="slower">0.56s</td>
-                        <td class="slower">1.35s</td>
+                        <td class="winner">0.82s</td>
+                        <td class="slower">2.61s</td>
+                        <td class="winner">3.2x</td>
                     </tr>
                 </tbody>
             </table>
 
             <h2>Strada vs Perl</h2>
 
-            <p>Strada is a natural upgrade from Perl &mdash; same syntax feel, dramatically better performance. The biggest gains come from compiled function calls and arithmetic, where Perl's interpreter dispatch loop creates massive overhead.</p>
+            <p>Strada is a natural upgrade from Perl &mdash; same syntax feel, dramatically better performance. The biggest gains come from compiled function calls and integer arithmetic, where Perl's interpreter dispatch loop creates massive overhead.</p>
 
             <div class="bench-group">
                 <div class="ratio-bar">
-                    <span class="ratio-label">Compute</span>
-                    <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 100%;">56x faster</div>
-                    </div>
-                </div>
-                <div class="ratio-bar">
                     <span class="ratio-label">Functions</span>
                     <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 48%;">27x faster</div>
+                        <div class="ratio-fill strada" style="width: 100%;">94x faster</div>
                     </div>
                 </div>
                 <div class="ratio-bar">
-                    <span class="ratio-label">OOP</span>
+                    <span class="ratio-label">Compute</span>
                     <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 11%;">6x faster</div>
+                        <div class="ratio-fill strada" style="width: 81%;">76x faster</div>
                     </div>
                 </div>
                 <div class="ratio-bar">
                     <span class="ratio-label">Array/Hash</span>
                     <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 6%;">3.5x faster</div>
+                        <div class="ratio-fill strada" style="width: 5%;">4.9x faster</div>
                     </div>
                 </div>
                 <div class="ratio-bar">
                     <span class="ratio-label">Strings</span>
                     <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 3%;">1.9x faster</div>
+                        <div class="ratio-fill strada" style="width: 3%;">3.2x faster</div>
+                    </div>
+                </div>
+                <div class="ratio-bar">
+                    <span class="ratio-label">OOP</span>
+                    <div class="ratio-track">
+                        <div class="ratio-fill strada" style="width: 3%;">3.2x faster</div>
                     </div>
                 </div>
             </div>
@@ -373,22 +373,22 @@
 
             <div class="why-section">
                 <h3>Zero-overhead function calls</h3>
-                <p>Perl and Python look up function names at runtime. Strada compiles function calls to direct C function calls &mdash; a single <code>call</code> instruction. With inline fast-path wrappers for tagged integer operations, function call overhead approaches zero. This makes Strada <strong>27x faster than Perl</strong> and <strong>29x faster than Python</strong> at function-heavy workloads.</p>
+                <p>Perl and Python look up function names at runtime. Strada compiles function calls to direct C function calls &mdash; a single <code>call</code> instruction. With inline fast-path wrappers for tagged integer operations, function call overhead approaches zero. This makes Strada <strong>94x faster than Perl</strong> and <strong>29x faster than Python</strong> at function-heavy workloads.</p>
             </div>
 
             <div class="why-section">
                 <h3>Tagged integers: zero-allocation arithmetic</h3>
-                <p>Strada encodes integers directly inside pointers &mdash; no heap allocation, no reference counting, no free. Integer arithmetic like <code>$a + $b</code> compiles to a single CPU add instruction plus a bit shift. Reference counting and type conversion functions are inlined at every call site, short-circuiting to a single pointer-bit check for the common integer case. This makes compute-heavy code <strong>56x faster than Perl</strong> and <strong>16x faster than Python</strong>.</p>
+                <p>Strada encodes integers directly inside pointers &mdash; no heap allocation, no reference counting, no free. Integer arithmetic like <code>$a + $b</code> compiles to a single CPU add instruction plus a bit shift. Reference counting and type conversion functions are inlined at every call site, short-circuiting to a single pointer-bit check for the common integer case. This makes compute-heavy code <strong>76x faster than Perl</strong> and <strong>16x faster than Python</strong>.</p>
             </div>
 
             <div class="why-section">
                 <h3>Refcounted strings: zero-copy sharing</h3>
-                <p>Strada uses <code>StradaString</code> &mdash; a refcounted string with the data stored inline (single allocation). When a string is passed to a function or used as a hash key, Strada increments the reference count instead of copying. String literals appended with <code>.=</code> bypass allocation entirely, appending bytes directly to the existing buffer. Short strings are recycled via a pool. This makes string operations <strong>1.9x faster than Perl</strong> and orders of magnitude faster than Python.</p>
+                <p>Strada uses <code>StradaString</code> &mdash; a refcounted string with the data stored inline (single allocation). When a string is passed to a function or used as a hash key, Strada increments the reference count instead of copying. String literals appended with <code>.=</code> bypass allocation entirely, appending bytes directly to the existing buffer. Short strings are recycled via a pool. This makes string operations <strong>3.2x faster than Perl</strong> and orders of magnitude faster than Python.</p>
             </div>
 
             <div class="why-section">
                 <h3>Inline accessor &amp; constructor optimization</h3>
-                <p>When you write <code>$self->x()</code> on a <code>has</code> attribute, Strada detects that the method is a simple accessor and compiles it to a direct hash fetch &mdash; skipping method dispatch entirely. For constructors like <code>Point::new("x", 1, "y", 2)</code>, the compiler pre-computes attribute key hashes at compile time, emits direct hash construction code, and devirtualizes method calls for known types. This makes Strada OOP <strong>6x faster than Perl</strong> and <strong>2.5x faster than Python</strong>.</p>
+                <p>When you write <code>$self->x()</code> on a <code>has</code> attribute, Strada detects that the method is a simple accessor and compiles it to a direct hash fetch &mdash; skipping method dispatch entirely. For constructors like <code>Point::new("x", 1, "y", 2)</code>, the compiler pre-computes attribute key hashes at compile time, emits direct hash construction code, and devirtualizes method calls for known types. This makes Strada OOP <strong>3.2x faster than Perl</strong> and <strong>2.5x faster than Python</strong>.</p>
             </div>
 
             <div class="why-section">
