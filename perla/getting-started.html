@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Getting Started — Perla</title>
+    <meta name="description" content="Install Perla, compile your first Perl program, precompile a module tree, run under Cannoli.">
+    <link rel="stylesheet" href="perla.css">
+</head>
+<body>
+    <nav>
+        <a href="index.html" class="logo"><span class="logo-pearl"></span>Perla</a>
+        <ul>
+            <li><a href="getting-started.html">Get Started</a></li>
+            <li><a href="docs.html">Docs</a></li>
+            <li><a href="index.html#why">Why Perla</a></li>
+            <li><a href="https://github.com/mjflick/strada/tree/main/perla">GitHub</a></li>
+            <li><a href="../index.html" class="nav-back">← Strada</a></li>
+        </ul>
+    </nav>
+
+    <header class="page-header">
+        <h1>Getting Started</h1>
+        <p class="tagline">Install Perla, compile your first script, and learn the iteration loop.</p>
+    </header>
+
+    <main>
+        <h2>Install</h2>
+        <p>Perla ships with the Strada repo. Clone, build Strada, then build Perla:</p>
+<pre><span class="prompt">$</span> git clone https://github.com/mjflick/strada
+<span class="prompt">$</span> <span class="kw">cd</span> strada
+<span class="prompt">$</span> make
+<span class="prompt">$</span> make -C perla</pre>
+
+        <p>You should now have <code>./perla/perla</code>. Either add that directory to your <code>PATH</code> or call it with a full path.</p>
+
+        <h3>Prerequisites</h3>
+        <ul>
+            <li><strong>gcc</strong> (or a recent clang). Perla calls the C compiler to produce the final binary.</li>
+            <li><strong>MySQL client headers</strong> (<code>libmysqlclient-dev</code> on Debian/Ubuntu) if you'll use the DBI bridge.</li>
+            <li><strong>zlib</strong> and <strong>OpenSSL</strong> if you'll compile programs that do compression or TLS.</li>
+            <li>A real <strong>perl</strong> binary on <code>$PATH</code> helps — Perla probes <code>perl -V</code> for <code>@INC</code> fallback. Set <code>PERLA_PERL=/path/to/perl</code> if it's not on PATH.</li>
+        </ul>
+
+        <div class="callout info">
+            <p><strong>Quick sanity check:</strong></p>
+<pre><span class="prompt">$</span> ./perla/perla -e <span class="str">'print "hello from perla\n"'</span>
+hello from perla</pre>
+            <p>If that works, you're done installing.</p>
+        </div>
+
+        <h2>Your first program</h2>
+        <p>Create a file <code>hello.pl</code>:</p>
+<pre><span class="comment"># hello.pl</span>
+<span class="kw">use</span> strict;
+<span class="kw">use</span> warnings;
+
+<span class="kw">sub</span> fib {
+    <span class="kw">my</span> $n = shift;
+    <span class="kw">return</span> $n <span class="kw">if</span> $n &lt; 2;
+    <span class="kw">return</span> fib($n - 1) + fib($n - 2);
+}
+
+<span class="kw">for</span> <span class="kw">my</span> $i (0..10) {
+    print <span class="str">"fib($i) = "</span>, fib($i), <span class="str">"\n"</span>;
+}</pre>
+
+        <h3>Compile and run</h3>
+<pre><span class="prompt">$</span> ./perla/perla hello.pl
+fib(0) = 0
+fib(1) = 1
+fib(2) = 1
+...
+fib(10) = 55</pre>
+
+        <p>Default <code>./perla foo.pl</code> compiles and runs, cleaning up the binary after. To keep the executable:</p>
+
+<pre><span class="prompt">$</span> ./perla/perla -o hello hello.pl
+<span class="prompt">$</span> ./hello
+<span class="prompt">$</span> file hello
+hello: ELF 64-bit LSB pie executable, x86-64, statically linked</pre>
+
+        <p>One file. No <code>perl</code> required on the target. Ship it.</p>
+
+        <h2>Optimization levels</h2>
+        <p>Default is <code>-O0</code> — fast compile, slow binary. For release, use <code>-O2</code> or <code>-O3</code>:</p>
+<pre><span class="prompt">$</span> ./perla/perla -O2 -o app app.pl          <span class="comment"># -O2 + -flto</span>
+<span class="prompt">$</span> ./perla/perla -O3 -o app app.pl          <span class="comment"># adds -march=native</span></pre>
+
+        <p>For a typical web-app-size program the difference is:</p>
+        <table>
+            <tr><th>Flag</th><th>Compile time (gcc phase)</th><th>Runtime perf</th></tr>
+            <tr><td><code>-O0</code> (default)</td><td>Fast (~15s)</td><td>Slower</td></tr>
+            <tr><td><code>-O2</code></td><td>~100s</td><td>Fast</td></tr>
+            <tr><td><code>-O3</code></td><td>~100s</td><td>Fastest (native CPU)</td></tr>
+        </table>
+
+        <h2>When you have modules</h2>
+        <p>Perla handles <code>use Module::Name</code> the way you'd expect — the module's source is found on the search path and included. The search path is built from the input file's directory, <code>.</code>, <code>$PERL5LIB</code>, and any <code>use lib "..."</code> statements.</p>
+
+<pre><span class="prompt">$</span> <span class="kw">mkdir</span> -p lib/My
+<span class="prompt">$</span> <span class="kw">cat</span> &gt; lib/My/Greeter.pm &lt;&lt;<span class="str">'EOF'</span>
+<span class="str">package My::Greeter;
+use strict;
+sub hello { return "Hello, $_[0]!"; }
+1;
+EOF
+<span class="prompt">$</span> <span class="kw">cat</span> &gt; greet.pl &lt;&lt;<span class="str">'EOF'</span>
+<span class="str">use lib 'lib';
+use My::Greeter;
+print My::Greeter::hello("Perla"), "\n";
+EOF
+<span class="prompt">$</span> ./perla/perla greet.pl
+Hello, Perla!</pre>
+
+        <h3>Precompile for faster iteration</h3>
+        <p>When your module tree gets large, compiling the script repeatedly means re-parsing every <code>.pm</code> every time. Precompile them once:</p>
+
+<pre><span class="prompt">$</span> ./perla/perla -M lib/My/Greeter.pm
+Compiled lib/My/Greeter.pm.o (module: My::Greeter, init: perla_mod_init_My_Greeter)
+
+<span class="prompt">$</span> ./perla/perla greet.pl          <span class="comment"># now uses cached .pm.o</span>
+Hello, Perla!</pre>
+
+        <p>Or precompile a whole directory recursively:</p>
+<pre><span class="prompt">$</span> ./perla/perla -M lib/
+[perla] precompiling 42 .pm files under lib/
+[perla] [1/42] ok lib/My/Greeter.pm
+...
+[perla] precompile done: 42 built, 0 skipped, 0 failed</pre>
+
+        <p>It's idempotent — already-built modules are skipped on re-runs. Force a rebuild with <code>--force-rebuild</code>.</p>
+
+        <div class="callout">
+            <p><strong>Make targets for larger projects:</strong> if you're shipping something bizowie-sized, add these to your <code>Makefile</code>:</p>
+<pre>PERLA ?= /path/to/perla
+
+precompile:
+	$(PERLA) -M lib/
+
+precompile-force:
+	$(PERLA) --force-rebuild -M lib/
+
+precompile-clean:
+	find lib -type f \( -name <span class="str">'*.pm.o'</span> -o -name <span class="str">'*.pm.so'</span> -o -name <span class="str">'*.pm.deps'</span> \) -delete</pre>
+        </div>
+
+        <h2>Debugging what Perla is doing</h2>
+        <p>The <code>--debug</code> flag prints every compile-time decision (module search, cache hits, auto-builds) plus the exact <code>gcc</code> invocation:</p>
+
+<pre><span class="prompt">$</span> ./perla/perla --debug -o app app.pl 2&gt;&amp;1 | <span class="kw">head</span> -20
+[perla] debug mode enabled
+[perla] cc: gcc
+[perla] compile-time lib paths (5):
+[perla]   [0] .
+[perla]   [1] /opt/bzperl/lib/site_perl/5.42.0
+...
+[perla] use Carp
+[perla]   Carp: cache HIT /opt/bzperl/.../Carp.pm [.pm.o (static)]
+[perla] use File::Spec
+[perla]   File::Spec: cache MISS /opt/bzperl/.../File/Spec.pm — auto-building via perla -M
+...
+[cc] gcc -O0 -w -o app app.c /opt/bzperl/.../Carp.pm.o ... 2&gt;&amp;1
+[cc] done in 16.03s (ok)</pre>
+
+        <p>Use this when a <code>use</code> resolves to an unexpected file, when you want to see what the compiler spawned, or when compile time is surprising.</p>
+
+        <h3><code>--keep</code> to inspect the generated C</h3>
+        <p>If something compiles but behaves weirdly, keep the intermediate <code>.c</code>:</p>
+
+<pre><span class="prompt">$</span> ./perla/perla --keep -o app app.pl
+[perla] kept C file: app.c
+<span class="prompt">$</span> grep <span class="str">'perla_sub_main_'</span> app.c    <span class="comment"># see what each sub compiled to</span></pre>
+
+        <h2>Dropping into C</h2>
+        <p>For FFI or performance-critical sections, Perla supports <code>__C__</code> blocks:</p>
+
+<pre><span class="kw">use</span> strict;
+
+<span class="comment"># file-scope __C__: #includes, statics</span>
+__C__ {
+    #include &lt;sys/time.h&gt;
+}
+
+<span class="kw">sub</span> ms_now {
+    <span class="kw">my</span> $ms = 0;
+    __C__ {
+        <span class="comment">/* Perl $foo → C var v_foo. Block is emitted verbatim. */</span>
+        <span class="kw">struct</span> timeval tv;
+        gettimeofday(&amp;tv, NULL);
+        strada_decref(v_ms);
+        v_ms = strada_new_int((int64_t)tv.tv_sec * 1000 + tv.tv_usec / 1000);
+    }
+    <span class="kw">return</span> $ms;
+}
+
+print <span class="str">"now: "</span>, ms_now(), <span class="str">"ms\n"</span>;</pre>
+
+        <p>See <a href="docs.html">the full <code>__C__</code> guide</a> for the variable-name mapping, runtime helpers you can call, and memory rules.</p>
+
+        <h2>Running under Cannoli (web apps)</h2>
+        <p>Compile your Perl app as a <code>.pm.so</code> and serve it via <a href="../docs/cannoli.html">Cannoli</a>'s preforking HTTP server:</p>
+
+<pre><span class="prompt">$</span> ./perla/perla -M MyApp.pm
+Compiled MyApp.pm.so (module: MyApp, init: perla_mod_init_MyApp)
+
+<span class="prompt">$</span> cannoli --library <span class="str">"./cannoli_perla.so:\
+    so=$(pwd)/MyApp.pm.so;\
+    init=perla_mod_init_MyApp;\
+    handler=perla_sub_MyApp_handle"</span> --dev -p 8080</pre>
+
+        <p>The <code>cannoli_perla.so</code> bridge is under <code>cannoli/lib/perla/</code> in the Cannoli repo.</p>
+
+        <h2>Where to next</h2>
+        <div class="doc-index">
+            <a href="docs.html" class="card">
+                <h3>Full Documentation →</h3>
+                <p>Compile flags, optimization, module cache, <code>__C__</code> reference, module search paths, common failure modes.</p>
+            </a>
+            <a href="../docs/perl-integration.html" class="card">
+                <h3>Porting from Perl →</h3>
+                <p>Converting Perl scripts to Strada source directly (alternative path — for when you want to embrace Strada's type annotations).</p>
+            </a>
+            <a href="../docs/cannoli.html" class="card">
+                <h3>Cannoli Web Server →</h3>
+                <p>The preforking web server Perla-compiled handlers plug into.</p>
+            </a>
+            <a href="https://github.com/mjflick/strada/tree/main/perla" class="card">
+                <h3>Source on GitHub →</h3>
+                <p>Browse the Perla compiler, runtime, and test suite.</p>
+            </a>
+        </div>
+    </main>
+
+    <footer>
+        <p><strong>Perla</strong> — a Perl 5 compiler built on <a href="../index.html">Strada</a>.</p>
+        <p style="margin-top: 1rem;">
+            <a href="index.html">Home</a> &nbsp;|&nbsp;
+            <a href="getting-started.html">Get Started</a> &nbsp;|&nbsp;
+            <a href="docs.html">Documentation</a> &nbsp;|&nbsp;
+            <a href="https://github.com/mjflick/strada/tree/main/perla">GitHub</a>
+        </p>
+    </footer>
+</body>
+</html>

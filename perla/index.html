@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perla — Compile Perl 5 to native executables</title>
+    <meta name="description" content="Perla is a Perl 5 compiler built on Strada. Turn your Perl scripts and modules into standalone native binaries — no perl interpreter required at runtime.">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3CradialGradient id='g' cx='35%25' cy='30%25'%3E%3Cstop offset='0%25' stop-color='%23ffffff'/%3E%3Cstop offset='100%25' stop-color='%23a0a8c0'/%3E%3C/radialGradient%3E%3C/defs%3E%3Ccircle cx='50' cy='52' r='42' fill='url(%23g)'/%3E%3C/svg%3E">
+    <style>
+        :root {
+            --primary: #1e2761;          /* deep indigo — "pearl depth" */
+            --primary-light: #3a4596;
+            --accent: #d4a76a;            /* warm pearl-gold */
+            --accent-dark: #b8884a;
+            --bg: #f4f2ee;                /* pearl-cream */
+            --bg-soft: #ffffff;
+            --ink: #1a1a2a;
+            --ink-soft: #4a4a5a;
+            --border: #d8d4cc;
+            --code-bg: #1a1a2a;
+            --code-text: #e6e0d2;
+            --code-comment: #8a8a9a;
+            --code-string: #d4a76a;
+            --code-keyword: #a5c8ff;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.65;
+            color: var(--ink);
+            background: var(--bg);
+            background-image:
+                radial-gradient(ellipse at top left, rgba(30, 39, 97, 0.05), transparent 50%),
+                radial-gradient(ellipse at bottom right, rgba(212, 167, 106, 0.08), transparent 50%);
+            min-height: 100vh;
+        }
+
+        /* Pearl logo — a circle with radial gradient for that luminous look */
+        .logo-pearl {
+            display: inline-block;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 30%, #ffffff, #c0c8d8 50%, #7a82a0 100%);
+            box-shadow:
+                inset 0 2px 4px rgba(255,255,255,0.6),
+                inset 0 -2px 4px rgba(0,0,0,0.15),
+                0 2px 8px rgba(30,39,97,0.2);
+            vertical-align: middle;
+            margin-right: 0.4rem;
+        }
+
+        nav {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 1rem 2rem;
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            font-family: 'Georgia', serif;
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 1.5rem;
+        }
+
+        nav a {
+            color: var(--ink-soft);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: color 0.2s;
+        }
+
+        nav a:hover { color: var(--primary); }
+
+        nav a.nav-back {
+            color: var(--ink-soft);
+            font-size: 0.88rem;
+            opacity: 0.75;
+        }
+        nav a.nav-back:hover { opacity: 1; color: var(--primary); }
+
+        .hero {
+            padding: 9rem 2rem 5rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 30%, rgba(255,255,255,0.7), rgba(212,167,106,0.08) 40%, transparent 70%);
+            transform: translate(-50%, -50%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .hero > * { position: relative; z-index: 1; }
+
+        .hero-badge {
+            display: inline-block;
+            padding: 0.35rem 1rem;
+            background: rgba(30, 39, 97, 0.08);
+            color: var(--primary);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            letter-spacing: 0.02em;
+        }
+
+        .hero h1 {
+            font-family: 'Georgia', serif;
+            font-size: 4.2rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+            line-height: 1.05;
+        }
+
+        .hero .tagline {
+            font-size: 1.45rem;
+            color: var(--ink-soft);
+            max-width: 720px;
+            margin: 0 auto 2rem;
+            line-height: 1.5;
+        }
+
+        .hero .sub {
+            font-size: 1rem;
+            color: var(--ink-soft);
+            max-width: 600px;
+            margin: 0 auto 2.5rem;
+            opacity: 0.85;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 0.85rem 2rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.95rem;
+            transition: transform 0.15s, box-shadow 0.2s;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(30,39,97,0.25);
+        }
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(30,39,97,0.35);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--primary);
+            border: 2px solid var(--primary);
+        }
+        .btn-secondary:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        section {
+            padding: 5rem 2rem;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        section h2 {
+            font-family: 'Georgia', serif;
+            font-size: 2.4rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        section h2 + p.lead {
+            text-align: center;
+            color: var(--ink-soft);
+            max-width: 640px;
+            margin: 0 auto 3rem;
+            font-size: 1.08rem;
+        }
+
+        /* Why Perla section — card grid */
+        .why-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.4rem;
+            margin-top: 3rem;
+        }
+
+        .why-card {
+            background: var(--bg-soft);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 1.8rem 1.6rem;
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+        }
+
+        .why-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(30,39,97,0.08);
+            border-color: var(--accent);
+        }
+
+        .why-card .icon {
+            font-size: 1.6rem;
+            margin-bottom: 0.7rem;
+            display: inline-block;
+            width: 2.6rem;
+            height: 2.6rem;
+            line-height: 2.6rem;
+            text-align: center;
+            border-radius: 8px;
+            background: linear-gradient(135deg, rgba(30,39,97,0.1), rgba(212,167,106,0.15));
+        }
+
+        .why-card h3 {
+            color: var(--primary);
+            font-size: 1.15rem;
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .why-card p {
+            color: var(--ink-soft);
+            font-size: 0.95rem;
+            line-height: 1.55;
+        }
+
+        /* Honest tradeoffs — muted, below the selling points */
+        .caveats {
+            background: var(--bg-soft);
+            border-left: 4px solid var(--accent);
+            border-radius: 0 8px 8px 0;
+            padding: 1.8rem 2rem;
+            margin: 4rem auto 0;
+            max-width: 800px;
+        }
+        .caveats h3 {
+            color: var(--accent-dark);
+            font-size: 1.2rem;
+            margin-bottom: 0.8rem;
+        }
+        .caveats ul {
+            color: var(--ink-soft);
+            padding-left: 1.2rem;
+            line-height: 1.7;
+        }
+        .caveats li { margin-bottom: 0.4rem; font-size: 0.95rem; }
+        .caveats code {
+            background: var(--bg);
+            padding: 0.1rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.88em;
+            color: var(--primary);
+        }
+
+        /* Code example */
+        .code-section {
+            background: var(--bg-soft);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            padding: 5rem 2rem;
+        }
+
+        .code-section .inner {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        pre.code {
+            background: var(--code-bg);
+            color: var(--code-text);
+            padding: 1.6rem 1.8rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: 'SF Mono', Menlo, Consolas, 'Courier New', monospace;
+            font-size: 0.92rem;
+            line-height: 1.6;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+            margin: 1.4rem 0;
+        }
+
+        pre.code .comment { color: var(--code-comment); font-style: italic; }
+        pre.code .str     { color: var(--code-string); }
+        pre.code .kw      { color: var(--code-keyword); font-weight: 500; }
+        pre.code .prompt  { color: #7a8a9a; user-select: none; }
+
+        .code-label {
+            display: inline-block;
+            background: var(--accent);
+            color: white;
+            padding: 0.2rem 0.8rem;
+            border-radius: 4px;
+            font-size: 0.82rem;
+            font-weight: 600;
+            margin-bottom: 0.4rem;
+            letter-spacing: 0.02em;
+        }
+
+        /* Get started quick strip */
+        .quickstart {
+            padding: 5rem 2rem;
+            text-align: center;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+        }
+        .quickstart h2 { color: white; }
+        .quickstart p.lead { color: rgba(255,255,255,0.85); }
+        .quickstart pre.code {
+            background: rgba(0,0,0,0.3);
+            text-align: left;
+            max-width: 700px;
+            margin: 2rem auto;
+        }
+        .quickstart .btn-primary {
+            background: white;
+            color: var(--primary);
+        }
+        .quickstart .btn-primary:hover {
+            box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+        }
+
+        /* Footer */
+        footer {
+            background: #141424;
+            color: #a0a8b8;
+            padding: 3rem 2rem;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        footer a { color: var(--accent); text-decoration: none; }
+        footer a:hover { color: white; }
+
+        /* Responsive */
+        @media (max-width: 700px) {
+            nav ul { gap: 0.9rem; font-size: 0.85rem; }
+            .hero h1 { font-size: 2.8rem; }
+            .hero .tagline { font-size: 1.15rem; }
+            section { padding: 3rem 1.2rem; }
+            section h2 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="#" class="logo"><span class="logo-pearl"></span>Perla</a>
+        <ul>
+            <li><a href="getting-started.html">Get Started</a></li>
+            <li><a href="docs.html">Docs</a></li>
+            <li><a href="#why">Why Perla</a></li>
+            <li><a href="https://github.com/mjflick/strada/tree/main/perla">GitHub</a></li>
+            <li><a href="../index.html" class="nav-back">← Strada</a></li>
+        </ul>
+    </nav>
+
+    <section class="hero">
+        <div class="hero-badge">Perl 5 → native executable</div>
+        <h1>Perla</h1>
+        <p class="tagline">Compile Perl 5 scripts and modules into standalone native binaries. No <code>perl</code> interpreter required at runtime.</p>
+        <p class="sub">Perla parses real Perl, lowers it to <a href="../index.html" style="color: var(--primary); font-weight: 600;">Strada</a>, and Strada compiles it to C. You get a single binary you can ship — no CPAN install, no DynaLoader, no libperl dependency.</p>
+        <div class="btn-row">
+            <a href="getting-started.html" class="btn btn-primary">Get Started</a>
+            <a href="docs.html" class="btn btn-secondary">Documentation</a>
+        </div>
+    </section>
+
+    <section id="why">
+        <h2>Why Perla?</h2>
+        <p class="lead">Real Perl is wonderful for scripting and prototyping. Perla is for the moments where you'd rather ship a compiled artifact than a script that depends on a runtime.</p>
+
+        <div class="why-grid">
+            <div class="why-card">
+                <div class="icon">📦</div>
+                <h3>Single-binary deploys</h3>
+                <p>One statically-linked executable. No <code>perl</code> to install on the target, no version skew, no CPAN bootstrap, no <code>cpanm</code> on boot. Drop it on a server or into a container and run.</p>
+            </div>
+            <div class="why-card">
+                <div class="icon">⚡</div>
+                <h3>Faster startup</h3>
+                <p>No perl interpreter warm-up. For short-lived scripts and CLI tools that get invoked constantly, the difference between 40ms perl startup and a sub-millisecond native exec matters.</p>
+            </div>
+            <div class="why-card">
+                <div class="icon">🏎️</div>
+                <h3>Native-code performance</h3>
+                <p>Tight inner loops compile to real machine code. Perla's <a href="../docs/benchmarks.html">backend is Strada</a> — which consistently outruns Perl, Python, and Ruby on CPU-bound work. You choose the tradeoff: <code>-O0</code> for fast compiles, <code>-O3</code> for release.</p>
+            </div>
+            <div class="why-card">
+                <div class="icon">🔧</div>
+                <h3>Raw C when you need it</h3>
+                <p><code>__C__ { ... }</code> drops inline C into a Perl sub. FFI to libc, libcurl, zstd, or a custom <code>.so</code> — without writing XS. All of Perl's value for rapid development, all of C's value for the 5% that needs it.</p>
+            </div>
+            <div class="why-card">
+                <div class="icon">🌐</div>
+                <h3>Web framework ready</h3>
+                <p>Runs well under <a href="../docs/cannoli.html">Cannoli</a>, Strada's preforking web server. Perla-compiled handlers load as <code>.so</code>'s — see the <a href="https://github.com/strada-lang/cannoli/tree/main/lib/perla">cannoli_perla bridge</a> for how bizowie-scale apps serve HTTP.</p>
+            </div>
+            <div class="why-card">
+                <div class="icon">🧠</div>
+                <h3>Keep your Perl brain</h3>
+                <p>Sigils, regex, <code>map</code>/<code>grep</code>/<code>sort</code>, <code>bless</code>, <code>AUTOLOAD</code>, Moose-style <code>has</code>/<code>extends</code>/<code>with</code>, <code>Try::Tiny</code>, <code>DBI</code>, <code>JSON</code> — the idioms you know from Perl work here. Native implementations of the most-used XS modules built in.</p>
+            </div>
+            <div class="why-card">
+                <div class="icon">💾</div>
+                <h3>Precompile once, run many</h3>
+                <p><code>perla -M lib/</code> builds every module in a tree to <code>.pm.o</code> once. Subsequent compiles of scripts that use them skip re-parsing the source — a big speedup on programs with deep <code>use</code> trees.</p>
+            </div>
+            <div class="why-card">
+                <div class="icon">🧪</div>
+                <h3>Predictable memory</h3>
+                <p>No GC pauses, no global interpreter lock, no mysterious memory growth. Reference counting with escape-analyzed tagged integers — allocation patterns are explicit and debuggable with valgrind.</p>
+            </div>
+        </div>
+
+        <div class="caveats">
+            <h3>Be honest — what Perla isn't</h3>
+            <ul>
+                <li>Not a drop-in Perl replacement. A 5000-line Perl codebase will usually compile, but you'll hit a few idioms that need rework — typically obscure XS modules, <code>eval STRING</code> at runtime, or very baroque overload dispatch.</li>
+                <li>Compile time is real. A large app with transitive <code>use</code> chains can take a minute or two. Use <code>make precompile</code> / <code>-M DIR/</code> to warm the cache.</li>
+                <li>XS modules without native Perla equivalents are silently skipped. You'll need to provide a Perl-or-Perla implementation, or wrap the C library yourself via <code>__C__</code>.</li>
+                <li>Debugging is C-level, not Perl-level. <code>--keep</code> preserves the generated <code>.c</code> for inspection, but you won't have <code>perl -d</code>.</li>
+            </ul>
+        </div>
+    </section>
+
+    <section class="code-section">
+        <div class="inner">
+            <span class="code-label">Example</span>
+            <h2 style="text-align: left; font-size: 1.8rem;">This is just Perl.</h2>
+            <p style="color: var(--ink-soft); margin-bottom: 1.5rem;">Compile, run, ship. No preamble, no type annotations, no IDE setup.</p>
+
+<pre class="code"><span class="comment"># hello.pl</span>
+<span class="kw">use</span> strict;
+<span class="kw">use</span> warnings;
+<span class="kw">use</span> JSON;
+
+<span class="kw">sub</span> greet {
+    <span class="kw">my</span> ($name) = <span class="kw">@_</span>;
+    <span class="kw">return</span> encode_json({ hello => $name, time => <span class="kw">time</span>() });
+}
+
+print greet(<span class="str">"world"</span>), <span class="str">"\n"</span>;
+</pre>
+
+<pre class="code"><span class="prompt">$</span> perla -O2 -o hello hello.pl
+<span class="prompt">$</span> ./hello
+<span class="str">{"hello":"world","time":1755123456}</span>
+
+<span class="prompt">$</span> file hello
+<span class="str">hello: ELF 64-bit LSB pie executable, x86-64, statically linked</span>
+</pre>
+
+            <p style="color: var(--ink-soft); margin-top: 1rem; font-size: 0.95rem;">That's the entire workflow. <code>perla</code> reads your <code>.pl</code>, resolves its <code>use</code> tree, lowers it to Strada, compiles to C, and links a binary. No <code>cpanm install JSON</code>, no Carton bundling, no <code>fatpack</code>. The JSON encoder is wired into Perla's runtime as a native module.</p>
+        </div>
+    </section>
+
+    <section class="quickstart">
+        <h2>Get started in 60 seconds</h2>
+        <p class="lead">Perla ships with the Strada repo. Build once, then compile any Perl file.</p>
+
+<pre class="code"><span class="prompt">$</span> git clone https://github.com/mjflick/strada
+<span class="prompt">$</span> <span class="kw">cd</span> strada && make && make -C perla
+
+<span class="prompt">$</span> <span class="kw">echo</span> <span class="str">'print "hi\n"'</span> &gt; hi.pl
+<span class="prompt">$</span> ./perla/perla hi.pl
+<span class="str">hi</span>
+</pre>
+
+        <div class="btn-row" style="margin-top: 1rem;">
+            <a href="getting-started.html" class="btn btn-primary">Full Getting Started Guide</a>
+        </div>
+    </section>
+
+    <footer>
+        <p><strong>Perla</strong> — a Perl 5 compiler built on <a href="../index.html">Strada</a>.</p>
+        <p style="margin-top: 1rem;">
+            <a href="getting-started.html">Get Started</a> &nbsp;|&nbsp;
+            <a href="docs.html">Documentation</a> &nbsp;|&nbsp;
+            <a href="https://github.com/mjflick/strada/tree/main/perla">GitHub</a> &nbsp;|&nbsp;
+            <a href="../index.html">Strada</a> &nbsp;|&nbsp;
+            <a href="https://github.com/strada-lang/cannoli">Cannoli</a>
+        </p>
+        <p style="margin-top: 2rem; font-size: 0.82rem; opacity: 0.6;">Licensed under the GNU General Public License v2.</p>
+    </footer>
+</body>
+</html>
