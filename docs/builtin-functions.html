@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Built-in Functions - Strada Documentation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <a href="../index.html" class="logo">Strada<span>Lang</span></a>
+        <ul>
+            <li><a href="quickstart.html">QuickStart</a></li>
+            <li><a href="index.html">Docs</a></li>
+            <li><a href="reference.html">Reference</a></li>
+            <li><a href="https://github.com/strada-lang/strada-lang">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h3>Getting Started</h3>
+            <ul>
+                <li><a href="quickstart.html">QuickStart</a></li>
+                <li><a href="index.html">Documentation</a></li>
+                <li><a href="repl.html">REPL &amp; Scripting</a></li>
+                <li><a href="interpreter.html">Interpreter</a></li>
+            </ul>
+            <h3>Language Guide</h3>
+            <ul>
+                <li><a href="basics.html">Language Basics</a></li>
+                <li><a href="types.html">Types &amp; Variables</a></li>
+                <li><a href="functions.html">Functions</a></li>
+                <li><a href="control-flow.html">Control Flow</a></li>
+                <li><a href="oop.html">Object-Oriented Programming</a></li>
+                <li><a href="regex.html">Regular Expressions</a></li>
+            </ul>
+            <h3>Advanced</h3>
+            <ul>
+                <li><a href="memory.html">Memory Management</a></li>
+                <li><a href="debugging.html">Debugging</a></li>
+                <li><a href="async.html">Async/Await</a></li>
+                <li><a href="c-interop.html">C Interoperability</a></li>
+                <li><a href="libraries.html">Libraries Guide</a></li>
+                <li><a href="perl-integration.html">Perl Integration</a></li>
+            </ul>
+            <h3>Reference</h3>
+            <ul>
+                <li><a href="reference.html">Reference</a></li>
+                <li><a href="builtin-functions.html" class="active">Built-in Functions</a></li>
+                <li><a href="benchmarks.html">Benchmarks</a></li>
+                <li><a href="cannoli.html">Cannoli Web Framework</a></li>
+                <li><a href="forma.html">Forma Template Engine</a></li>
+                <li><a href="dbi.html">DBI Database Interface</a></li>
+                <li><a href="nesso.html">Nesso ORM</a></li>
+                <li><a href="stradadoc.html">Documentation Tools</a></li>
+            </ul>
+        </aside>
+
+        <main class="content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a> / <a href="index.html">Docs</a> / Built-in Functions
+            </div>
+
+            <h1><span>Built-in Function Reference</span></h1>
+            <p class="subtitle">Complete reference for every built-in function in Strada, organized by namespace.</p>
+
+            <div class="info-box">
+                <strong>Namespaces</strong><br>
+                <code>core::</code> &mdash; system &amp; libc. <em>Use this in new code.</em><br>
+                <code>math::</code> &mdash; math.<br>
+                <code>async::</code> &mdash; threading, channels, mutexes, futures.<br>
+                <code>c::</code> &mdash; low-level memory &amp; FFI.<br>
+                Bare built-ins (no namespace) match Perl one-to-one in most cases.
+            </div>
+            <div class="info-box">
+                <strong><code>sys::</code> is the legacy alias.</strong>
+                It still compiles, but new code should use <code>core::</code>.
+                The compiler normalizes <code>core::</code> to <code>sys::</code>
+                internally for both forms to resolve to the same C runtime.
+            </div>
+
+            <h2 id="quick-index">Quick Index</h2>
+            <ul>
+                <li><a href="#math">math::</a> &mdash; 36 functions</li>
+                <li><a href="#async">async::</a> &mdash; 29 functions</li>
+                <li><a href="#c-ns">c::</a> &mdash; 21 functions</li>
+                <li><a href="#core">core::</a> &mdash; ~300 functions (also accessible as <code>sys::</code> legacy alias)</li>
+                <li><a href="#utf8">utf8::</a> &mdash; UTF-8 introspection + UAX#15 normalization (NFC/NFD/NFKC/NFKD)</li>
+                <li><a href="#bare">Bare built-ins</a> &mdash; strings, arrays, hashes, refs, OOP</li>
+            </ul>
+
+            <h2 id="math">math:: &mdash; Math functions</h2>
+            <p>All math functions take and return scalars. Most are libm wrappers.</p>
+            <table>
+                <thead><tr><th>Function</th><th>Signature</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>math::abs(x)</code></td><td><code>num&rarr;num</code></td><td>Absolute value.</td></tr>
+                    <tr><td><code>math::acos(x)</code></td><td><code>num&rarr;num</code></td><td>Arc cosine, result in [0, &pi;].</td></tr>
+                    <tr><td><code>math::asin(x)</code></td><td><code>num&rarr;num</code></td><td>Arc sine, result in [-&pi;/2, &pi;/2].</td></tr>
+                    <tr><td><code>math::atan(x)</code></td><td><code>num&rarr;num</code></td><td>Arc tangent.</td></tr>
+                    <tr><td><code>math::atan2(y, x)</code></td><td><code>num,num&rarr;num</code></td><td>Arc tangent of <code>y/x</code>, using both signs to pick the quadrant.</td></tr>
+                    <tr><td><code>math::cbrt(x)</code></td><td><code>num&rarr;num</code></td><td>Cube root.</td></tr>
+                    <tr><td><code>math::ceil(x)</code></td><td><code>num&rarr;num</code></td><td>Smallest integer &ge; x.</td></tr>
+                    <tr><td><code>math::copysign(x, y)</code></td><td><code>num,num&rarr;num</code></td><td>x with sign of y.</td></tr>
+                    <tr><td><code>math::cos(x)</code></td><td><code>num&rarr;num</code></td><td>Cosine (radians).</td></tr>
+                    <tr><td><code>math::cosh(x)</code></td><td><code>num&rarr;num</code></td><td>Hyperbolic cosine.</td></tr>
+                    <tr><td><code>math::exp(x)</code></td><td><code>num&rarr;num</code></td><td>e<sup>x</sup>.</td></tr>
+                    <tr><td><code>math::fabs(x)</code></td><td><code>num&rarr;num</code></td><td>Absolute value (alias).</td></tr>
+                    <tr><td><code>math::floor(x)</code></td><td><code>num&rarr;num</code></td><td>Largest integer &le; x.</td></tr>
+                    <tr><td><code>math::fmax(x, y)</code></td><td><code>num,num&rarr;num</code></td><td>Max.</td></tr>
+                    <tr><td><code>math::fmin(x, y)</code></td><td><code>num,num&rarr;num</code></td><td>Min.</td></tr>
+                    <tr><td><code>math::fmod(x, y)</code></td><td><code>num,num&rarr;num</code></td><td>Floating-point remainder.</td></tr>
+                    <tr><td><code>math::frexp(x)</code></td><td><code>num&rarr;array</code></td><td>[mantissa, exponent] s.t. x = m&times;2<sup>e</sup>.</td></tr>
+                    <tr><td><code>math::hypot(x, y)</code></td><td><code>num,num&rarr;num</code></td><td>sqrt(x&sup2; + y&sup2;) without overflow.</td></tr>
+                    <tr><td><code>math::isfinite(x)</code></td><td><code>num&rarr;int</code></td><td>1 if finite.</td></tr>
+                    <tr><td><code>math::isinf(x)</code></td><td><code>num&rarr;int</code></td><td>1 if infinity.</td></tr>
+                    <tr><td><code>math::isnan(x)</code></td><td><code>num&rarr;int</code></td><td>1 if NaN.</td></tr>
+                    <tr><td><code>math::ldexp(x, e)</code></td><td><code>num,int&rarr;num</code></td><td>x &times; 2<sup>e</sup>.</td></tr>
+                    <tr><td><code>math::log(x)</code></td><td><code>num&rarr;num</code></td><td>Natural log.</td></tr>
+                    <tr><td><code>math::log10(x)</code></td><td><code>num&rarr;num</code></td><td>Base-10 logarithm.</td></tr>
+                    <tr><td><code>math::modf(x)</code></td><td><code>num&rarr;array</code></td><td>[integer part, fractional part].</td></tr>
+                    <tr><td><code>math::pow(x, y)</code></td><td><code>num,num&rarr;num</code></td><td>x<sup>y</sup>.</td></tr>
+                    <tr><td><code>math::rand()</code></td><td><code>&rarr;num</code></td><td>Random in [0, 1).</td></tr>
+                    <tr><td><code>math::remainder(x, y)</code></td><td><code>num,num&rarr;num</code></td><td>IEEE 754 remainder.</td></tr>
+                    <tr><td><code>math::round(x)</code></td><td><code>num&rarr;num</code></td><td>Round to nearest (away from zero on halfway).</td></tr>
+                    <tr><td><code>math::scalbn(x, e)</code></td><td><code>num,int&rarr;num</code></td><td>x &times; 2<sup>e</sup> (integer exponent).</td></tr>
+                    <tr><td><code>math::sin(x)</code></td><td><code>num&rarr;num</code></td><td>Sine (radians).</td></tr>
+                    <tr><td><code>math::sinh(x)</code></td><td><code>num&rarr;num</code></td><td>Hyperbolic sine.</td></tr>
+                    <tr><td><code>math::sqrt(x)</code></td><td><code>num&rarr;num</code></td><td>Square root.</td></tr>
+                    <tr><td><code>math::tan(x)</code></td><td><code>num&rarr;num</code></td><td>Tangent (radians).</td></tr>
+                    <tr><td><code>math::tanh(x)</code></td><td><code>num&rarr;num</code></td><td>Hyperbolic tangent.</td></tr>
+                    <tr><td><code>math::trunc(x)</code></td><td><code>num&rarr;num</code></td><td>Truncate towards zero.</td></tr>
+                </tbody>
+            </table>
+
+            <h2 id="async">async:: &mdash; Async, Threading, IPC</h2>
+            <p>Strada uses a thread-pool backend (default 4 workers).</p>
+
+            <h3>Futures</h3>
+            <table>
+                <thead><tr><th>Function</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>async::all(@futures)</code></td><td>Wait for all; returns ordered result array.</td></tr>
+                    <tr><td><code>async::race(@futures)</code></td><td>Wait for first; returns its value.</td></tr>
+                    <tr><td><code>async::timeout(future, ms)</code></td><td>Wait up to <em>ms</em> ms; undef on timeout.</td></tr>
+                    <tr><td><code>async::cancel(future)</code></td><td>Request cancellation.</td></tr>
+                    <tr><td><code>async::is_cancelled(future)</code></td><td>1 if cancellation requested.</td></tr>
+                    <tr><td><code>async::is_done(future)</code></td><td>1 if completed.</td></tr>
+                    <tr><td><code>async::pool_init(n)</code></td><td>Initialize thread pool with n workers.</td></tr>
+                    <tr><td><code>async::pool_shutdown()</code></td><td>Drain and shutdown pool.</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Channels</h3>
+            <table>
+                <thead><tr><th>Function</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>async::channel(cap)</code></td><td>Buffered channel; cap=0 for unbuffered.</td></tr>
+                    <tr><td><code>async::send(ch, v)</code></td><td>Send (blocks if full).</td></tr>
+                    <tr><td><code>async::recv(ch)</code></td><td>Receive (blocks if empty).</td></tr>
+                    <tr><td><code>async::try_send(ch, v)</code></td><td>Non-blocking send.</td></tr>
+                    <tr><td><code>async::try_recv(ch)</code></td><td>Non-blocking receive.</td></tr>
+                    <tr><td><code>async::close(ch)</code></td><td>Close channel.</td></tr>
+                    <tr><td><code>async::is_closed(ch)</code></td><td>1 if closed.</td></tr>
+                    <tr><td><code>async::len(ch)</code></td><td>Current item count.</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Mutexes</h3>
+            <table>
+                <thead><tr><th>Function</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>async::mutex()</code></td><td>New mutex.</td></tr>
+                    <tr><td><code>async::lock(mtx)</code></td><td>Acquire (blocks).</td></tr>
+                    <tr><td><code>async::try_lock(mtx)</code></td><td>Non-blocking acquire.</td></tr>
+                    <tr><td><code>async::unlock(mtx)</code></td><td>Release.</td></tr>
+                    <tr><td><code>async::mutex_destroy(mtx)</code></td><td>Free.</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Atomics</h3>
+            <table>
+                <thead><tr><th>Function</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>async::atomic(v)</code></td><td>Create atomic int.</td></tr>
+                    <tr><td><code>async::atomic_load(at)</code></td><td>Read.</td></tr>
+                    <tr><td><code>async::atomic_store(at, v)</code></td><td>Write.</td></tr>
+                    <tr><td><code>async::atomic_add(at, n)</code></td><td>Add; returns previous.</td></tr>
+                    <tr><td><code>async::atomic_sub(at, n)</code></td><td>Subtract; returns previous.</td></tr>
+                    <tr><td><code>async::atomic_inc(at)</code></td><td>+1; returns previous.</td></tr>
+                    <tr><td><code>async::atomic_dec(at)</code></td><td>-1; returns previous.</td></tr>
+                    <tr><td><code>async::atomic_cas(at, exp, new)</code></td><td>Compare-and-swap.</td></tr>
+                </tbody>
+            </table>
+
+            <h2 id="c-ns">c:: &mdash; Low-level memory and FFI</h2>
+            <table>
+                <thead><tr><th>Function</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>c::alloc(size)</code></td><td>malloc(size).</td></tr>
+                    <tr><td><code>c::realloc(ptr, size)</code></td><td>realloc.</td></tr>
+                    <tr><td><code>c::free(ptr)</code></td><td>free().</td></tr>
+                    <tr><td><code>c::null()</code></td><td>NULL pointer.</td></tr>
+                    <tr><td><code>c::is_null(ptr)</code></td><td>1 if NULL.</td></tr>
+                    <tr><td><code>c::memcpy(dst, src, n)</code></td><td>Copy n bytes.</td></tr>
+                    <tr><td><code>c::memset(ptr, b, n)</code></td><td>Fill n bytes.</td></tr>
+                    <tr><td><code>c::ptr_add(ptr, off)</code></td><td>Pointer arithmetic.</td></tr>
+                    <tr><td><code>c::ptr_to_str(ptr)</code></td><td>NUL-term'd C str &rarr; Strada str.</td></tr>
+                    <tr><td><code>c::ptr_to_str_n(ptr, n)</code></td><td>n bytes from ptr.</td></tr>
+                    <tr><td><code>c::str_to_ptr(s)</code></td><td>Pointer to string's bytes.</td></tr>
+                    <tr><td><code>c::read_float(ptr)</code></td><td>Read float at ptr.</td></tr>
+                    <tr><td><code>c::read_double(ptr)</code></td><td>Read double.</td></tr>
+                    <tr><td><code>c::read_ptr(ptr)</code></td><td>Dereference pointer-to-pointer.</td></tr>
+                    <tr><td><code>c::write_float(ptr, v)</code></td><td>Write float.</td></tr>
+                    <tr><td><code>c::write_double(ptr, v)</code></td><td>Write double.</td></tr>
+                    <tr><td><code>c::write_ptr(ptr, v)</code></td><td>Write pointer.</td></tr>
+                    <tr><td><code>c::sizeof_int()</code></td><td>sizeof(int).</td></tr>
+                    <tr><td><code>c::sizeof_long()</code></td><td>sizeof(long).</td></tr>
+                    <tr><td><code>c::sizeof_ptr()</code></td><td>sizeof(void*).</td></tr>
+                    <tr><td><code>c::sizeof_size_t()</code></td><td>sizeof(size_t).</td></tr>
+                </tbody>
+            </table>
+
+            <h2 id="core">core:: &mdash; System interface</h2>
+            <p>Use <code>core::</code> in user code. <code>sys::</code> is a legacy
+            alias that still works for backward compatibility (the compiler
+            normalizes <code>core::</code> to <code>sys::</code> internally), but
+            new code should write <code>core::</code>.</p>
+
+            <h3>Process control</h3>
+            <table>
+                <thead><tr><th>Function</th><th>Signature</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>core::fork()</code></td><td><code>&rarr;int</code></td><td>fork(2); returns child pid in parent, 0 in child, -1 on error.</td></tr>
+                    <tr><td><code>core::exec(cmd)</code></td><td><code>str&rarr;int</code></td><td>execlp; replaces current process.</td></tr>
+                    <tr><td><code>core::exec_argv(@argv)</code></td><td><code>array&rarr;int</code></td><td>execvp with argument list.</td></tr>
+                    <tr><td><code>core::system(cmd)</code></td><td><code>str&rarr;int</code></td><td>Shell out via /bin/sh -c; returns exit status.</td></tr>
+                    <tr><td><code>core::system_argv(@argv)</code></td><td><code>array&rarr;int</code></td><td>system with argv (no shell).</td></tr>
+                    <tr><td><code>core::wait()</code></td><td><code>&rarr;int</code></td><td>wait(2); returns child pid; updates $?.</td></tr>
+                    <tr><td><code>core::waitpid(pid, flags)</code></td><td><code>int,int&rarr;int</code></td><td>waitpid(2).</td></tr>
+                    <tr><td><code>core::kill(sig, pid)</code></td><td><code>str/int,int&rarr;int</code></td><td>Send signal. Sig may be name ("USR1") or number.</td></tr>
+                    <tr><td><code>core::killpg(pgid, sig)</code></td><td><code>int,int&rarr;int</code></td><td>killpg(2).</td></tr>
+                    <tr><td><code>core::exit(code)</code></td><td><code>int&rarr;void</code></td><td>Run END blocks then exit(code).</td></tr>
+                    <tr><td><code>core::_exit(code)</code></td><td><code>int&rarr;void</code></td><td>_exit(2); skips END blocks.</td></tr>
+                    <tr><td><code>core::exit_status(status)</code></td><td><code>int&rarr;int</code></td><td>WEXITSTATUS-equivalent extraction.</td></tr>
+                    <tr><td><code>core::getpid()</code></td><td><code>&rarr;int</code></td><td>Current process id.</td></tr>
+                    <tr><td><code>core::getppid()</code></td><td><code>&rarr;int</code></td><td>Parent process id.</td></tr>
+                    <tr><td><code>core::getpgid(pid)</code></td><td><code>int&rarr;int</code></td><td>Process group id.</td></tr>
+                    <tr><td><code>core::getpgrp()</code></td><td><code>&rarr;int</code></td><td>Process group id of current process.</td></tr>
+                    <tr><td><code>core::setpgid(pid, pgid)</code></td><td><code>int,int&rarr;int</code></td><td>Set process group.</td></tr>
+                    <tr><td><code>core::setpgrp()</code></td><td><code>&rarr;int</code></td><td>Make current process a process-group leader.</td></tr>
+                    <tr><td><code>core::setsid()</code></td><td><code>&rarr;int</code></td><td>Create new session.</td></tr>
+                    <tr><td><code>core::getsid(pid)</code></td><td><code>int&rarr;int</code></td><td>Session id.</td></tr>
+                    <tr><td><code>core::nice(inc)</code></td><td><code>int&rarr;int</code></td><td>Adjust scheduling priority.</td></tr>
+                    <tr><td><code>core::getpriority(which, who)</code></td><td><code>int,int&rarr;int</code></td><td>getpriority(2).</td></tr>
+                    <tr><td><code>core::setpriority(which, who, prio)</code></td><td><code>int,int,int&rarr;int</code></td><td>setpriority(2).</td></tr>
+                    <tr><td><code>core::pause()</code></td><td><code>&rarr;int</code></td><td>pause(2); sleep until signal.</td></tr>
+                    <tr><td><code>core::alarm(sec)</code></td><td><code>int&rarr;int</code></td><td>alarm(2).</td></tr>
+                    <tr><td><code>core::umask(mask)</code></td><td><code>int&rarr;int</code></td><td>umask(2).</td></tr>
+                    <tr><td><code>core::chroot(dir)</code></td><td><code>str&rarr;int</code></td><td>chroot(2).</td></tr>
+                    <tr><td><code>core::chdir(dir)</code></td><td><code>str&rarr;int</code></td><td>chdir(2).</td></tr>
+                    <tr><td><code>core::getcwd()</code></td><td><code>&rarr;str</code></td><td>getcwd(3).</td></tr>
+                    <tr><td><code>core::times()</code></td><td><code>&rarr;array</code></td><td>[user, system, cuser, csystem] CPU times.</td></tr>
+                    <tr><td><code>core::getrlimit(resource)</code></td><td><code>int&rarr;array</code></td><td>[soft, hard] limits.</td></tr>
+                    <tr><td><code>core::setrlimit(resource, soft, hard)</code></td><td><code>int,int,int&rarr;int</code></td><td>setrlimit(2).</td></tr>
+                    <tr><td><code>core::getrusage(who)</code></td><td><code>int&rarr;array</code></td><td>getrusage(2).</td></tr>
+                </tbody>
+            </table>
+
+            <h3>User / group</h3>
+            <table>
+                <thead><tr><th>Function</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>core::getuid()</code></td><td>Real user id.</td></tr>
+                    <tr><td><code>core::geteuid()</code></td><td>Effective user id.</td></tr>
+                    <tr><td><code>core::setuid(uid)</code></td><td>setuid(2).</td></tr>
+                    <tr><td><code>core::seteuid(uid)</code></td><td>seteuid(2).</td></tr>
+                    <tr><td><code>core::setreuid(real, eff)</code></td><td>setreuid(2).</td></tr>
+                    <tr><td><code>core::getgid()</code></td><td>Real group id.</td></tr>
+                    <tr><td><code>core::getegid()</code></td><td>Effective group id.</td></tr>
+                    <tr><td><code>core::setgid(gid)</code></td><td>setgid(2).</td></tr>
+                    <tr><td><code>core::setegid(gid)</code></td><td>setegid(2).</td></tr>
+                    <tr><td><code>core::setregid(real, eff)</code></td><td>setregid(2).</td></tr>
+                    <tr><td><code>core::getgroups()</code></td><td>Supplementary groups.</td></tr>
+                    <tr><td><code>core::getpwuid(uid)</code></td><td>Password entry by uid.</td></tr>
+                    <tr><td><code>core::getpwnam(name)</code></td><td>Password entry by name.</td></tr>
+                    <tr><td><code>core::getgrgid(gid)</code></td><td>Group entry by gid.</td></tr>
+                    <tr><td><code>core::getgrnam(name)</code></td><td>Group entry by name.</td></tr>
+                    <tr><td><code>core::getlogin()</code></td><td>Login name.</td></tr>
+                </tbody>
+            </table>
+
+            <h3>File I/O</h3>
+            <table>
+                <thead><tr><th>Function</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>core::open(path, mode)</code></td><td>Open file; mode &isin; {"r","w","a","rb","&lt;",">",">>","+>"}.</td></tr>
+                    <tr><td><code>core::close(fh)</code></td><td>Close filehandle.</td></tr>
+                    <tr><td><code>core::open_fd(fd, mode)</code></td><td>fdopen(3); wrap an fd as filehandle.</td></tr>
+                    <tr><td><code>core::open_str(ref)</code></td><td>In-memory open over a scalar ref.</td></tr>
+                    <tr><td><code>core::fdopen_read(fd)</code></td><td>Open fd for reading.</td></tr>
+                    <tr><td><code>core::fdopen_write(fd)</code></td><td>Open fd for writing.</td></tr>
+                    <tr><td><code>core::close_fd(fd)</code></td><td>close(2).</td></tr>
+                    <tr><td><code>core::readline(fh)</code></td><td>Read one line (or undef at EOF).</td></tr>
+                    <tr><td><code>core::read_fd(fd, n)</code></td><td>read(2) up to n bytes.</td></tr>
+                    <tr><td><code>core::read_all_fd(fd)</code></td><td>Read until EOF.</td></tr>
+                    <tr><td><code>core::read_byte(fh)</code></td><td>Read one byte (-1 on EOF).</td></tr>
+                    <tr><td><code>core::write_fd(fd, data)</code></td><td>write(2).</td></tr>
+                    <tr><td><code>core::seek(fh, offset, whence)</code></td><td>fseek; whence &isin; {0,1,2}.</td></tr>
+                    <tr><td><code>core::tell(fh)</code></td><td>ftell(3).</td></tr>
+                    <tr><td><code>core::eof(fh)</code></td><td>feof(3).</td></tr>
+                    <tr><td><code>core::flush(fh)</code></td><td>fflush(3).</td></tr>
+                    <tr><td><code>core::autoflush(fh, on)</code></td><td>setvbuf to <code>_IONBF</code> when on, else <code>_IOFBF</code>. Matches perl <code>$|=1</code>.</td></tr>
+                    <tr><td><code>core::rewind(fh)</code></td><td>rewind(3).</td></tr>
+                    <tr><td><code>core::clearerr(fh)</code></td><td>clearerr(3).</td></tr>
+                    <tr><td><code>core::ferror(fh)</code></td><td>ferror(3).</td></tr>
+                    <tr><td><code>core::fileno(fh)</code></td><td>Underlying fd.</td></tr>
+                    <tr><td><code>core::fread(fh, len)</code></td><td>Read len bytes from fh.</td></tr>
+                    <tr><td><code>core::fwrite(fh, data)</code></td><td>Write data to fh.</td></tr>
+                    <tr><td><code>core::fgetc(fh)</code></td><td>Read one char (-1 on EOF).</td></tr>
+                    <tr><td><code>core::fputc(c, fh)</code></td><td>Write one char.</td></tr>
+                    <tr><td><code>core::fgets(fh, max)</code></td><td>Read up to max bytes or newline.</td></tr>
+                    <tr><td><code>core::fputs(s, fh)</code></td><td>Write string to fh.</td></tr>
+                    <tr><td><code>core::dup(fd)</code></td><td>dup(2).</td></tr>
+                    <tr><td><code>core::pipe()</code></td><td>Returns [read_fd, write_fd].</td></tr>
+                    <tr><td><code>core::popen(cmd, mode)</code></td><td>popen(3).</td></tr>
+                    <tr><td><code>core::pclose(fh)</code></td><td>pclose(3).</td></tr>
+                    <tr><td><code>core::tmpfile()</code></td><td>tmpfile(3) &mdash; auto-deleted filehandle.</td></tr>
+                    <tr><td><code>core::mkstemp(template)</code></td><td>mkstemp(3); returns [fd, path].</td></tr>
+                    <tr><td><code>core::mkdtemp(template)</code></td><td>mkdtemp(3); returns path.</td></tr>
+                    <tr><td><code>core::slurp(path)</code></td><td>Read entire file into string.</td></tr>
+                    <tr><td><code>core::slurp_fd(fd)</code></td><td>Slurp from fd.</td></tr>
+                    <tr><td><code>core::slurp_fh(fh)</code></td><td>Slurp from filehandle.</td></tr>
+                    <tr><td><code>core::spew(path, data)</code></td><td>Write entire string to file (truncate).</td></tr>
+                    <tr><td><code>core::spew_fd(fd, data)</code></td><td>Write to fd.</td></tr>
+                    <tr><td><code>core::spew_fh(fh, data)</code></td><td>Write to filehandle.</td></tr>
+                    <tr><td><code>core::str_from_fh(fh)</code></td><td>Slurp filehandle to string.</td></tr>
+                    <tr><td><code>core::qx(cmd)</code></td><td>Capture command output (shell).</td></tr>
+                    <tr><td><code>core::flock(fh, op)</code></td><td>flock(2); op &isin; {LOCK_SH=1, LOCK_EX=2, LOCK_UN=8, LOCK_NB=4}.</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Filesystem</h3>
+            <table>
+                <thead><tr><th>Function</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>core::file_exists(path)</code></td><td>Existence (any type).</td></tr>
+                    <tr><td><code>core::is_file(path)</code></td><td>Regular file?</td></tr>
+                    <tr><td><code>core::is_dir(path)</code></td><td>Directory?</td></tr>
+                    <tr><td><code>core::is_symlink(path)</code></td><td>Symbolic link?</td></tr>
+                    <tr><td><code>core::is_readable(path)</code></td><td>Readable by current user?</td></tr>
+                    <tr><td><code>core::is_writable(path)</code></td><td>Writable?</td></tr>
+                    <tr><td><code>core::is_executable(path)</code></td><td>Executable?</td></tr>
+                    <tr><td><code>core::is_zero_size(path)</code></td><td>Zero-byte file?</td></tr>
+                    <tr><td><code>core::dir_exists(path)</code></td><td>Directory existence (alias for is_dir).</td></tr>
+                    <tr><td><code>core::file_size(path)</code></td><td>Bytes; -1 on error.</td></tr>
+                    <tr><td><code>core::file_mtime(path)</code></td><td>Modification time (epoch).</td></tr>
+                    <tr><td><code>core::file_ext(path)</code></td><td>Filename extension (no leading ".").</td></tr>
+                    <tr><td><code>core::basename(path)</code></td><td>Basename (last component).</td></tr>
+                    <tr><td><code>core::dirname(path)</code></td><td>Directory part.</td></tr>
+                    <tr><td><code>core::path_join(@parts)</code></td><td>Join with platform separator.</td></tr>
+                    <tr><td><code>core::realpath(path)</code></td><td>Resolve symlinks; absolute path.</td></tr>
+                    <tr><td><code>core::readlink(path)</code></td><td>readlink(2).</td></tr>
+                    <tr><td><code>core::symlink(target, link)</code></td><td>symlink(2).</td></tr>
+                    <tr><td><code>core::link(src, dst)</code></td><td>link(2) (hard link).</td></tr>
+                    <tr><td><code>core::unlink(path)</code></td><td>Remove a file.</td></tr>
+                    <tr><td><code>core::rename(old, new)</code></td><td>rename(2).</td></tr>
+                    <tr><td><code>core::mkdir(path, mode)</code></td><td>mkdir(2).</td></tr>
+                    <tr><td><code>core::rmdir(path)</code></td><td>rmdir(2).</td></tr>
+                    <tr><td><code>core::chmod(mode, path)</code></td><td>chmod(2).</td></tr>
+                    <tr><td><code>core::fchmod(fh, mode)</code></td><td>fchmod(2).</td></tr>
+                    <tr><td><code>core::chown(uid, gid, path)</code></td><td>chown(2).</td></tr>
+                    <tr><td><code>core::fchown(fh, uid, gid)</code></td><td>fchown(2).</td></tr>
+                    <tr><td><code>core::lchown(uid, gid, path)</code></td><td>lchown(2).</td></tr>
+                    <tr><td><code>core::access(path, mode)</code></td><td>access(2).</td></tr>
+                    <tr><td><code>core::truncate(path, len)</code></td><td>truncate(2).</td></tr>
+                    <tr><td><code>core::ftruncate(fh, len)</code></td><td>ftruncate(2).</td></tr>
+                    <tr><td><code>core::stat(path)</code></td><td>stat(2); 13-element list.</td></tr>
+                    <tr><td><code>core::lstat(path)</code></td><td>lstat(2).</td></tr>
+                    <tr><td><code>core::statvfs(path)</code></td><td>statvfs(3).</td></tr>
+                    <tr><td><code>core::fstatvfs(fh)</code></td><td>fstatvfs(3).</td></tr>
+                    <tr><td><code>core::utime(atime, mtime, @paths)</code></td><td>utime(2).</td></tr>
+                    <tr><td><code>core::utimes(atime, mtime, path)</code></td><td>utimes(2).</td></tr>
+                    <tr><td><code>core::glob(pattern)</code></td><td>Filename globbing.</td></tr>
+                    <tr><td><code>core::fnmatch(pattern, name)</code></td><td>fnmatch(3).</td></tr>
+                    <tr><td><code>core::opendir(path)</code></td><td>Open directory.</td></tr>
+                    <tr><td><code>core::readdir(dh)</code></td><td>All entries.</td></tr>
+                    <tr><td><code>core::readdir_next(dh)</code></td><td>One entry (undef when done).</td></tr>
+                    <tr><td><code>core::readdir_full(dh)</code></td><td>Entries with type info.</td></tr>
+                    <tr><td><code>core::closedir(dh)</code></td><td>Close directory.</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Time</h3>
+            <table>
+                <thead><tr><th>Function</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>core::time()</code></td><td>Seconds since epoch.</td></tr>
+                    <tr><td><code>core::hires_time()</code></td><td>Sub-second seconds since epoch.</td></tr>
+                    <tr><td><code>core::gettimeofday()</code></td><td>[sec, usec].</td></tr>
+                    <tr><td><code>core::tv_interval(t1, t2)</code></td><td>Difference in seconds.</td></tr>
+                    <tr><td><code>core::nanosleep(sec)</code></td><td>Sleep with sub-second precision.</td></tr>
+                    <tr><td><code>core::sleep(sec)</code></td><td>Whole-second sleep.</td></tr>
+                    <tr><td><code>core::usleep(usec)</code></td><td>Microsecond sleep.</td></tr>
+                    <tr><td><code>core::localtime(epoch)</code></td><td>Local time 9-tuple.</td></tr>
+                    <tr><td><code>core::gmtime(epoch)</code></td><td>UTC time 9-tuple.</td></tr>
+                    <tr><td><code>core::mktime(@parts)</code></td><td>Inverse of localtime.</td></tr>
+                    <tr><td><code>core::strftime(fmt, @parts)</code></td><td>Format time.</td></tr>
+                    <tr><td><code>core::ctime(epoch)</code></td><td>"Day Mon DD HH:MM:SS YYYY".</td></tr>
+                    <tr><td><code>core::difftime(t2, t1)</code></td><td>t2 &minus; t1 in seconds.</td></tr>
+                    <tr><td><code>core::clock()</code></td><td>CPU clock ticks.</td></tr>
+                    <tr><td><code>core::clock_gettime(clk)</code></td><td>clock_gettime(2).</td></tr>
+                    <tr><td><code>core::clock_getres(clk)</code></td><td>Resolution.</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Network / sockets</h3>
+            <table>
+                <thead><tr><th>Function</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>core::socket_client(host, port)</code></td><td>TCP connect.</td></tr>
+                    <tr><td><code>core::socket_server(host, port)</code></td><td>TCP listen socket.</td></tr>
+                    <tr><td><code>core::socket_server_backlog(host, port, backlog)</code></td><td>TCP listen with explicit backlog.</td></tr>
+                    <tr><td><code>core::socket_accept(srv)</code></td><td>Accept a connection.</td></tr>
+                    <tr><td><code>core::socket_send(sock, data)</code></td><td>Send bytes.</td></tr>
+                    <tr><td><code>core::socket_recv(sock, n)</code></td><td>Receive up to n bytes.</td></tr>
+                    <tr><td><code>core::socket_close(sock)</code></td><td>Close.</td></tr>
+                    <tr><td><code>core::socket_flush(sock)</code></td><td>Flush write buffer.</td></tr>
+                    <tr><td><code>core::socket_select(@socks)</code></td><td>Indexes of ready sockets.</td></tr>
+                    <tr><td><code>core::socket_fd(sock)</code></td><td>Underlying fd.</td></tr>
+                    <tr><td><code>core::socket_set_nonblocking(sock)</code></td><td>Set O_NONBLOCK.</td></tr>
+                    <tr><td><code>core::shutdown(sock, how)</code></td><td>shutdown(2); how &isin; {0,1,2}.</td></tr>
+                    <tr><td><code>core::getsockname(sock)</code></td><td>Local [addr, port].</td></tr>
+                    <tr><td><code>core::getpeername(sock)</code></td><td>Remote [addr, port].</td></tr>
+                    <tr><td><code>core::getsockopt(sock, level, opt)</code></td><td>getsockopt(2).</td></tr>
+                    <tr><td><code>core::setsockopt(sock, level, opt, val)</code></td><td>setsockopt(2).</td></tr>
+                    <tr><td><code>core::udp_socket()</code></td><td>New UDP socket.</td></tr>
+                    <tr><td><code>core::udp_bind(sock, host, port)</code></td><td>Bind UDP socket.</td></tr>
+                    <tr><td><code>core::udp_server(host, port)</code></td><td>UDP socket + bind.</td></tr>
+                    <tr><td><code>core::udp_sendto(sock, data, host, port)</code></td><td>sendto.</td></tr>
+                    <tr><td><code>core::udp_recvfrom(sock, max)</code></td><td>[data, addr, port].</td></tr>
+                    <tr><td><code>core::gethostname()</code></td><td>gethostname(3).</td></tr>
+                    <tr><td><code>core::gethostbyname(host)</code></td><td>First IP for hostname.</td></tr>
+                    <tr><td><code>core::gethostbyname_all(host)</code></td><td>All IPs.</td></tr>
+                    <tr><td><code>core::getaddrinfo(host, port)</code></td><td>getaddrinfo(3).</td></tr>
+                    <tr><td><code>core::inet_addr(ip)</code></td><td>"1.2.3.4" &rarr; 32-bit int.</td></tr>
+                    <tr><td><code>core::inet_ntoa(addr)</code></td><td>int &rarr; "1.2.3.4".</td></tr>
+                    <tr><td><code>core::inet_pton(af, str)</code></td><td>Address presentation&rarr;binary.</td></tr>
+                    <tr><td><code>core::inet_ntop(af, bin)</code></td><td>Binary&rarr;presentation.</td></tr>
+                    <tr><td><code>core::htonl(n)</code></td><td>Host &rarr; network long.</td></tr>
+                    <tr><td><code>core::ntohl(n)</code></td><td>Network &rarr; host long.</td></tr>
+                    <tr><td><code>core::htons(n)</code></td><td>Host &rarr; network short.</td></tr>
+                    <tr><td><code>core::ntohs(n)</code></td><td>Network &rarr; host short.</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Process I/O &amp; terminal</h3>
+            <table>
+                <thead><tr><th>Function</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>core::ioctl(fd, req, arg)</code></td><td>ioctl(2).</td></tr>
+                    <tr><td><code>core::fcntl(fd, cmd, arg)</code></td><td>fcntl(2).</td></tr>
+                    <tr><td><code>core::poll(@fds, timeout)</code></td><td>poll(2).</td></tr>
+                    <tr><td><code>core::select_fds(rfds, wfds, efds, timeout)</code></td><td>select(2).</td></tr>
+                    <tr><td><code>core::isatty(fd)</code></td><td>isatty(3).</td></tr>
+                    <tr><td><code>core::ttyname(fd)</code></td><td>ttyname(3).</td></tr>
+                    <tr><td><code>core::term_rows()</code></td><td>Terminal height.</td></tr>
+                    <tr><td><code>core::term_cols()</code></td><td>Terminal width.</td></tr>
+                    <tr><td><code>core::term_enable_raw()</code></td><td>Put terminal into raw mode.</td></tr>
+                    <tr><td><code>core::term_disable_raw()</code></td><td>Restore terminal mode.</td></tr>
+                    <tr><td><code>core::tcgetattr(fd)</code></td><td>Read terminal attributes.</td></tr>
+                    <tr><td><code>core::tcsetattr(fd, attrs)</code></td><td>Write terminal attributes.</td></tr>
+                    <tr><td><code>core::tcdrain(fd)</code></td><td>tcdrain(2).</td></tr>
+                    <tr><td><code>core::tcflush(fd, q)</code></td><td>tcflush(2).</td></tr>
+                    <tr><td><code>core::cfgetispeed(attrs)</code></td><td>Input speed.</td></tr>
+                    <tr><td><code>core::cfgetospeed(attrs)</code></td><td>Output speed.</td></tr>
+                    <tr><td><code>core::cfsetispeed(attrs, speed)</code></td><td>Set input speed.</td></tr>
+                    <tr><td><code>core::cfsetospeed(attrs, speed)</code></td><td>Set output speed.</td></tr>
+                    <tr><td><code>core::serial_open(path)</code></td><td>Open serial port.</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Signals</h3>
+            <table>
+                <thead><tr><th>Function</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>core::signal(name, handler)</code></td><td>Install handler. <code>handler</code> can be a code ref, "IGNORE", or "DEFAULT".</td></tr>
+                    <tr><td><code>core::raise(sig)</code></td><td>raise(3).</td></tr>
+                    <tr><td><code>core::sigprocmask(how, set)</code></td><td>sigprocmask(2).</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Environment</h3>
+            <table>
+                <thead><tr><th>Function</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>core::getenv(name)</code></td><td>Get env variable (or undef).</td></tr>
+                    <tr><td><code>core::setenv(name, val)</code></td><td>setenv(3).</td></tr>
+                    <tr><td><code>core::unsetenv(name)</code></td><td>unsetenv(3).</td></tr>
+                    <tr><td><code>core::argv()</code></td><td>Command-line args.</td></tr>
+                    <tr><td><code>core::getprocname()</code></td><td>argv[0].</td></tr>
+                    <tr><td><code>core::setprocname(name)</code></td><td>Set process name.</td></tr>
+                    <tr><td><code>core::getproctitle()</code></td><td>Full process title.</td></tr>
+                    <tr><td><code>core::setproctitle(title)</code></td><td>Override process title.</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Memory &amp; dynamic loader</h3>
+            <table>
+                <thead><tr><th>Function</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>core::mmap(addr, len, prot, flags, fd, off)</code></td><td>mmap(2).</td></tr>
+                    <tr><td><code>core::munmap(addr, len)</code></td><td>munmap(2).</td></tr>
+                    <tr><td><code>core::mlock(addr, len)</code></td><td>mlock(2).</td></tr>
+                    <tr><td><code>core::munlock(addr, len)</code></td><td>munlock(2).</td></tr>
+                    <tr><td><code>core::calloc(n, sz)</code></td><td>calloc(3).</td></tr>
+                    <tr><td><code>core::realloc(ptr, sz)</code></td><td>realloc(3).</td></tr>
+                    <tr><td><code>core::free(ptr)</code></td><td>free(3).</td></tr>
+                    <tr><td><code>core::dl_open(path)</code></td><td>dlopen(3).</td></tr>
+                    <tr><td><code>core::dl_close(handle)</code></td><td>dlclose.</td></tr>
+                    <tr><td><code>core::dl_sym(handle, name)</code></td><td>dlsym.</td></tr>
+                    <tr><td><code>core::dl_error()</code></td><td>dlerror.</td></tr>
+                    <tr><td><code>core::dl_call_void(sym, @args)</code></td><td>Call <code>void(...)</code>.</td></tr>
+                    <tr><td><code>core::dl_call_int(sym, @args)</code></td><td>Call <code>int(...)</code>.</td></tr>
+                    <tr><td><code>core::dl_call_num(sym, @args)</code></td><td>Call <code>double(...)</code>.</td></tr>
+                    <tr><td><code>core::dl_call_str(sym, @args)</code></td><td>Returns char*.</td></tr>
+                    <tr><td><code>core::dl_call_void_sv(sym, @args)</code></td><td>Pass StradaValue* args.</td></tr>
+                    <tr><td><code>core::dl_call_int_sv(sym, @args)</code></td><td>StradaValue args, int return.</td></tr>
+                    <tr><td><code>core::dl_call_str_sv(sym, @args)</code></td><td>StradaValue args, str return.</td></tr>
+                    <tr><td><code>core::dl_call_sv(sym, @args)</code></td><td>StradaValue args + return.</td></tr>
+                    <tr><td><code>core::dl_call_export_info(sym)</code></td><td>Read <code>__strada_export_info</code>.</td></tr>
+                    <tr><td><code>core::dl_call_version(sym)</code></td><td>Module version string.</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Strings &amp; encoding</h3>
+            <p>Strings are <strong>UTF-8 character oriented</strong> — <code>length</code>,
+            <code>substr</code>, <code>index</code>, <code>reverse</code> count Unicode codepoints.
+            For byte-level access (binary protocols, file formats), use the <code>core::byte_*</code>
+            family below.</p>
+            <table>
+                <thead><tr><th>Function</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>core::pack(fmt, @vals)</code></td><td>Binary pack. Codes: <code>c C s S l L i I q Q n v N V f d a A Z H h B b x X w u U</code> (<code>w</code>=BER, <code>u</code>=uuencode, <code>U</code>=UTF-8 codepoint); <code>&lt;</code>/<code>&gt;</code> endian, <code>*</code> = all.</td></tr>
+                    <tr><td><code>core::unpack(fmt, data)</code></td><td>Binary unpack (same format codes).</td></tr>
+                    <tr><td><code>core::vec_get(s, off, bits)</code></td><td>Perl <code>vec()</code> rvalue: read a <code>bits</code>-wide field.</td></tr>
+                    <tr><td><code>core::vec_set(s, off, bits, val)</code></td><td>Perl <code>vec()</code> lvalue: set field, growing <code>s</code>.</td></tr>
+                    <tr><td><code>core::ord_byte(s)</code></td><td>First byte ordinal (0&ndash;255).</td></tr>
+                    <tr><td><code>core::byte_length(s)</code></td><td>Length in bytes (vs <code>length</code> = codepoints).</td></tr>
+                    <tr><td><code>core::byte_substr(s, off, len)</code></td><td>Byte-offset substring.</td></tr>
+                    <tr><td><code>core::get_byte(s, pos)</code></td><td>Byte at position (0&ndash;255).</td></tr>
+                    <tr><td><code>core::set_byte(s, pos, val)</code></td><td>Return s with byte replaced.</td></tr>
+                    <tr><td><code>utf8::is_utf8(s)</code> / <code>utf8::valid(s)</code></td><td>1 if string is valid UTF-8.</td></tr>
+                    <tr><td><code>utf8::encode(s)</code> / <code>utf8::decode(s)</code></td><td>No-op (strings are already byte-encoded and char-oriented).</td></tr>
+                    <tr><td><code>utf8::upgrade(s)</code> / <code>utf8::downgrade(s)</code></td><td>No-op (same).</td></tr>
+                    <tr><td><code>core::read_byte(fh)</code></td><td>Read one byte.</td></tr>
+                    <tr><td><code>core::hex(s)</code></td><td>Parse hex string.</td></tr>
+                    <tr><td><code>core::random_bytes(n)</code></td><td>Cryptographic random bytes.</td></tr>
+                    <tr><td><code>core::random_bytes_hex(n)</code></td><td>Random bytes as hex.</td></tr>
+                    <tr><td><code>core::strerror(errno)</code></td><td>Errno &rarr; message.</td></tr>
+                    <tr><td><code>core::strtod(s)</code></td><td>strtod(3).</td></tr>
+                    <tr><td><code>core::strtol(s, base)</code></td><td>strtol(3).</td></tr>
+                    <tr><td><code>core::atof(s)</code></td><td>atof(3).</td></tr>
+                    <tr><td><code>core::atoi(s)</code></td><td>atoi(3).</td></tr>
+                    <tr><td><code>core::quotemeta(s)</code></td><td>Escape regex metacharacters.</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Errors &amp; introspection</h3>
+            <table>
+                <thead><tr><th>Function</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>core::errno()</code></td><td>Current errno.</td></tr>
+                    <tr><td><code>core::caller(level)</code></td><td>Hash with function/file/line.</td></tr>
+                    <tr><td><code>core::stack_trace()</code></td><td>Formatted call stack.</td></tr>
+                    <tr><td><code>core::wantarray()</code></td><td>1 in list context, 0 in scalar, undef in void.</td></tr>
+                    <tr><td><code>core::wanthash()</code></td><td>1 if caller expects a hash.</td></tr>
+                    <tr><td><code>core::wantscalar()</code></td><td>1 in scalar context.</td></tr>
+                    <tr><td><code>core::set_recursion_limit(n)</code></td><td>Set max sub recursion depth.</td></tr>
+                    <tr><td><code>core::get_recursion_limit()</code></td><td>Current limit.</td></tr>
+                    <tr><td><code>core::isweak(ref)</code></td><td>1 if a weak reference.</td></tr>
+                    <tr><td><code>core::weaken(ref)</code></td><td>Make a weak reference.</td></tr>
+                    <tr><td><code>core::release(ref)</code></td><td>Force-free a reference.</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Globals &amp; package storage</h3>
+            <table>
+                <thead><tr><th>Function</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>core::global_get(name)</code></td><td>Read package-scoped global.</td></tr>
+                    <tr><td><code>core::global_set(name, val)</code></td><td>Write global.</td></tr>
+                    <tr><td><code>core::global_exists(name)</code></td><td>Existence check.</td></tr>
+                    <tr><td><code>core::global_delete(name)</code></td><td>Remove and return.</td></tr>
+                    <tr><td><code>core::global_keys()</code></td><td>All package-global keys.</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Profiling &amp; tuning</h3>
+            <table>
+                <thead><tr><th>Function</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>core::full_profile_start(path)</code></td><td>Begin line-level profiling.</td></tr>
+                    <tr><td><code>core::full_profile_stop()</code></td><td>Stop profiling.</td></tr>
+                    <tr><td><code>core::memprof_enable()</code></td><td>Enable allocation tracking.</td></tr>
+                    <tr><td><code>core::memprof_disable()</code></td><td>Disable.</td></tr>
+                    <tr><td><code>core::memprof_report()</code></td><td>Report by type.</td></tr>
+                    <tr><td><code>core::memprof_reset()</code></td><td>Zero counters.</td></tr>
+                    <tr><td><code>core::hash_default_capacity(n)</code></td><td>Default capacity for new hashes.</td></tr>
+                    <tr><td><code>core::array_default_capacity(n)</code></td><td>Default capacity for new arrays.</td></tr>
+                </tbody>
+            </table>
+
+            <h3>C struct interop</h3>
+            <table>
+                <thead><tr><th>Function</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>core::cstruct_new(layout)</code></td><td>Allocate a struct described by layout.</td></tr>
+                    <tr><td><code>core::cstruct_get_int(cs, field)</code></td><td>Read int field.</td></tr>
+                    <tr><td><code>core::cstruct_get_double(cs, field)</code></td><td>Read double field.</td></tr>
+                    <tr><td><code>core::cstruct_get_string(cs, field)</code></td><td>Read string field.</td></tr>
+                    <tr><td><code>core::cstruct_set_int(cs, field, v)</code></td><td>Write int field.</td></tr>
+                    <tr><td><code>core::cstruct_set_double(cs, field, v)</code></td><td>Write double field.</td></tr>
+                    <tr><td><code>core::cstruct_set_string(cs, field, v)</code></td><td>Write string field.</td></tr>
+                    <tr><td><code>core::cstruct_ptr(cs)</code></td><td>Raw pointer to the struct.</td></tr>
+                    <tr><td><code>core::int_ptr(v)</code></td><td>Pointer to an int holding v.</td></tr>
+                    <tr><td><code>core::num_ptr(v)</code></td><td>Pointer to a double holding v.</td></tr>
+                    <tr><td><code>core::str_ptr(v)</code></td><td>Pointer to a C string.</td></tr>
+                    <tr><td><code>core::ptr_deref_int(ptr)</code></td><td>Read int through pointer.</td></tr>
+                    <tr><td><code>core::ptr_deref_num(ptr)</code></td><td>Read num through pointer.</td></tr>
+                    <tr><td><code>core::ptr_deref_str(ptr)</code></td><td>Read C string through pointer.</td></tr>
+                    <tr><td><code>core::ptr_set_int(ptr, v)</code></td><td>Write int through pointer.</td></tr>
+                    <tr><td><code>core::ptr_set_num(ptr, v)</code></td><td>Write num through pointer.</td></tr>
+                </tbody>
+            </table>
+
+            <h2 id="utf8">utf8:: &mdash; Unicode / UTF-8</h2>
+            <p>UTF-8 introspection plus the full UAX#15 normalization forms. Tables are bundled (Unicode 15.0.0); Hangul is handled algorithmically.</p>
+            <table class="ref-table">
+                <thead><tr><th>Function</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>utf8::is_utf8(s)</code></td><td>Returns 1 if <code>s</code> is well-formed UTF-8.</td></tr>
+                    <tr><td><code>utf8::valid(s)</code></td><td>Alias for <code>utf8::is_utf8</code>.</td></tr>
+                    <tr><td><code>utf8::encode(s)</code></td><td>No-op (strada strings are already bytes).</td></tr>
+                    <tr><td><code>utf8::decode(s)</code></td><td>Validates UTF-8; 1 if valid, 0 if not.</td></tr>
+                    <tr><td><code>utf8::upgrade(s)</code></td><td>No-op; returns <code>s</code>.</td></tr>
+                    <tr><td><code>utf8::downgrade(s)</code></td><td>Returns <code>s</code> if ASCII-only, else dies.</td></tr>
+                    <tr><td><code>utf8::downgrade(s, 1)</code></td><td>Returns <code>s</code> if ASCII, undef if not (fail_ok).</td></tr>
+                    <tr><td><code>utf8::nfc(s)</code></td><td>UAX#15 canonical composition (NFC).</td></tr>
+                    <tr><td><code>utf8::nfd(s)</code></td><td>UAX#15 canonical decomposition (NFD).</td></tr>
+                    <tr><td><code>utf8::nfkc(s)</code></td><td>UAX#15 compatibility composition (NFKC).</td></tr>
+                    <tr><td><code>utf8::nfkd(s)</code></td><td>UAX#15 compatibility decomposition (NFKD).</td></tr>
+                    <tr><td><code>utf8::normalize(form, s)</code></td><td>Generic entry; <code>form</code> = <code>"NFC"</code>/<code>"NFD"</code>/<code>"NFKC"</code>/<code>"NFKD"</code>.</td></tr>
+                </tbody>
+            </table>
+
+            <h2 id="bare">Bare built-ins (no namespace)</h2>
+            <p>These match Perl built-ins. The most common are listed below; see <a href="../../docs/BUILTIN_FUNCTIONS.md">BUILTIN_FUNCTIONS.md</a> for the full alphabetical listing and signature details.</p>
+
+            <h3>Strings</h3>
+            <p><code>length</code>, <code>lc</code>/<code>lower</code>, <code>uc</code>/<code>upper</code>, <code>lcfirst</code>, <code>ucfirst</code>, <code>chomp</code>, <code>chop</code>, <code>chr</code>, <code>ord</code>, <code>reverse</code>, <code>substr</code>, <code>index</code>, <code>rindex</code>, <code>sprintf</code>, <code>printf</code>, <code>join</code>, <code>split</code>, <code>trim</code>, <code>ltrim</code>, <code>rtrim</code>, <code>quotemeta</code>, <code>match</code>, <code>replace</code>, <code>replace_all</code>, <code>captures</code>, <code>named_captures</code>, <code>pos</code>, <code>pack</code>, <code>unpack</code>.</p>
+
+            <h3>Numbers</h3>
+            <p><code>abs</code>, <code>int</code>, <code>hex</code>, <code>rand</code>, <code>srand</code>.</p>
+
+            <h3>Arrays</h3>
+            <p><code>push</code>, <code>pop</code>, <code>shift</code>, <code>unshift</code>, <code>splice</code>, <code>each</code>, <code>sort</code>, <code>nsort</code>, <code>reverse</code>, <code>scalar</code>, <code>map</code>, <code>grep</code>, <code>array_new</code>, <code>clone</code>, <code>reserve</code>, <code>deref</code>, <code>derefto</code>, <code>deref_array</code>, <code>deref_hash</code>, <code>deref_set</code>.</p>
+
+            <h3>Hashes</h3>
+            <p><code>keys</code>, <code>values</code>, <code>each</code>, <code>exists</code>, <code>delete</code>, <code>hash_new</code>, <code>hash_get</code>, <code>hash_set</code>, <code>tie</code>, <code>untie</code>, <code>tied</code>.</p>
+
+            <h3>References &amp; OOP</h3>
+            <p><code>ref</code>, <code>reftype</code>, <code>is_ref</code>, <code>is_refto</code>, <code>bless</code>, <code>blessed</code>, <code>isa</code>, <code>can</code>, <code>UNIVERSAL::isa</code>, <code>UNIVERSAL::can</code>, <code>inherit</code>.</p>
+
+            <h3>Misc</h3>
+            <p><code>defined</code>, <code>print</code>, <code>say</code>, <code>printf</code>, <code>warn</code>, <code>die</code>, <code>eval</code>, <code>caller</code>, <code>time</code>, <code>gmtime</code>, <code>localtime</code>, <code>wait</code>, <code>waitpid</code>, <code>fork</code>, <code>exec</code>, <code>exit</code>, <code>system</code>, <code>getpid</code>, <code>dumper</code>, <code>dumper_str</code>, <code>clone</code>, <code>cast_int</code>, <code>cast_num</code>, <code>cast_str</code>.</p>
+            <p>Special constants: <code>__PACKAGE__</code>, <code>__FILE__</code>, <code>__LINE__</code>, <code>__program_name</code>.</p>
+
+            <h2>See also</h2>
+            <ul>
+                <li><a href="reference.html">General reference</a></li>
+                <li><a href="functions.html">Defining your own functions</a></li>
+                <li><a href="async.html">Async / await tutorial</a></li>
+                <li><a href="c-interop.html">C interop (<code>__C__</code> blocks)</a></li>
+                <li>Source: <code>compiler/CodeGen.strada</code> &mdash; the authoritative dispatch table.</li>
+            </ul>
+        </main>
+    </div>
+</body>
+</html>

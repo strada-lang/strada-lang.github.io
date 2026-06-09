@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cannoli Web Framework - Strada Documentation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <a href="../index.html" class="logo">Strada<span>Lang</span></a>
+        <ul>
+            <li><a href="quickstart.html">QuickStart</a></li>
+            <li><a href="index.html">Docs</a></li>
+            <li><a href="reference.html">Reference</a></li>
+            <li><a href="https://github.com/strada-lang/strada-lang">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h3>Getting Started</h3>
+            <ul>
+                <li><a href="quickstart.html">QuickStart</a></li>
+                <li><a href="index.html">Documentation</a></li>
+                <li><a href="repl.html">REPL & Scripting</a></li>
+                <li><a href="interpreter.html">Interpreter</a></li>
+            </ul>
+            <h3>Language Guide</h3>
+            <ul>
+                <li><a href="basics.html">Language Basics</a></li>
+                <li><a href="types.html">Types & Variables</a></li>
+                <li><a href="functions.html">Functions</a></li>
+                <li><a href="control-flow.html">Control Flow</a></li>
+                <li><a href="oop.html">Object-Oriented Programming</a></li>
+                <li><a href="regex.html">Regular Expressions</a></li>
+            </ul>
+            <h3>Advanced</h3>
+            <ul>
+                <li><a href="memory.html">Memory Management</a></li>
+                <li><a href="debugging.html">Debugging</a></li>
+                <li><a href="async.html">Async/Await</a></li>
+                <li><a href="c-interop.html">C Interoperability</a></li>
+                <li><a href="libraries.html">Libraries Guide</a></li>
+                <li><a href="perl-integration.html">Perl Integration</a></li>
+            </ul>
+            <h3>Reference</h3>
+            <ul>
+                <li><a href="reference.html">Reference</a></li>
+                <li><a href="builtin-functions.html">Built-in Functions</a></li>
+                <li><a href="benchmarks.html">Benchmarks</a></li>
+                <li><a href="cannoli.html" class="active">Cannoli Web Framework</a></li>
+                <li><a href="forma.html">Forma Template Engine</a></li>
+                <li><a href="dbi.html">DBI Database Interface</a></li>
+                <li><a href="nesso.html">Nesso ORM</a></li>
+                <li><a href="stradadoc.html">Documentation Tools</a></li>
+            </ul>
+        </aside>
+
+        <main class="content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a> / <a href="index.html">Docs</a> / Cannoli
+            </div>
+
+            <h1>Cannoli <span>Web Framework</span></h1>
+            <p class="subtitle">Build web applications with Strada's built-in web framework.</p>
+
+            <p style="margin-bottom: 2rem;">
+                <a href="https://github.com/strada-lang/cannoli" style="display: inline-flex; align-items: center; gap: 0.5rem; background: var(--panel-2); color: var(--text); border: 1px solid var(--border-strong); padding: 0.5rem 1rem; border-radius: 8px; text-decoration: none; font-weight: 500;">
+                    <span>📦</span> Download Cannoli on GitHub
+                </a>
+            </p>
+
+            <h2>Overview</h2>
+
+            <p>Cannoli is Strada's built-in web framework for building HTTP servers. It provides:</p>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h4>Routing</h4>
+                    <p>URL path matching and HTTP method handling</p>
+                </div>
+                <div class="card">
+                    <h4>Request Parsing</h4>
+                    <p>Query params, form data, JSON bodies, headers, cookies</p>
+                </div>
+                <div class="card">
+                    <h4>Response Building</h4>
+                    <p>JSON, HTML, redirects, custom headers, cookies</p>
+                </div>
+                <div class="card">
+                    <h4>File Uploads</h4>
+                    <p>Multipart form-data parsing for file uploads</p>
+                </div>
+                <div class="card">
+                    <h4>SSL/TLS</h4>
+                    <p>HTTPS support with certificate configuration</p>
+                </div>
+                <div class="card">
+                    <h4>Static Files</h4>
+                    <p>Built-in static file serving with directory listing</p>
+                </div>
+            </div>
+
+            <h2>Quick Start</h2>
+
+            <pre><code><span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
+    <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$app</span> = <span class="func">Cannoli::App::new</span>();
+
+    <span class="comment"># Each route registers a handler: func (hash %req) hash</span>
+    <span class="func">Cannoli::App::get</span>(<span class="sigil">$app</span>, <span class="string">"/"</span>, <span class="keyword">func</span> (<span class="type">hash</span> <span class="sigil">%req</span>) <span class="type">hash</span> {
+        <span class="keyword">return</span> <span class="func">Cannoli::Response::json</span>(<span class="number">200</span>, <span class="string">"{\"message\":\"Hello, Cannoli!\"}"</span>);
+    });
+
+    <span class="func">Cannoli::App::get</span>(<span class="sigil">$app</span>, <span class="string">"/greet"</span>, <span class="keyword">func</span> (<span class="type">hash</span> <span class="sigil">%req</span>) <span class="type">hash</span> {
+        <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$name</span> = <span class="func">Cannoli::Request::get_param</span>(<span class="sigil">%req</span>, <span class="string">"name"</span>);
+        <span class="keyword">if</span> (<span class="sigil">$name</span> eq <span class="string">""</span>) { <span class="sigil">$name</span> = <span class="string">"World"</span>; }
+        <span class="keyword">return</span> <span class="func">Cannoli::Response::text</span>(<span class="number">200</span>, <span class="string">"Hello, "</span> . <span class="sigil">$name</span> . <span class="string">"!"</span>);
+    });
+
+    <span class="keyword">return</span> <span class="func">Cannoli::App::run</span>(<span class="sigil">$app</span>);
+}</code></pre>
+
+            <p class="note">Cannoli registers a handler per route with
+            <code>Cannoli::App::get</code> / <code>post</code> / <code>put</code> /
+            <code>delete_route</code> (paths may be regexes with capture groups).
+            Each handler takes the request hash <code>%req</code> and returns a
+            response built with <code>Cannoli::Response::html / text / json(code, body)</code>.
+            See the <code>examples/</code> directory in the
+            <a href="https://github.com/strada-lang/cannoli">Cannoli repository</a>
+            for request parsing, sessions, file uploads, and WebSockets.</p>
+
+            <p>Run with:</p>
+            <pre><code>./strada -r myapp.strada</code></pre>
+
+            <p>Visit <code>http://localhost:8080/</code> to see your app.</p>
+
+            <h2>Handlers, Request &amp; Response</h2>
+
+            <p>A route handler has the signature <code>func (hash %req) hash</code>: it
+            receives the request hash <code>%req</code> and returns a response hash built
+            with the <code>Cannoli::Response</code> helpers.</p>
+
+            <h3>Routing</h3>
+
+            <table>
+                <thead><tr><th>Function</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>Cannoli::App::new()</code></td><td>Create an application</td></tr>
+                    <tr><td><code>Cannoli::App::get($app, $path, $handler)</code></td><td>Register a GET route</td></tr>
+                    <tr><td><code>Cannoli::App::post($app, $path, $handler)</code></td><td>Register a POST route</td></tr>
+                    <tr><td><code>Cannoli::App::put($app, $path, $handler)</code></td><td>Register a PUT route</td></tr>
+                    <tr><td><code>Cannoli::App::delete_route($app, $path, $handler)</code></td><td>Register a DELETE route</td></tr>
+                    <tr><td><code>Cannoli::App::run($app)</code></td><td>Start the server</td></tr>
+                </tbody>
+            </table>
+
+            <p>Paths may be regexes with capture groups, e.g. <code>"/users/([0-9]+)"</code>.</p>
+
+            <h3>Reading the Request</h3>
+
+            <table>
+                <thead><tr><th>Function</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>Cannoli::Request::get_param(%req, $name)</code></td><td>Query/form parameter</td></tr>
+                    <tr><td><code>Cannoli::Request::get_header(%req, $name)</code></td><td>Request header value</td></tr>
+                    <tr><td><code>Cannoli::Request::header_names(%req)</code></td><td>All request header names</td></tr>
+                </tbody>
+            </table>
+
+            <h3>Building the Response</h3>
+
+            <table>
+                <thead><tr><th>Function</th><th>Description</th></tr></thead>
+                <tbody>
+                    <tr><td><code>Cannoli::Response::html($code, $body)</code></td><td>HTML response</td></tr>
+                    <tr><td><code>Cannoli::Response::text($code, $body)</code></td><td>Plain-text response</td></tr>
+                    <tr><td><code>Cannoli::Response::json($code, $json_string)</code></td><td>JSON response (body is a JSON string)</td></tr>
+                    <tr><td><code>Cannoli::Response::header(%res, $name, $value)</code></td><td>Add a header to a response</td></tr>
+                </tbody>
+            </table>
+
+            <h2>Example: a small JSON API</h2>
+
+            <pre><code><span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
+    <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$app</span> = <span class="func">Cannoli::App::new</span>();
+
+    <span class="func">Cannoli::App::get</span>(<span class="sigil">$app</span>, <span class="string">"/health"</span>, <span class="keyword">func</span> (<span class="type">hash</span> <span class="sigil">%req</span>) <span class="type">hash</span> {
+        <span class="keyword">return</span> <span class="func">Cannoli::Response::json</span>(<span class="number">200</span>, <span class="string">"{\"status\":\"ok\"}"</span>);
+    });
+
+    <span class="comment"># Path capture group -&gt; available as a parameter</span>
+    <span class="func">Cannoli::App::get</span>(<span class="sigil">$app</span>, <span class="string">"/hello/(\\w+)"</span>, <span class="keyword">func</span> (<span class="type">hash</span> <span class="sigil">%req</span>) <span class="type">hash</span> {
+        <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$who</span> = <span class="func">Cannoli::Request::get_param</span>(<span class="sigil">%req</span>, <span class="string">"name"</span>);
+        <span class="keyword">if</span> (<span class="sigil">$who</span> eq <span class="string">""</span>) { <span class="sigil">$who</span> = <span class="string">"World"</span>; }
+        <span class="keyword">return</span> <span class="func">Cannoli::Response::text</span>(<span class="number">200</span>, <span class="string">"Hello, "</span> . <span class="sigil">$who</span> . <span class="string">"!"</span>);
+    });
+
+    <span class="func">Cannoli::App::post</span>(<span class="sigil">$app</span>, <span class="string">"/echo"</span>, <span class="keyword">func</span> (<span class="type">hash</span> <span class="sigil">%req</span>) <span class="type">hash</span> {
+        <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$msg</span> = <span class="func">Cannoli::Request::get_param</span>(<span class="sigil">%req</span>, <span class="string">"msg"</span>);
+        <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%res</span> = <span class="func">Cannoli::Response::text</span>(<span class="number">200</span>, <span class="sigil">$msg</span>);
+        <span class="func">Cannoli::Response::header</span>(<span class="sigil">%res</span>, <span class="string">"X-Echo"</span>, <span class="string">"1"</span>);
+        <span class="keyword">return</span> <span class="sigil">%res</span>;
+    });
+
+    <span class="keyword">return</span> <span class="func">Cannoli::App::run</span>(<span class="sigil">$app</span>);
+}</code></pre>
+
+            <h2>More Features</h2>
+
+            <p>Cannoli also includes form/JSON body parsing, file uploads, cookies and
+            sessions, static-file serving, chunked/streaming responses, HTTPS/SSL, and
+            WebSockets. These are demonstrated in the <code>examples/</code> directory of
+            the <a href="https://github.com/strada-lang/cannoli">Cannoli repository</a>
+            (<code>hello_app</code>, <code>api_app</code>, <code>upload_demo</code>,
+            <code>headers_demo</code>, <code>static_server</code>,
+            <code>template_demo</code>).</p>
+
+
+            <div class="page-nav">
+                <a href="benchmarks.html">
+                    <span class="label">&larr; Previous</span>
+                    <span class="title">Benchmarks</span>
+                </a>
+                <a href="index.html" class="next">
+                    <span class="label">Back to &rarr;</span>
+                    <span class="title">Documentation</span>
+                </a>
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <p><a href="../index.html">Strada</a> - A strongly-typed language inspired by Perl</p>
+    </footer>
+</body>
+</html>

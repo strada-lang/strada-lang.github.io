@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Strada - A Perl-Inspired Language That Compiles to Native Code</title>
+    <meta name="description" content="Strada is a Perl-inspired language that compiles to native executables via C. Familiar Perl syntax with optional type annotations. Up to 95x faster than Perl, 66x faster than Python, 3.1x faster than Node.js.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #07080c;
+            --bg-soft: #0d0f16;
+            --panel: #11131c;
+            --panel-2: #161925;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-strong: rgba(255, 255, 255, 0.14);
+            --text: #e8e9f0;
+            --muted: #9aa0b4;
+            --faint: #6b7088;
+            --accent: #ff6a52;
+            --accent-2: #4be1c0;
+            --accent-3: #a78bfa;
+            --code-bg: #0b0d14;
+            --glow-a: rgba(255, 106, 82, 0.5);
+            --glow-b: rgba(75, 225, 192, 0.4);
+            --glow-c: rgba(167, 139, 250, 0.4);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.65;
+            color: var(--text);
+            background: var(--bg);
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        a { color: inherit; }
+
+        ::selection { background: var(--accent); color: #fff; }
+
+        .mono { font-family: 'JetBrains Mono', 'SF Mono', Consolas, monospace; }
+
+        .gradient-text {
+            background: linear-gradient(110deg, var(--accent) 0%, var(--accent-3) 55%, var(--accent-2) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* ---------- Nav ---------- */
+        nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: rgba(7, 8, 12, 0.6);
+            backdrop-filter: blur(18px) saturate(1.4);
+            -webkit-backdrop-filter: blur(18px) saturate(1.4);
+            border-bottom: 1px solid transparent;
+            transition: border-color 0.3s, background 0.3s;
+        }
+
+        nav.scrolled {
+            border-bottom: 1px solid var(--border);
+            background: rgba(7, 8, 12, 0.85);
+        }
+
+        .logo {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 700;
+            text-decoration: none;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+
+        .logo .mark {
+            width: 30px;
+            height: 30px;
+            border-radius: 9px;
+            background: linear-gradient(135deg, var(--accent), var(--accent-3));
+            display: grid;
+            place-items: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #fff;
+            box-shadow: 0 4px 16px var(--glow-a);
+        }
+
+        .logo span { color: var(--muted); font-weight: 500; }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        nav ul a {
+            text-decoration: none;
+            color: var(--muted);
+            font-size: 0.92rem;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+
+        nav ul a:hover { color: var(--text); }
+
+        .nav-cta {
+            padding: 0.5rem 1.1rem;
+            border-radius: 8px;
+            border: 1px solid var(--border-strong);
+            color: var(--text) !important;
+            transition: border-color 0.2s, background 0.2s;
+        }
+
+        .nav-cta:hover { border-color: var(--accent); background: rgba(255,106,82,0.08); }
+
+        /* ---------- Hero ---------- */
+        .hero {
+            position: relative;
+            padding: 11rem 2rem 5rem;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .hero-bg::before {
+            content: '';
+            position: absolute;
+            top: -20%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 900px;
+            height: 900px;
+            background:
+                radial-gradient(circle at 30% 30%, var(--glow-a), transparent 55%),
+                radial-gradient(circle at 70% 40%, var(--glow-c), transparent 55%),
+                radial-gradient(circle at 50% 70%, var(--glow-b), transparent 55%);
+            filter: blur(40px);
+            opacity: 0.55;
+            animation: drift 16s ease-in-out infinite alternate;
+        }
+
+        .hero-bg .grid-lines {
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(var(--border) 1px, transparent 1px),
+                linear-gradient(90deg, var(--border) 1px, transparent 1px);
+            background-size: 56px 56px;
+            mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, #000 30%, transparent 75%);
+            -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 30%, #000 30%, transparent 75%);
+            opacity: 0.5;
+        }
+
+        @keyframes drift {
+            0%   { transform: translateX(-50%) translateY(0) scale(1); }
+            100% { transform: translateX(-50%) translateY(40px) scale(1.08); }
+        }
+
+        .hero-inner { position: relative; z-index: 1; max-width: 1000px; margin: 0 auto; }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.4rem 0.9rem;
+            border-radius: 999px;
+            border: 1px solid var(--border-strong);
+            background: rgba(255,255,255,0.03);
+            font-size: 0.82rem;
+            color: var(--muted);
+            margin-bottom: 2rem;
+        }
+
+        .badge .dot {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: var(--accent-2);
+            box-shadow: 0 0 10px var(--accent-2);
+        }
+
+        .hero h1 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(2.8rem, 7vw, 5.5rem);
+            line-height: 1.02;
+            letter-spacing: -3px;
+            font-weight: 700;
+            margin-bottom: 1.4rem;
+        }
+
+        .hero .tagline {
+            font-size: clamp(1.05rem, 2.2vw, 1.35rem);
+            color: var(--muted);
+            max-width: 640px;
+            margin: 0 auto 2.5rem;
+        }
+
+        .hero-cta { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.9rem 1.6rem;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.98rem;
+            transition: transform 0.15s, box-shadow 0.2s, border-color 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(120deg, var(--accent), #ff8a52);
+            color: #fff;
+            box-shadow: 0 10px 32px var(--glow-a);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 16px 44px var(--glow-a); }
+
+        .btn-ghost {
+            background: rgba(255,255,255,0.04);
+            color: var(--text);
+            border: 1px solid var(--border-strong);
+        }
+        .btn-ghost:hover { transform: translateY(-2px); border-color: var(--accent-2); }
+
+        /* ---------- Code window ---------- */
+        .code-window {
+            margin: 3.5rem auto 0;
+            max-width: 680px;
+            text-align: left;
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.55);
+        }
+
+        .code-titlebar {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.8rem 1rem;
+            background: rgba(255,255,255,0.025);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .code-titlebar .dots { display: flex; gap: 0.45rem; }
+        .code-titlebar .dots i { width: 12px; height: 12px; border-radius: 50%; display: block; }
+        .code-titlebar .dots i:nth-child(1){ background:#ff5f56; }
+        .code-titlebar .dots i:nth-child(2){ background:#ffbd2e; }
+        .code-titlebar .dots i:nth-child(3){ background:#27c93f; }
+        .code-titlebar .fname { margin-left: 0.6rem; font-size: 0.82rem; color: var(--faint); font-family: 'JetBrains Mono', monospace; }
+
+        .code-window pre {
+            padding: 1.5rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            line-height: 1.7;
+            overflow-x: auto;
+            color: var(--text);
+        }
+
+        /* ---------- syntax ---------- */
+        .keyword { color: #c4a4ff; }
+        .type    { color: #69b4ff; }
+        .string  { color: #6ee7b7; }
+        .number  { color: #ffb86c; }
+        .comment { color: #5a6178; font-style: italic; }
+        .sigil   { color: #ff8aa0; }
+        .func    { color: #7fdbff; }
+
+        /* ---------- Section scaffolding ---------- */
+        section { position: relative; }
+
+        .wrap { max-width: 1180px; margin: 0 auto; padding: 6rem 2rem; }
+
+        .eyebrow {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.8rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--accent-2);
+            margin-bottom: 0.9rem;
+        }
+
+        .section-head { max-width: 720px; margin-bottom: 3.5rem; }
+        .section-head.center { margin-left: auto; margin-right: auto; text-align: center; }
+
+        .section-head h2 {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: clamp(2rem, 4vw, 3rem);
+            letter-spacing: -1.5px;
+            line-height: 1.1;
+            font-weight: 700;
+        }
+
+        .section-head p { color: var(--muted); font-size: 1.1rem; margin-top: 1rem; }
+
+        /* ---------- Marquee stats ---------- */
+        .stats-strip {
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            background: var(--bg-soft);
+        }
+        .stats-inner {
+            max-width: 1180px; margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 1px;
+            background: var(--border);
+            border-left: 1px solid var(--border);
+            border-right: 1px solid var(--border);
+        }
+        .stat {
+            background: var(--bg);
+            padding: 2.2rem 1.4rem;
+            text-align: center;
+        }
+        .stat-num {
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 2rem;
+            font-weight: 700;
+            letter-spacing: -1px;
+            line-height: 1;
+        }
+        .stat-label { color: var(--faint); font-size: 0.85rem; margin-top: 0.6rem; }
+        .stat-label a { color: var(--accent); text-decoration: none; }
+
+        /* ---------- Bento features ---------- */
+        .bento {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 1.1rem;
+        }
+        .card {
+            position: relative;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 1.6rem;
+            overflow: hidden;
+            transition: transform 0.25s, border-color 0.25s, background 0.25s;
+        }
+        .card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 16px;
+            padding: 1px;
+            background: linear-gradient(130deg, transparent 40%, var(--accent), transparent 70%);
+            -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .card:hover { transform: translateY(-4px); border-color: var(--border-strong); background: var(--panel-2); }
+        .card:hover::after { opacity: 0.9; }
+
+        .card .ico {
+            width: 44px; height: 44px;
+            border-radius: 11px;
+            display: grid; place-items: center;
+            font-size: 1.4rem;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            margin-bottom: 1.1rem;
+        }
+        .card h3 { font-family: 'Space Grotesk', sans-serif; font-size: 1.12rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .card p { color: var(--muted); font-size: 0.93rem; }
+        .card p a, .card code { color: var(--accent-2); text-decoration: none; }
+        .card code { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; background: rgba(255,255,255,0.05); padding: 0.1rem 0.35rem; border-radius: 5px; }
+
+        .col-2 { grid-column: span 2; }
+        .col-3 { grid-column: span 3; }
+
+        .card.feature-hero {
+            grid-column: span 3;
+            grid-row: span 2;
+            background: linear-gradient(160deg, var(--panel-2), var(--panel));
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .card.feature-hero .ico { width: 54px; height: 54px; font-size: 1.7rem; }
+        .card.feature-hero h3 { font-size: 1.5rem; }
+        .card.feature-hero p { font-size: 1rem; }
+
+        /* ---------- Split (Perl) ---------- */
+        .split { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; }
+        .perl-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.6rem;
+            transition: border-color 0.2s;
+        }
+        .perl-card:hover { border-color: var(--border-strong); }
+        .perl-card h3 { font-family: 'Space Grotesk', sans-serif; font-size: 1.1rem; margin-bottom: 0.5rem; }
+        .perl-card p { color: var(--muted); font-size: 0.95rem; }
+        .perl-card code, .perl-card a { color: var(--accent-2); text-decoration: none; }
+        .perl-card code { font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; background: rgba(255,255,255,0.05); padding: 0.1rem 0.35rem; border-radius: 5px; }
+        .cta-line { text-align: center; margin-top: 2.5rem; color: var(--muted); }
+        .cta-line a { color: var(--accent); text-decoration: none; font-weight: 600; }
+
+        /* ---------- Benchmarks ---------- */
+        .bench-section { background: var(--bg-soft); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+        .bench-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 3rem; align-items: center; }
+        .bench-bar-row { display: flex; align-items: center; margin-bottom: 1rem; gap: 1rem; }
+        .bench-label { width: 96px; font-size: 0.9rem; color: var(--muted); flex-shrink: 0; font-family: 'JetBrains Mono', monospace; }
+        .bench-track {
+            flex: 1; height: 40px; border-radius: 9px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+        .bench-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-3), var(--accent));
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: flex-end;
+            padding-right: 0.9rem;
+            min-width: 110px;
+        }
+        .bench-value { font-size: 0.85rem; font-weight: 600; color: #fff; font-family: 'JetBrains Mono', monospace; }
+        .bench-callout {
+            background: var(--panel);
+            border: 1px solid var(--border-strong);
+            border-radius: 18px;
+            padding: 2.5rem 1.5rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .bench-callout::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: radial-gradient(circle at 50% 0%, var(--glow-a), transparent 65%);
+            opacity: 0.5;
+        }
+        .bench-callout-number {
+            position: relative;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 4.5rem; font-weight: 700; line-height: 1;
+            letter-spacing: -2px;
+        }
+        .bench-callout-text { position: relative; font-size: 1.05rem; margin-top: 0.6rem; }
+        .bench-callout-detail { position: relative; color: var(--faint); font-size: 0.85rem; margin-top: 0.3rem; }
+        .bench-footer { max-width: 720px; margin: 3rem auto 0; text-align: center; font-size: 0.92rem; color: var(--faint); }
+        .bench-footer a { color: var(--accent); text-decoration: none; }
+
+        /* ---------- Types ---------- */
+        .types-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 0.9rem;
+        }
+        .type-card {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-left: 3px solid var(--accent);
+            border-radius: 10px;
+            padding: 1.1rem;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .type-card:hover { transform: translateY(-3px); }
+        .type-card.sig { border-left-color: var(--accent-2); }
+        .type-card h4 { font-family: 'JetBrains Mono', monospace; font-size: 1.05rem; color: var(--text); }
+        .type-card p { color: var(--faint); font-size: 0.82rem; margin-top: 0.35rem; }
+
+        /* ---------- Examples ---------- */
+        .examples-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 1.4rem; }
+        .example {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            overflow: hidden;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+        .example:hover { border-color: var(--border-strong); transform: translateY(-3px); }
+        .example-header {
+            display: flex; align-items: center; gap: 0.5rem;
+            padding: 0.7rem 1rem;
+            background: rgba(255,255,255,0.025);
+            border-bottom: 1px solid var(--border);
+            font-size: 0.85rem;
+            color: var(--muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .example-header::before {
+            content: ''; width: 9px; height: 9px; border-radius: 50%;
+            background: var(--accent); flex-shrink: 0;
+        }
+        .example pre {
+            padding: 1.3rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.86rem;
+            line-height: 1.65;
+            overflow-x: auto;
+            color: var(--text);
+        }
+
+        /* ---------- Pipeline ---------- */
+        .pipeline { display: flex; justify-content: center; align-items: stretch; flex-wrap: wrap; gap: 1rem; }
+        .pipeline-step {
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.6rem 2rem;
+            text-align: center;
+            min-width: 170px;
+        }
+        .pipeline-step .icon { font-size: 1.8rem; margin-bottom: 0.6rem; }
+        .pipeline-step strong { font-family: 'Space Grotesk', sans-serif; }
+        .pipeline-step .sub { color: var(--faint); font-size: 0.85rem; margin-top: 0.2rem; font-family: 'JetBrains Mono', monospace; }
+        .pipeline-arrow { display: grid; place-items: center; font-size: 1.6rem; color: var(--accent-2); }
+        .pipeline-note { max-width: 680px; margin: 2.5rem auto 0; text-align: center; color: var(--muted); }
+        .pipeline-note a { color: var(--accent); text-decoration: none; }
+        .pipeline-note code { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; }
+
+        /* ---------- Steps ---------- */
+        .steps { display: grid; gap: 1.1rem; max-width: 820px; }
+        .step {
+            display: flex; gap: 1.4rem; align-items: flex-start;
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            padding: 1.5rem;
+        }
+        .step-number {
+            flex-shrink: 0;
+            width: 42px; height: 42px;
+            border-radius: 11px;
+            display: grid; place-items: center;
+            font-family: 'JetBrains Mono', monospace;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent), var(--accent-3));
+            color: #fff;
+        }
+        .step-content h3 { font-family: 'Space Grotesk', sans-serif; margin-bottom: 0.3rem; }
+        .step-content p { color: var(--muted); font-size: 0.95rem; }
+        .step-content code {
+            display: block;
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 0.9rem 1rem;
+            border-radius: 9px;
+            margin-top: 0.8rem;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.85rem;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+
+        /* ---------- CTA banner ---------- */
+        .cta-banner { text-align: center; }
+        .cta-box {
+            max-width: 900px; margin: 0 auto;
+            background: linear-gradient(160deg, var(--panel-2), var(--panel));
+            border: 1px solid var(--border-strong);
+            border-radius: 22px;
+            padding: 4rem 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        .cta-box::before {
+            content: '';
+            position: absolute; top: -50%; left: 50%; transform: translateX(-50%);
+            width: 600px; height: 600px;
+            background: radial-gradient(circle, var(--glow-c), transparent 60%);
+            opacity: 0.4;
+        }
+        .cta-box > * { position: relative; }
+        .cta-box h2 { font-family: 'Space Grotesk', sans-serif; font-size: clamp(1.8rem, 4vw, 2.6rem); letter-spacing: -1px; }
+        .cta-box p { color: var(--muted); margin: 1rem auto 2rem; max-width: 520px; }
+
+        /* ---------- Footer ---------- */
+        footer {
+            border-top: 1px solid var(--border);
+            background: var(--bg-soft);
+            padding: 3.5rem 2rem 2.5rem;
+        }
+        .footer-inner { max-width: 1180px; margin: 0 auto; }
+        .footer-top { display: flex; justify-content: space-between; gap: 2rem; flex-wrap: wrap; margin-bottom: 2.5rem; }
+        .footer-links { display: flex; flex-wrap: wrap; gap: 1.4rem; }
+        .footer-links a { color: var(--muted); text-decoration: none; font-size: 0.92rem; transition: color 0.2s; }
+        .footer-links a:hover { color: var(--text); }
+        .footer-bottom { border-top: 1px solid var(--border); padding-top: 1.8rem; color: var(--faint); font-size: 0.88rem; }
+        .footer-bottom a { color: var(--accent); text-decoration: none; }
+
+        /* ---------- Reveal animation ---------- */
+        .reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+        .reveal.in { opacity: 1; transform: none; }
+
+        /* ---------- Responsive ---------- */
+        @media (max-width: 900px) {
+            .bento { grid-template-columns: repeat(2, 1fr); }
+            .col-2, .col-3, .card.feature-hero { grid-column: span 2; grid-row: auto; }
+            .stats-inner { grid-template-columns: repeat(2, 1fr); }
+            .split { grid-template-columns: 1fr; }
+            .bench-layout { grid-template-columns: 1fr; }
+            .examples-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 720px) {
+            nav ul li:not(.nav-cta-li) { display: none; }
+            .wrap { padding: 4rem 1.3rem; }
+            .pipeline-arrow { transform: rotate(90deg); }
+            .examples-grid { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 520px) {
+            .bento { grid-template-columns: 1fr; }
+            .col-2, .col-3, .card.feature-hero { grid-column: span 1; }
+            .stats-inner { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <nav id="nav">
+        <a href="#" class="logo"><span class="mark">S</span>Strada<span>Lang</span></a>
+        <ul>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#examples">Examples</a></li>
+            <li><a href="docs/benchmarks.html">Benchmarks</a></li>
+            <li><a href="perla/index.html">perla</a></li>
+            <li><a href="docs/index.html">Docs</a></li>
+            <li class="nav-cta-li"><a href="https://github.com/strada-lang/strada-lang" class="nav-cta">GitHub ↗</a></li>
+        </ul>
+    </nav>
+
+    <!-- ================= HERO ================= -->
+    <section class="hero">
+        <div class="hero-bg"><div class="grid-lines"></div></div>
+        <div class="hero-inner">
+            <span class="badge"><span class="dot"></span> Self-hosting · Memory-safe · Zero runtime deps</span>
+            <h1>Perl's soul.<br><span class="gradient-text">Native speed.</span></h1>
+            <p class="tagline">Strada is a strongly-typed language inspired by Perl that compiles straight to native executables via C — familiar sigils, optional types, and up to <strong style="color:var(--text)">95× the speed</strong>.</p>
+            <div class="hero-cta">
+                <a href="docs/quickstart.html" class="btn btn-primary">Get Started →</a>
+                <a href="docs/index.html" class="btn btn-ghost">Read the Docs</a>
+            </div>
+
+            <div class="code-window">
+                <div class="code-titlebar">
+                    <div class="dots"><i></i><i></i><i></i></div>
+                    <span class="fname">hello.strada</span>
+                </div>
+                <pre><span class="keyword">func</span> <span class="func">greet</span>(<span class="sigil">$name</span>) {
+    <span class="func">say</span>(<span class="string">"Hello, "</span> . <span class="sigil">$name</span> . <span class="string">"!"</span>);
+}
+
+<span class="keyword">func</span> <span class="func">sum_all</span> {
+    <span class="keyword">my</span> <span class="sigil">$total</span> = <span class="number">0</span>;
+    <span class="keyword">foreach</span> (<span class="sigil">@_</span>) { <span class="sigil">$total</span> += <span class="sigil">$_</span>; }
+    <span class="keyword">return</span> <span class="sigil">$total</span>;
+}
+
+<span class="func">greet</span>(<span class="string">"Strada"</span>);
+<span class="func">say</span>(<span class="func">sum_all</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>));  <span class="comment"># 15</span></pre>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= STATS ================= -->
+    <div class="stats-strip">
+        <div class="stats-inner">
+            <div class="stat">
+                <div class="stat-num gradient-text">95×</div>
+                <div class="stat-label">faster than Perl on compute</div>
+            </div>
+            <div class="stat">
+                <div class="stat-num">Self-hosting</div>
+                <div class="stat-label">compiler written in Strada</div>
+            </div>
+            <div class="stat">
+                <div class="stat-num">Memory-safe</div>
+                <div class="stat-label">refcount + cycle collector</div>
+            </div>
+            <div class="stat">
+                <div class="stat-num">Perl&nbsp;5</div>
+                <div class="stat-label">runs unmodified via <a href="perla/index.html">perla</a></div>
+            </div>
+            <div class="stat">
+                <div class="stat-num">0</div>
+                <div class="stat-label">runtime deps beyond libc</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= FEATURES (BENTO) ================= -->
+    <section id="features">
+        <div class="wrap">
+            <div class="section-head reveal">
+                <div class="eyebrow">// why strada</div>
+                <h2>Expressiveness you know,<br>performance you didn't expect.</h2>
+                <p>Perl's idioms with optional type annotations, compiled to native machine code. No VM, no interpreter overhead in production.</p>
+            </div>
+
+            <div class="bento">
+                <div class="card feature-hero reveal">
+                    <div>
+                        <div class="ico">🚀</div>
+                        <h3>Native Performance</h3>
+                        <p>Compiles to portable C, then to native machine code via GCC. Function calls become a single <code>call</code> instruction; integer arithmetic uses zero heap allocation. No VM overhead in production.</p>
+                    </div>
+                    <p style="margin-top:1.5rem;color:var(--faint)"><code>.strada → .c → native binary</code></p>
+                </div>
+
+                <div class="card col-3 reveal">
+                    <div class="ico">🔒</div>
+                    <h3>Optional Type Annotations</h3>
+                    <p>Add types when you want clarity (<code>int</code>, <code>num</code>, <code>str</code>, <code>array</code>, <code>hash</code>), or omit them for quick scripting. The sigil tells the compiler the rest.</p>
+                </div>
+
+                <div class="card col-3 reveal">
+                    <div class="ico">✨</div>
+                    <h3>Perl-Inspired Syntax</h3>
+                    <p>Familiar sigils (<code>$</code>, <code>@</code>, <code>%</code>), expressive string handling, and powerful regex support — the idioms you already reach for.</p>
+                </div>
+
+                <div class="card col-2 reveal">
+                    <div class="ico">🔄</div>
+                    <h3>Self-Hosting Compiler</h3>
+                    <p>The Strada compiler is written in Strada itself — proof the language can carry real, serious work.</p>
+                </div>
+
+                <div class="card col-2 reveal">
+                    <div class="ico">🧹</div>
+                    <h3>Automatic Memory Management</h3>
+                    <p>Refcounting with a built-in <a href="docs/memory.html">cycle collector and request arena</a> (default-on). Reclaims cycles with no manual <code>weaken()</code>. Designed valgrind-clean.</p>
+                </div>
+
+                <div class="card col-2 reveal">
+                    <div class="ico">🧩</div>
+                    <h3>Moose-Style OOP</h3>
+                    <p>Declarative OOP with <code>has</code>, <code>extends</code>, <code>with</code>, and <code>before</code>/<code>after</code>/<code>around</code> modifiers. Auto-generated constructors and accessors.</p>
+                </div>
+
+                <div class="card col-2 reveal">
+                    <div class="ico">🌐</div>
+                    <h3>Web Framework</h3>
+                    <p>Ships with <a href="https://github.com/strada-lang/cannoli">Cannoli</a> — routing, file uploads, chunked responses, and SSL/TLS, built in.</p>
+                </div>
+
+                <div class="card col-2 reveal">
+                    <div class="ico">🔗</div>
+                    <h3>C Interop &amp; Separate Compilation</h3>
+                    <p>Embed C with <code>__C__</code> blocks. Precompile with <code>strada -M</code>; consumers just <code>use Foo;</code> and the <code>.o</code> links automatically.</p>
+                </div>
+
+                <div class="card col-2 reveal">
+                    <div class="ico">⏳</div>
+                    <h3>Async / Await</h3>
+                    <p>First-class async/await on a thread pool. <code>async::all()</code>, <code>async::race()</code>, timeouts, and cancellation.</p>
+                </div>
+
+                <div class="card col-2 reveal">
+                    <div class="ico">⚡</div>
+                    <h3>Exception Handling</h3>
+                    <p>Modern <code>try</code>/<code>catch</code>/<code>throw</code> for robust error handling with clean propagation.</p>
+                </div>
+
+                <div class="card col-2 reveal">
+                    <div class="ico">📦</div>
+                    <h3>Closures &amp; First-Class Functions</h3>
+                    <p>Anonymous functions with automatic variable capture. Pass functions around as values.</p>
+                </div>
+
+                <div class="card col-2 reveal">
+                    <div class="ico">💻</div>
+                    <h3>JIT REPL &amp; Scripting</h3>
+                    <p>Interactive REPL via <code>strada-jit</code> — real native compilation through tcc or gcc + dlopen. <code>strada --script</code> runs files whole-file.</p>
+                </div>
+
+                <div class="card col-2 reveal">
+                    <div class="ico">📊</div>
+                    <h3>Profiling Built In</h3>
+                    <p>Function profiler (<code>-p</code>) and line-level profiler (<code>--full-profile</code>) with text and HTML report tools.</p>
+                </div>
+
+                <div class="card col-2 reveal">
+                    <div class="ico">🔧</div>
+                    <h3>Map, Grep, Sort</h3>
+                    <p>Perl-style array transforms with <code>$_</code> and blocks. Build lookup hashes with <code>map { $_ =&gt; 1 }</code>.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= FOR PERL DEVS ================= -->
+    <section id="for-perl">
+        <div class="wrap">
+            <div class="section-head center reveal">
+                <div class="eyebrow">// for perl developers</div>
+                <h2>If you know Perl,<br>you already know Strada.</h2>
+                <p>Strada draws heavily from Perl — sigils, regex, hashes, Moose-style OOP — and compiles it all to a single native binary with no interpreter, no VM, and no runtime dependencies.</p>
+            </div>
+
+            <div class="split">
+                <div class="perl-card reveal">
+                    <h3>Familiar syntax</h3>
+                    <p>Sigils (<code>$</code>, <code>@</code>, <code>%</code>), regex (<code>=~</code>, <code>s///</code>), <code>foreach</code>, <code>map</code>, <code>grep</code>, <code>push</code>/<code>pop</code> — the idioms you know, with optional types for clarity.</p>
+                </div>
+                <div class="perl-card reveal">
+                    <h3>Compile Perl directly with perla</h3>
+                    <p>Rather keep writing Perl? <a href="perla/index.html"><strong>perla</strong></a> is a Perl 5 compiler built on Strada — Perl source straight to native code, no rewriting.</p>
+                </div>
+                <div class="perl-card reveal">
+                    <h3>Up to 95× faster</h3>
+                    <p>No interpreter dispatch loop, no symbol-table lookups, no bytecode overhead. Function calls compile to a single <code>call</code>; integer math allocates nothing.</p>
+                </div>
+                <div class="perl-card reveal">
+                    <h3>Single-binary deployment</h3>
+                    <p>Compile once, ship a standalone native executable. No language runtime required on the target machine.</p>
+                </div>
+            </div>
+
+            <p class="cta-line reveal">Coming from Perl? <a href="docs/perl-integration.html">See the Perl integration guide →</a></p>
+        </div>
+    </section>
+
+    <!-- ================= BENCHMARKS ================= -->
+    <section id="benchmarks" class="bench-section">
+        <div class="wrap">
+            <div class="section-head center reveal">
+                <div class="eyebrow">// benchmarks</div>
+                <h2>Faster than every language we tested.</h2>
+                <p>Strada compiles to native machine code via GCC. Here's how it stacks up against Perl 5.38.</p>
+            </div>
+
+            <div class="bench-layout">
+                <div class="bench-bars reveal">
+                    <div class="bench-bar-row">
+                        <span class="bench-label">Compute</span>
+                        <div class="bench-track"><div class="bench-fill" style="width:100%"><span class="bench-value">95× faster</span></div></div>
+                    </div>
+                    <div class="bench-bar-row">
+                        <span class="bench-label">Functions</span>
+                        <div class="bench-track"><div class="bench-fill" style="width:86%"><span class="bench-value">82× faster</span></div></div>
+                    </div>
+                    <div class="bench-bar-row">
+                        <span class="bench-label">OOP</span>
+                        <div class="bench-track"><div class="bench-fill" style="width:34%"><span class="bench-value">30× faster</span></div></div>
+                    </div>
+                    <div class="bench-bar-row">
+                        <span class="bench-label">Array/Hash</span>
+                        <div class="bench-track"><div class="bench-fill" style="width:16%"><span class="bench-value">6.9× faster</span></div></div>
+                    </div>
+                    <div class="bench-bar-row">
+                        <span class="bench-label">Strings</span>
+                        <div class="bench-track"><div class="bench-fill" style="width:12%"><span class="bench-value">2.5× faster</span></div></div>
+                    </div>
+                </div>
+
+                <div class="bench-callout reveal">
+                    <div class="bench-callout-number gradient-text">95×</div>
+                    <div class="bench-callout-text">faster than Perl</div>
+                    <div class="bench-callout-detail">on compute benchmarks</div>
+                </div>
+            </div>
+
+            <p class="bench-footer reveal">Benchmarked against Perl 5.38, Python 3.12, Ruby 3.2, Node.js 24, and PHP 8.3. Strada beats every language across every benchmark. <a href="docs/benchmarks.html">See all benchmarks</a> or <a href="https://github.com/strada-lang/strada-lang/tree/main/benchmarks">run them yourself</a>.</p>
+        </div>
+    </section>
+
+    <!-- ================= TYPE SYSTEM ================= -->
+    <section id="types">
+        <div class="wrap">
+            <div class="section-head center reveal">
+                <div class="eyebrow">// type system</div>
+                <h2>Optional types, Perl-style sigils.</h2>
+                <p>Annotate when you want the clarity. Omit them when you want to move fast.</p>
+            </div>
+
+            <div class="types-grid reveal">
+                <div class="type-card"><h4>int</h4><p>64-bit integers (tagged, zero alloc)</p></div>
+                <div class="type-card"><h4>num</h4><p>Floating-point numbers</p></div>
+                <div class="type-card"><h4>str</h4><p>UTF-8 strings</p></div>
+                <div class="type-card"><h4>array</h4><p>Dynamic arrays</p></div>
+                <div class="type-card"><h4>hash</h4><p>Key-value maps</p></div>
+                <div class="type-card"><h4>scalar</h4><p>Generic type</p></div>
+                <div class="type-card sig"><h4>$var</h4><p>Scalar sigil</p></div>
+                <div class="type-card sig"><h4>@arr</h4><p>Array sigil</p></div>
+                <div class="type-card sig"><h4>%hash</h4><p>Hash sigil</p></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= EXAMPLES ================= -->
+    <section id="examples">
+        <div class="wrap">
+            <div class="section-head center reveal">
+                <div class="eyebrow">// code examples</div>
+                <h2>See Strada in action.</h2>
+                <p>Real syntax, real programs — from hello world to a web server.</p>
+            </div>
+
+            <div class="examples-grid">
+                <div class="example reveal">
+                    <div class="example-header">Hello World</div>
+                    <pre><span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
+    <span class="func">say</span>(<span class="string">"Hello, World!"</span>);
+    <span class="keyword">return</span> <span class="number">0</span>;
+}</pre>
+                </div>
+
+                <div class="example reveal">
+                    <div class="example-header">Variables &amp; Types</div>
+                    <pre><span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$count</span> = <span class="number">42</span>;
+<span class="keyword">my</span> <span class="type">num</span> <span class="sigil">$price</span> = <span class="number">19.99</span>;
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$name</span> = <span class="string">"Strada"</span>;
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@items</span> = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>];
+<span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%config</span> = {
+    <span class="string">"host"</span> => <span class="string">"localhost"</span>,
+    <span class="string">"port"</span> => <span class="number">8080</span>
+};</pre>
+                </div>
+
+                <div class="example reveal">
+                    <div class="example-header">Functions</div>
+                    <pre><span class="keyword">func</span> <span class="func">factorial</span>(<span class="type">int</span> <span class="sigil">$n</span>) <span class="type">int</span> {
+    <span class="keyword">if</span> (<span class="sigil">$n</span> <= <span class="number">1</span>) {
+        <span class="keyword">return</span> <span class="number">1</span>;
+    }
+    <span class="keyword">return</span> <span class="sigil">$n</span> * <span class="func">factorial</span>(<span class="sigil">$n</span> - <span class="number">1</span>);
+}
+
+<span class="func">say</span>(<span class="func">factorial</span>(<span class="number">10</span>)); <span class="comment"># 3628800</span></pre>
+                </div>
+
+                <div class="example reveal">
+                    <div class="example-header">Variadic Functions</div>
+                    <pre><span class="comment"># Accept variable number of args</span>
+<span class="keyword">func</span> <span class="func">sum</span>(<span class="type">int</span> ...<span class="sigil">@nums</span>) <span class="type">int</span> {
+    <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$total</span> = <span class="number">0</span>;
+    <span class="keyword">foreach</span> <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$n</span> (<span class="sigil">@nums</span>) {
+        <span class="sigil">$total</span> = <span class="sigil">$total</span> + <span class="sigil">$n</span>;
+    }
+    <span class="keyword">return</span> <span class="sigil">$total</span>;
+}
+
+<span class="func">sum</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>);   <span class="comment"># 15</span>
+
+<span class="comment"># Spread operator unpacks arrays</span>
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@vals</span> = [<span class="number">10</span>, <span class="number">20</span>, <span class="number">30</span>];
+<span class="func">sum</span>(...<span class="sigil">@vals</span>);            <span class="comment"># 60</span>
+<span class="func">sum</span>(<span class="number">1</span>, ...<span class="sigil">@vals</span>, <span class="number">99</span>);    <span class="comment"># 160</span></pre>
+                </div>
+
+                <div class="example reveal">
+                    <div class="example-header">Moose-Style OOP</div>
+                    <pre><span class="keyword">package</span> <span class="type">Animal</span>;
+<span class="keyword">has</span> ro <span class="type">str</span> <span class="sigil">$species</span> (required);
+<span class="keyword">has</span> rw <span class="type">int</span> <span class="sigil">$energy</span> = <span class="number">100</span>;
+
+<span class="keyword">package</span> <span class="type">Dog</span>;
+<span class="keyword">extends</span> <span class="type">Animal</span>;
+<span class="keyword">has</span> ro <span class="type">str</span> <span class="sigil">$name</span> (required);
+
+<span class="keyword">before</span> <span class="string">"bark"</span> <span class="keyword">func</span>(<span class="type">scalar</span> <span class="sigil">$self</span>) <span class="type">void</span> {
+    <span class="func">say</span>(<span class="string">"[get ready]"</span>);
+}
+<span class="keyword">func</span> <span class="func">bark</span>(<span class="type">scalar</span> <span class="sigil">$self</span>) <span class="type">void</span> {
+    <span class="func">say</span>(<span class="sigil">$self</span>-><span class="func">name</span>() . <span class="string">" barks!"</span>);
+}
+
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$d</span> = <span class="type">Dog</span>::<span class="func">new</span>(<span class="string">"name"</span>, <span class="string">"Rex"</span>,
+    <span class="string">"species"</span>, <span class="string">"dog"</span>);
+<span class="sigil">$d</span>-><span class="func">bark</span>();  <span class="comment"># [get ready] / Rex barks!</span></pre>
+                </div>
+
+                <div class="example reveal">
+                    <div class="example-header">Closures</div>
+                    <pre><span class="keyword">func</span> <span class="func">make_counter</span>() <span class="type">scalar</span> {
+    <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$count</span> = <span class="number">0</span>;
+    <span class="keyword">return</span> <span class="keyword">func</span> () {
+        <span class="sigil">$count</span>++;
+        <span class="keyword">return</span> <span class="sigil">$count</span>;
+    };
+}
+
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$counter</span> = <span class="func">make_counter</span>();
+<span class="func">say</span>(<span class="sigil">$counter</span>->());  <span class="comment"># 1</span>
+<span class="func">say</span>(<span class="sigil">$counter</span>->());  <span class="comment"># 2</span></pre>
+                </div>
+
+                <div class="example reveal">
+                    <div class="example-header">Exception Handling</div>
+                    <pre><span class="keyword">func</span> <span class="func">divide</span>(<span class="type">int</span> <span class="sigil">$a</span>, <span class="type">int</span> <span class="sigil">$b</span>) <span class="type">int</span> {
+    <span class="keyword">if</span> (<span class="sigil">$b</span> == <span class="number">0</span>) {
+        <span class="keyword">throw</span> <span class="string">"Division by zero"</span>;
+    }
+    <span class="keyword">return</span> <span class="sigil">$a</span> / <span class="sigil">$b</span>;
+}
+
+<span class="keyword">try</span> {
+    <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$result</span> = <span class="func">divide</span>(<span class="number">10</span>, <span class="number">0</span>);
+} <span class="keyword">catch</span> (<span class="sigil">$e</span>) {
+    <span class="func">say</span>(<span class="string">"Error: "</span> . <span class="sigil">$e</span>);
+}</pre>
+                </div>
+
+                <div class="example reveal">
+                    <div class="example-header">Web Server (Cannoli)</div>
+                    <pre><span class="keyword">func</span> <span class="func">handle</span>(<span class="type">scalar</span> <span class="sigil">$c</span>) <span class="type">hash</span> {
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$path</span> = <span class="sigil">$c</span>-><span class="func">path</span>();
+
+    <span class="keyword">if</span> (<span class="sigil">$path</span> eq <span class="string">"/"</span>) {
+        <span class="keyword">return</span> <span class="sigil">$c</span>-><span class="func">json</span>({
+            <span class="string">"message"</span> => <span class="string">"Welcome to Strada!"</span>
+        });
+    }
+
+    <span class="keyword">return</span> <span class="sigil">$c</span>-><span class="func">not_found</span>();
+}</pre>
+                </div>
+
+                <div class="example reveal">
+                    <div class="example-header">Command-Line Arguments</div>
+                    <pre><span class="keyword">func</span> <span class="func">main</span>(<span class="type">int</span> <span class="sigil">$argc</span>, <span class="type">array</span> <span class="sigil">@argv</span>) <span class="type">int</span> {
+    <span class="keyword">if</span> (<span class="sigil">$argc</span> < <span class="number">2</span>) {
+        <span class="func">say</span>(<span class="string">"Usage: "</span> . <span class="sigil">$argv</span>[<span class="number">0</span>] . <span class="string">" &lt;name&gt;"</span>);
+        <span class="keyword">return</span> <span class="number">1</span>;
+    }
+    <span class="func">say</span>(<span class="string">"Hello, "</span> . <span class="sigil">$argv</span>[<span class="number">1</span>] . <span class="string">"!"</span>);
+    <span class="keyword">return</span> <span class="number">0</span>;
+}</pre>
+                </div>
+
+                <div class="example reveal">
+                    <div class="example-header">C Interop (__C__ Blocks)</div>
+                    <pre><span class="keyword">__C__</span> {
+    <span class="comment">#include &lt;math.h&gt;</span>
+}
+
+<span class="keyword">func</span> <span class="func">fast_sqrt</span>(<span class="type">num</span> <span class="sigil">$x</span>) <span class="type">num</span> {
+    <span class="keyword">__C__</span> {
+        <span class="keyword">double</span> val = strada_to_num(x);
+        <span class="keyword">return</span> strada_new_num(sqrt(val));
+    }
+}
+
+<span class="func">say</span>(<span class="func">fast_sqrt</span>(<span class="number">16.0</span>)); <span class="comment"># 4.0</span></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= PIPELINE ================= -->
+    <section id="architecture">
+        <div class="wrap">
+            <div class="section-head center reveal">
+                <div class="eyebrow">// compilation pipeline</div>
+                <h2>Source to native, in three steps.</h2>
+            </div>
+
+            <div class="pipeline reveal">
+                <div class="pipeline-step">
+                    <div class="icon">📝</div>
+                    <strong>Strada Source</strong>
+                    <div class="sub">.strada</div>
+                </div>
+                <div class="pipeline-arrow">→</div>
+                <div class="pipeline-step">
+                    <div class="icon">⚙️</div>
+                    <strong>C Code</strong>
+                    <div class="sub">.c</div>
+                </div>
+                <div class="pipeline-arrow">→</div>
+                <div class="pipeline-step">
+                    <div class="icon">🚀</div>
+                    <strong>Native Binary</strong>
+                    <div class="sub">executable</div>
+                </div>
+            </div>
+
+            <div class="pipeline-note reveal">
+                <p>The self-hosting compiler is written in Strada and compiles to portable C, which GCC turns into fast native executables with no runtime dependencies beyond libc.</p>
+                <p style="margin-top:1rem">For interactive use, <a href="docs/repl.html"><code>strada --repl</code></a> opens a JIT-backed REPL (tcc or gcc + <code>dlopen</code>) supporting the full language. A standalone <a href="docs/interpreter.html">tree-walking / bytecode VM interpreter</a> is also available as an opt-in build for embedding.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= GETTING STARTED ================= -->
+    <section id="getting-started">
+        <div class="wrap">
+            <div class="section-head reveal">
+                <div class="eyebrow">// getting started</div>
+                <h2>Up and running in minutes.</h2>
+            </div>
+
+            <div class="steps">
+                <div class="step reveal">
+                    <div class="step-number">1</div>
+                    <div class="step-content">
+                        <h3>Clone the repository</h3>
+                        <p>Get the source code from GitHub.</p>
+                        <code>git clone https://github.com/strada-lang/strada-lang.git && cd strada-lang</code>
+                    </div>
+                </div>
+                <div class="step reveal">
+                    <div class="step-number">2</div>
+                    <div class="step-content">
+                        <h3>Configure and build</h3>
+                        <p>Detect dependencies and build the compiler.</p>
+                        <code>./configure && make</code>
+                    </div>
+                </div>
+                <div class="step reveal">
+                    <div class="step-number">3</div>
+                    <div class="step-content">
+                        <h3>Write your first program</h3>
+                        <p>Create hello.strada with your favorite editor.</p>
+                        <code>func main() int {
+    say("Hello, Strada!");
+    return 0;
+}</code>
+                    </div>
+                </div>
+                <div class="step reveal">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h3>Compile and run</h3>
+                        <p>Use the Strada compiler to build and execute.</p>
+                        <code>./strada -r hello.strada</code>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= CTA ================= -->
+    <section class="cta-banner">
+        <div class="wrap">
+            <div class="cta-box reveal">
+                <h2>Ready to write Perl that flies?</h2>
+                <p>Clone the repo, build the compiler, and ship your first native binary in minutes.</p>
+                <div class="hero-cta">
+                    <a href="docs/quickstart.html" class="btn btn-primary">Get Started →</a>
+                    <a href="https://github.com/strada-lang/strada-lang" class="btn btn-ghost">Star on GitHub ★</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ================= FOOTER ================= -->
+    <footer>
+        <div class="footer-inner">
+            <div class="footer-top">
+                <a href="#" class="logo"><span class="mark">S</span>Strada<span>Lang</span></a>
+                <div class="footer-links">
+                    <a href="https://github.com/strada-lang/strada-lang">GitHub</a>
+                    <a href="docs/index.html">Documentation</a>
+                    <a href="docs/quickstart.html">QuickStart</a>
+                    <a href="docs/repl.html">REPL</a>
+                    <a href="docs/interpreter.html">Interpreter</a>
+                    <a href="docs/reference.html">Reference</a>
+                    <a href="docs/benchmarks.html">Benchmarks</a>
+                    <a href="docs/cannoli.html">Cannoli</a>
+                    <a href="perla/index.html">perla</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p><strong>Strada</strong> — a strongly-typed language inspired by Perl that compiles to native code via C. Open source under the <a href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html">GNU General Public License v2</a>.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Nav border on scroll
+        const nav = document.getElementById('nav');
+        const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 20);
+        onScroll();
+        window.addEventListener('scroll', onScroll, { passive: true });
+
+        // Reveal on scroll
+        const io = new IntersectionObserver((entries) => {
+            entries.forEach((e, i) => {
+                if (e.isIntersecting) {
+                    e.target.style.transitionDelay = Math.min(i * 40, 160) + 'ms';
+                    e.target.classList.add('in');
+                    io.unobserve(e.target);
+                }
+            });
+        }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+        document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+    </script>
+</body>
+</html>

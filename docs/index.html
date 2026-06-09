@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Documentation - Strada</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <a href="../index.html" class="logo">Strada<span>Lang</span></a>
+        <ul>
+            <li><a href="quickstart.html">QuickStart</a></li>
+            <li><a href="index.html">Docs</a></li>
+            <li><a href="reference.html">Reference</a></li>
+            <li><a href="../perla/index.html">perla</a></li>
+            <li><a href="https://github.com/strada-lang/strada-lang">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h3>Getting Started</h3>
+            <ul>
+                <li><a href="quickstart.html">QuickStart</a></li>
+                <li><a href="index.html" class="active">Documentation</a></li>
+                <li><a href="repl.html">REPL & Scripting</a></li>
+                <li><a href="interpreter.html">Interpreter</a></li>
+            </ul>
+            <h3>Language Guide</h3>
+            <ul>
+                <li><a href="basics.html">Language Basics</a></li>
+                <li><a href="types.html">Types & Variables</a></li>
+                <li><a href="functions.html">Functions</a></li>
+                <li><a href="control-flow.html">Control Flow</a></li>
+                <li><a href="oop.html">Object-Oriented Programming</a></li>
+                <li><a href="regex.html">Regular Expressions</a></li>
+            </ul>
+            <h3>Advanced</h3>
+            <ul>
+                <li><a href="memory.html">Memory Management</a></li>
+                <li><a href="debugging.html">Debugging</a></li>
+                <li><a href="async.html">Async/Await</a></li>
+                <li><a href="c-interop.html">C Interoperability</a></li>
+                <li><a href="libraries.html">Libraries Guide</a></li>
+                <li><a href="perl-integration.html">Perl Integration</a></li>
+            </ul>
+            <h3>Reference</h3>
+            <ul>
+                <li><a href="reference.html">Reference</a></li>
+                <li><a href="builtin-functions.html">Built-in Functions</a></li>
+                <li><a href="benchmarks.html">Benchmarks</a></li>
+                <li><a href="cannoli.html">Cannoli Web Framework</a></li>
+                <li><a href="forma.html">Forma Template Engine</a></li>
+                <li><a href="dbi.html">DBI Database Interface</a></li>
+                <li><a href="nesso.html">Nesso ORM</a></li>
+                <li><a href="stradadoc.html">Documentation Tools</a></li>
+            </ul>
+        </aside>
+
+        <main class="content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a> / Documentation
+            </div>
+
+            <h1>Strada <span>Documentation</span></h1>
+            <p class="subtitle">Everything you need to master Strada programming.</p>
+
+            <h2>Getting Started</h2>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h4>QuickStart Guide</h4>
+                    <p>Install Strada and write your first program in 5 minutes.</p>
+                    <p><a href="quickstart.html">Get started &rarr;</a></p>
+                </div>
+                <div class="card">
+                    <h4>REPL & Scripting</h4>
+                    <p>Interactive shell for experimentation and quick scripts without compilation.</p>
+                    <p><a href="repl.html">Try the REPL &rarr;</a></p>
+                </div>
+                <div class="card">
+                    <h4>Language Basics</h4>
+                    <p>Learn syntax, operators, and fundamental concepts.</p>
+                    <p><a href="basics.html">Learn basics &rarr;</a></p>
+                </div>
+                <div class="card">
+                    <h4>Interpreter</h4>
+                    <p>Tree-walking interpreter for scripts and embedded eval &mdash; no C compiler needed.</p>
+                    <p><a href="interpreter.html">Learn more &rarr;</a></p>
+                </div>
+            </div>
+
+            <h2>Language Guide</h2>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h4>Types & Variables</h4>
+                    <p>Understand Strada's type system: int, num, str, array, hash, and sigils.</p>
+                    <p><a href="types.html">Read more &rarr;</a></p>
+                </div>
+                <div class="card">
+                    <h4>Functions</h4>
+                    <p>Define functions, use closures, and work with references.</p>
+                    <p><a href="functions.html">Read more &rarr;</a></p>
+                </div>
+                <div class="card">
+                    <h4>Control Flow</h4>
+                    <p>Conditionals (if/unless), loops (while/until/for/foreach), statement modifiers, redo, map/grep/sort, and exception handling.</p>
+                    <p><a href="control-flow.html">Read more &rarr;</a></p>
+                </div>
+                <div class="card">
+                    <h4>Object-Oriented Programming</h4>
+                    <p>Classes, objects, methods, and inheritance with packages.</p>
+                    <p><a href="oop.html">Read more &rarr;</a></p>
+                </div>
+                <div class="card">
+                    <h4>Regular Expressions</h4>
+                    <p>Pattern matching, substitution, captures, and text processing with regex.</p>
+                    <p><a href="regex.html">Read more &rarr;</a></p>
+                </div>
+            </div>
+
+            <h2>Advanced</h2>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h4>Memory Management</h4>
+                    <p>Automatic reference counting, object destruction, and performance optimization.</p>
+                    <p><a href="memory.html">Learn more &rarr;</a></p>
+                </div>
+                <div class="card">
+                    <h4>Debugging</h4>
+                    <p>Inspect variables with dumper, trace call stacks, profile function performance, and analyze line-level hotspots with <code>--full-profile</code>.</p>
+                    <p><a href="debugging.html">Learn more &rarr;</a></p>
+                </div>
+                <div class="card">
+                    <h4>Async/Await</h4>
+                    <p>Thread pool concurrency with async functions, futures, all(), race(), timeouts, and cancellation.</p>
+                    <p><a href="async.html">Learn more &rarr;</a></p>
+                </div>
+                <div class="card">
+                    <h4>C Interoperability</h4>
+                    <p>Embed C code with __C__ blocks, create shared libraries, and interface with C APIs.</p>
+                    <p><a href="c-interop.html">Learn more &rarr;</a></p>
+                </div>
+                <div class="card">
+                    <h4>Libraries Guide</h4>
+                    <p>Create and use reusable libraries with import_lib (dynamic) and import_object (static).</p>
+                    <p><a href="libraries.html">Learn more &rarr;</a></p>
+                </div>
+                <div class="card">
+                    <h4>Perl Integration</h4>
+                    <p>Embed Perl in Strada programs or call Strada from Perl. Access CPAN modules.</p>
+                    <p><a href="perl-integration.html">Learn more &rarr;</a></p>
+                </div>
+            </div>
+
+            <h2>Reference</h2>
+
+            <div class="card-grid">
+                <div class="card">
+                    <h4>Reference (curated)</h4>
+                    <p>Tour of the most-used built-ins with example snippets.</p>
+                    <p><a href="reference.html">View reference &rarr;</a></p>
+                </div>
+                <div class="card">
+                    <h4>Built-in Functions (complete)</h4>
+                    <p>Alphabetical list of every <code>math::</code>, <code>async::</code>, <code>c::</code>, and <code>sys::/core::</code> function &mdash; over 350.</p>
+                    <p><a href="builtin-functions.html">Full listing &rarr;</a></p>
+                </div>
+                <div class="card">
+                    <h4>Cannoli Web Framework</h4>
+                    <p>Build web applications with routing, file uploads, SSL, and more.</p>
+                    <p><a href="cannoli.html">Read docs &rarr;</a></p>
+                </div>
+                <div class="card">
+                    <h4>Documentation Tools</h4>
+                    <p>Document your code with POD and generate HTML with stradadoc.</p>
+                    <p><a href="stradadoc.html">Read docs &rarr;</a></p>
+                </div>
+            </div>
+
+            <h2>Compilation</h2>
+
+            <p>Strada compiles to C, which is then compiled to native executables:</p>
+
+            <pre><code><span class="comment"># One-step compilation (recommended)</span>
+./strada program.strada           <span class="comment"># Creates ./program executable</span>
+./strada -r program.strada        <span class="comment"># Compile and run</span>
+./strada -c program.strada        <span class="comment"># Keep generated .c file</span>
+./strada -g program.strada        <span class="comment"># Include debug symbols</span>
+./strada --shared lib.strada      <span class="comment"># Create shared library (.so)</span>
+
+<span class="comment"># Two-step compilation (manual)</span>
+./stradac input.strada output.c
+gcc -o output output.c runtime/strada_runtime.c -Iruntime -ldl -lm
+./output</code></pre>
+
+            <h2>Project Structure</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Directory</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>compiler/</code></td>
+                        <td>Self-hosting compiler source (Lexer, Parser, AST, CodeGen)</td>
+                    </tr>
+                    <tr>
+                        <td><code>runtime/</code></td>
+                        <td>C runtime library (StradaValue, reference counting, built-ins)</td>
+                    </tr>
+                    <tr>
+                        <td><code>bootstrap/</code></td>
+                        <td>Bootstrap compiler in C (used only to build self-hosting compiler)</td>
+                    </tr>
+                    <tr>
+                        <td><code>interpreter/</code></td>
+                        <td>Tree-walking interpreter driver (REPL and file execution)</td>
+                    </tr>
+                    <tr>
+                        <td><code>examples/</code></td>
+                        <td>Example programs demonstrating language features</td>
+                    </tr>
+                    <tr>
+                        <td><code>cannoli/</code></td>
+                        <td>Web framework source and examples</td>
+                    </tr>
+                    <tr>
+                        <td><code>lib/</code></td>
+                        <td>Standard library modules (ssl, etc.)</td>
+                    </tr>
+                    <tr>
+                        <td><code>t/</code></td>
+                        <td>Test suite (154 tests)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Testing</h2>
+
+            <pre><code><span class="comment"># Run all tests</span>
+make test-suite
+
+<span class="comment"># Verbose output</span>
+make test-suite V=1
+
+<span class="comment"># TAP format for CI/CD</span>
+make test-suite TAP=1
+
+<span class="comment"># Run specific tests</span>
+./t/run_tests.sh string     <span class="comment"># Tests matching "string"</span>
+./t/run_tests.sh -v oop     <span class="comment"># Verbose OOP tests</span></code></pre>
+
+        </main>
+    </div>
+
+    <footer>
+        <p><a href="../index.html">Strada</a> - A strongly-typed language inspired by Perl</p>
+        <p style="margin-top: 0.5rem; font-size: 0.85rem;">Licensed under <a href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html">GPLv2</a> | <a href="https://github.com/strada-lang/strada-lang">GitHub</a></p>
+    </footer>
+</body>
+</html>

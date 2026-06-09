@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REPL &amp; Scripting - Strada</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <a href="../index.html" class="logo">Strada<span>Lang</span></a>
+        <ul>
+            <li><a href="quickstart.html">QuickStart</a></li>
+            <li><a href="index.html">Docs</a></li>
+            <li><a href="reference.html">Reference</a></li>
+            <li><a href="https://github.com/strada-lang/strada-lang">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h3>Getting Started</h3>
+            <ul>
+                <li><a href="quickstart.html">QuickStart</a></li>
+                <li><a href="index.html">Documentation</a></li>
+                <li><a href="repl.html" class="active">REPL & Scripting</a></li>
+                <li><a href="interpreter.html">Interpreter</a></li>
+            </ul>
+            <h3>Language Guide</h3>
+            <ul>
+                <li><a href="basics.html">Language Basics</a></li>
+                <li><a href="types.html">Types & Variables</a></li>
+                <li><a href="functions.html">Functions</a></li>
+                <li><a href="control-flow.html">Control Flow</a></li>
+                <li><a href="oop.html">Object-Oriented Programming</a></li>
+                <li><a href="regex.html">Regular Expressions</a></li>
+            </ul>
+            <h3>Advanced</h3>
+            <ul>
+                <li><a href="memory.html">Memory Management</a></li>
+                <li><a href="debugging.html">Debugging</a></li>
+                <li><a href="async.html">Async/Await</a></li>
+                <li><a href="c-interop.html">C Interoperability</a></li>
+                <li><a href="libraries.html">Libraries Guide</a></li>
+                <li><a href="perl-integration.html">Perl Integration</a></li>
+            </ul>
+            <h3>Reference</h3>
+            <ul>
+                <li><a href="reference.html">Reference</a></li>
+                <li><a href="builtin-functions.html">Built-in Functions</a></li>
+                <li><a href="benchmarks.html">Benchmarks</a></li>
+                <li><a href="cannoli.html">Cannoli Web Framework</a></li>
+                <li><a href="forma.html">Forma Template Engine</a></li>
+                <li><a href="dbi.html">DBI Database Interface</a></li>
+                <li><a href="nesso.html">Nesso ORM</a></li>
+                <li><a href="stradadoc.html">Documentation Tools</a></li>
+            </ul>
+        </aside>
+
+        <main class="content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a> / <a href="index.html">Documentation</a> / REPL &amp; Scripting
+            </div>
+
+            <h1>Strada <span>REPL &amp; Scripting</span></h1>
+            <p class="subtitle">Interactive shell and script execution via <code>strada-jit</code> — real native compilation (tcc or gcc + dlopen). Supports the full Strada language including closures, try/catch, OOP, <code>const</code>, and <code>enum</code>. tcc is auto-detected for snappy per-line latency; gcc is the fallback and the default for <code>--script</code>.</p>
+
+            <h2>Quick Start</h2>
+
+            <pre><code><span class="comment"># Interactive REPL (auto-detects tcc when installed; falls back to gcc)</span>
+strada --repl
+
+<span class="comment"># Force a specific backend</span>
+strada --repl --compiler=gcc
+strada --repl --compiler=tcc
+
+<span class="comment"># Run a script file (whole-file mode, gcc by default)</span>
+strada --script program.strada
+
+<span class="comment"># Same, but use tcc for the script compile (faster for small scripts)</span>
+strada --script program.strada --compiler=tcc
+
+<span class="comment"># Fall back to REPL-style line-by-line evaluation for a script</span>
+strada --script program.strada --chunked</code></pre>
+
+            <div class="info-box">
+                <strong>How <code>--script</code> works:</strong> by default it's <em>whole-file mode</em> — the entire file is handed to <code>stradac</code> once and the resulting binary is exec'd. Much faster than feeding the file line-by-line through the REPL eval path (each line otherwise pays a full gcc invocation). <code>--chunked</code> brings back the old line-by-line behaviour for free-form scripts without a <code>main()</code>.
+            </div>
+
+            <div class="info-box">
+                <strong>Older interpreter (opt-in):</strong> a bytecode VM / tree-walking interpreter still exists at <code>interpreter/strada-interp</code> for embedding and experiments. It's no longer built by default — run <code>make interpreter</code> to opt in. The REPL and scripting flow above does not depend on it.
+            </div>
+
+            <h2>Interactive REPL</h2>
+
+            <p>The REPL supports readline with line editing, history, and arrow keys. Each balanced chunk you enter is compiled to a small <code>.so</code> via tcc (or gcc) and <code>dlopen</code>'d — so the REPL runs real, fully-typed Strada with closures, try/catch, OOP, the lot.</p>
+
+            <pre><code>$ strada --repl
+Strada JIT v0.3 (using tcc)
+Type .help for help, .quit to exit.
+
+strada> <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$x</span> = <span class="number">42</span>;
+strada> <span class="sigil">$x</span> * <span class="number">2</span>
+<span class="number">84</span>
+strada> <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@nums</span> = (<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>);
+strada> <span class="func">push</span>(<span class="sigil">@nums</span>, <span class="number">4</span>);
+strada> <span class="func">say</span>(<span class="func">join</span>(<span class="string">", "</span>, <span class="sigil">@nums</span>))
+<span class="number">1, 2, 3, 4</span></code></pre>
+
+            <h3>Multi-line Input</h3>
+
+            <p>The REPL automatically detects incomplete input (unbalanced braces, parentheses, or brackets) and prompts for continuation:</p>
+
+            <pre><code>strada> <span class="keyword">func</span> <span class="func">greet</span>(<span class="type">str</span> <span class="sigil">$name</span>) <span class="type">void</span> {
+...         <span class="func">say</span>(<span class="string">"Hello, "</span> . <span class="sigil">$name</span> . <span class="string">"!"</span>);
+...     }
+strada> <span class="func">greet</span>(<span class="string">"World"</span>)
+Hello, World!</code></pre>
+
+            <h3>REPL Commands</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Command</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>.help</code></td>
+                        <td>Show help message</td>
+                    </tr>
+                    <tr>
+                        <td><code>.vars</code></td>
+                        <td>List variables in scope with current values</td>
+                    </tr>
+                    <tr>
+                        <td><code>.funcs</code></td>
+                        <td>List defined functions with parameter counts</td>
+                    </tr>
+                    <tr>
+                        <td><code>.load FILE</code></td>
+                        <td>Load and execute code from a file (registers functions, skips main)</td>
+                    </tr>
+                    <tr>
+                        <td><code>.clear</code></td>
+                        <td>Reset all state (variables, functions, enums)</td>
+                    </tr>
+                    <tr>
+                        <td><code>.quit</code></td>
+                        <td>Exit the REPL</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h3>OOP in the REPL</h3>
+
+            <p>Packages, inheritance, and method calls all work interactively:</p>
+
+            <pre><code>strada> <span class="keyword">package</span> Dog;
+strada> <span class="keyword">has</span> ro <span class="type">str</span> <span class="sigil">$name</span> (required);
+strada> <span class="keyword">func</span> <span class="func">bark</span>(<span class="type">scalar</span> <span class="sigil">$self</span>) <span class="type">void</span> { <span class="func">say</span>(<span class="sigil">$self</span>-><span class="func">name</span>() . <span class="string">" says woof!"</span>); }
+
+strada> <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$d</span> = Dog::new(<span class="string">"name"</span>, <span class="string">"Rex"</span>);
+strada> <span class="sigil">$d</span>-><span class="func">bark</span>()
+Rex says woof!</code></pre>
+
+            <h2>Script Execution</h2>
+
+            <p>Run Strada programs without writing a separate build step. <code>strada --script</code> compiles the whole file once with gcc and exec's the resulting binary — same level of optimisation as a regular <code>strada</code> build, but you don't have to manage the executable:</p>
+
+            <pre><code><span class="comment"># Compile + run a script (whole-file mode; gcc by default)</span>
+strada --script program.strada
+
+<span class="comment"># With library search paths</span>
+strada --script -L lib program.strada
+
+<span class="comment"># Pick a different C compiler</span>
+strada --script program.strada --compiler=tcc
+
+<span class="comment"># Line-by-line REPL semantics for free-form scripts without a main()</span>
+strada --script program.strada --chunked</code></pre>
+
+            <h3>Shebang Scripts</h3>
+
+            <p>Make a Strada source file directly executable:</p>
+
+            <pre><code><span class="comment">#!/usr/bin/env strada</span>
+<span class="comment"># --script is implied when the file is given as the first arg</span>
+
+<span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
+    <span class="func">say</span>(<span class="string">"Hello from script!"</span>);
+    <span class="keyword">return</span> <span class="number">0</span>;
+}</code></pre>
+
+            <pre><code>chmod +x myscript.strada
+./myscript.strada</code></pre>
+
+            <h3>--script (whole-file) vs --script --chunked vs ahead-of-time compile</h3>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th><code>--script</code> (default)</th>
+                        <th><code>--script --chunked</code></th>
+                        <th>Ahead-of-time (<code>strada foo.strada</code>)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>What runs</td>
+                        <td>One full <code>stradac</code> + gcc, exec'd</td>
+                        <td>Each balanced chunk JIT-compiled via tcc/gcc and dlopen'd</td>
+                        <td>Same as <code>--script</code>, but you keep the binary</td>
+                    </tr>
+                    <tr>
+                        <td>Startup cost</td>
+                        <td>~1 sec gcc (or ~50 ms with <code>--compiler=tcc</code>)</td>
+                        <td>~50 ms per chunk with tcc; ~500 ms per chunk with gcc</td>
+                        <td>One-time at build; instant at runtime</td>
+                    </tr>
+                    <tr>
+                        <td>Execution speed</td>
+                        <td>Native code, fully optimised</td>
+                        <td>Native code per chunk; less inlining across chunks</td>
+                        <td>Native code, fully optimised</td>
+                    </tr>
+                    <tr>
+                        <td>Needs <code>main()</code>?</td>
+                        <td>Yes</td>
+                        <td>No — top-level statements run as written</td>
+                        <td>Yes</td>
+                    </tr>
+                    <tr>
+                        <td>Best for</td>
+                        <td>Scripts you run a few times</td>
+                        <td>REPL-style sequences, free-form scripts</td>
+                        <td>Production binaries</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Command-Line Options (strada --repl / --script)</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Option</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>--repl</code></td>
+                        <td>Start the interactive REPL (auto-detects tcc/gcc)</td>
+                    </tr>
+                    <tr>
+                        <td><code>--script FILE</code></td>
+                        <td>Compile and run <code>FILE</code> in whole-file mode (default: gcc)</td>
+                    </tr>
+                    <tr>
+                        <td><code>--compiler=tcc</code> / <code>=gcc</code></td>
+                        <td>Force a specific C compiler for the JIT/script path</td>
+                    </tr>
+                    <tr>
+                        <td><code>--chunked</code></td>
+                        <td>For <code>--script</code>: feed the file to the REPL eval path line-by-line instead of whole-file mode</td>
+                    </tr>
+                    <tr>
+                        <td><code>-L PATH</code></td>
+                        <td>Add library search path</td>
+                    </tr>
+                    <tr>
+                        <td><code>--help</code></td>
+                        <td>Show help message</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <h2>Embedded eval</h2>
+
+            <p>If you want to evaluate Strada strings from inside a Strada program, use the <code>Eval</code> library:</p>
+
+            <pre><code><span class="keyword">use</span> lib <span class="string">"lib"</span>;
+<span class="keyword">use</span> Eval;
+
+<span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
+    <span class="type">Strada::Interpreter</span>::<span class="func">init</span>();
+    <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$r</span> = <span class="type">Strada::Interpreter</span>::<span class="func">eval</span>(<span class="string">"2 + 2"</span>);
+    <span class="func">say</span>(<span class="sigil">$r</span>);  <span class="comment"># 4</span>
+    <span class="keyword">return</span> <span class="number">0</span>;
+}</code></pre>
+
+            <p>The default backend is the tree-walking interpreter, which is always available. Switch to the bytecode VM with <code>Strada::Interpreter::set_eval_backend("vm")</code> — note the VM requires the runtime to be built with <code>-DHAVE_VM</code> (only the standalone <code>strada-interp</code> binary defines it).</p>
+
+        </main>
+    </div>
+
+    <footer>
+        <p><a href="../index.html">Strada</a> - A strongly-typed language inspired by Perl</p>
+        <p style="margin-top: 0.5rem; font-size: 0.85rem;">Licensed under <a href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html">GPLv2</a> | <a href="https://github.com/strada-lang/strada-lang">GitHub</a></p>
+    </footer>
+</body>
+</html>
