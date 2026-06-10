@@ -449,6 +449,17 @@
     <span class="func">say</span>(<span class="string">"Unknown day"</span>);
 }</code></pre>
 
+            <h2>Value-Producing do Blocks</h2>
+
+            <p>A <code>do { }</code> block in expression position yields its last <em>expression</em> statement's value. Block-locals are cleaned up before the value is returned.</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$x</span> = <span class="keyword">do</span> {
+    <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$a</span> = <span class="number">40</span>;
+    <span class="sigil">$a</span> + <span class="number">2</span>;          <span class="comment"># the value</span>
+};</code></pre>
+
+            <p>Use a ternary for conditional values (an <code>if/else</code> tail is a statement, which yields undef); parenthesize a value-do at the start of a statement (bare <code>do {</code> parses as do/while).</p>
+
             <h2>Statement Modifiers</h2>
 
             <p>Perl-style postfix modifiers let you write concise one-liners:</p>
