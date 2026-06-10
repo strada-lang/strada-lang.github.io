@@ -314,6 +314,34 @@
     <span class="func">say</span>(<span class="string">"Caught outer: "</span> . <span class="sigil">$e</span>);
 }</code></pre>
 
+            <h3>Finally Blocks</h3>
+
+            <p>A <code>finally</code> block runs on <strong>every</strong> exit path: normal completion, after a catch, before an unmatched or re-thrown exception propagates (including when the catch body itself throws), and before <code>return</code>/<code>next</code>/<code>last</code> leave the construct. The return value is captured before the finally runs (Java-style). <code>try { } finally { }</code> without a catch is allowed.</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$fh</span> = <span class="func">core::open</span>(<span class="string">"data.txt"</span>, <span class="string">"r"</span>);
+<span class="keyword">try</span> {
+    <span class="func">process</span>(<span class="sigil">$fh</span>);
+} <span class="keyword">catch</span> (<span class="sigil">$e</span>) {
+    <span class="func">say</span>(<span class="string">"failed: "</span> . <span class="sigil">$e</span>);
+} finally {
+    <span class="func">core::close</span>(<span class="sigil">$fh</span>);   <span class="comment"># always runs</span>
+}</code></pre>
+
+            <h3>Error Chaining</h3>
+
+            <p><code>core::exception_trace()</code> returns the call stack captured at the most recent <code>throw</code> (readable inside the catch, plain thrown values included). The <code>Exception</code> module adds structured exceptions with cause chains:</p>
+
+            <pre><code><span class="keyword">use</span> Exception;
+
+<span class="keyword">try</span> {
+    <span class="keyword">try</span> { <span class="keyword">throw</span> <span class="func">Exception::new</span>(<span class="string">"disk full"</span>); }
+    <span class="keyword">catch</span> (Exception <span class="sigil">$inner</span>) {
+        <span class="keyword">throw</span> <span class="func">Exception::wrap</span>(<span class="string">"saving config failed"</span>, <span class="sigil">$inner</span>);
+    }
+} <span class="keyword">catch</span> (Exception <span class="sigil">$e</span>) {
+    <span class="func">say</span>(<span class="sigil">$e</span>-&gt;<span class="func">describe</span>());   <span class="comment"># whole chain with traces</span>
+}</code></pre>
+
             <h2>Goto and Labels</h2>
 
             <p>For exceptional control flow (use sparingly):</p>
