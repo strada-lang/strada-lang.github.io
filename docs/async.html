@@ -137,6 +137,26 @@
                         <td>Await with timeout (throws on timeout)</td>
                     </tr>
                     <tr>
+                        <td><code>async::spawn($fn)</code></td>
+                        <td>Run any closure as a pool future</td>
+                    </tr>
+                    <tr>
+                        <td><code>async::select(\@chs [, $ms])</code></td>
+                        <td>Block on multiple channels; returns [index, value] (−1 timeout, −2 all closed)</td>
+                    </tr>
+                    <tr>
+                        <td><code>async::sleep($ms)</code></td>
+                        <td>Cancellation-aware sleep (returns 0 when woken by cancel)</td>
+                    </tr>
+                    <tr>
+                        <td><code>async::cancelled()</code></td>
+                        <td>Has THIS task been asked to cancel? (cooperative loops)</td>
+                    </tr>
+                    <tr>
+                        <td><code>async::map($fn, \@items [, $n])</code></td>
+                        <td>Data-parallel map; ordered results; first error rethrows</td>
+                    </tr>
+                    <tr>
                         <td><code>async::cancel($f)</code></td>
                         <td>Request cancellation of a future</td>
                     </tr>
@@ -291,6 +311,32 @@
 
     <span class="keyword">return</span> <span class="number">0</span>;
 }</code></pre>
+
+            <h2>Structured Concurrency (Async::Scope)</h2>
+
+            <p>A scope (nursery) owns every task spawned inside it: <code>wait()</code> joins them all and returns results in spawn order, and a failure cancels the remaining siblings (their <code>async::sleep</code> calls wake early) before rethrowing the first error. No task outlives the scope.</p>
+
+            <pre><code><span class="keyword">use</span> Async::Scope;
+
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$scope</span> = <span class="func">Async::Scope::new</span>();
+<span class="sigil">$scope</span>-&gt;<span class="func">spawn</span>(<span class="keyword">fn</span> () <span class="type">scalar</span> { <span class="keyword">return</span> <span class="func">fetch</span>(<span class="string">"a"</span>); });
+<span class="sigil">$scope</span>-&gt;<span class="func">spawn</span>(<span class="keyword">fn</span> () <span class="type">scalar</span> { <span class="keyword">return</span> <span class="func">fetch</span>(<span class="string">"b"</span>); });
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@results</span> = <span class="sigil">$scope</span>-&gt;<span class="func">wait</span>();</code></pre>
+
+            <h2>Actors (Async::Actor)</h2>
+
+            <p>An actor is a pool task looping over a private inbox channel — messages are handled strictly in order, so actor state needs no locking. <code>tell</code> is fire-and-forget; <code>ask</code> blocks for the handler's return value; <code>stop</code> drains and joins.</p>
+
+            <pre><code><span class="keyword">use</span> Async::Actor;
+
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$counter</span> = <span class="func">Async::Actor::new</span>(<span class="keyword">fn</span> (<span class="type">scalar</span> <span class="sigil">$msg</span>, <span class="type">scalar</span> <span class="sigil">$st</span>) <span class="type">scalar</span> {
+    <span class="keyword">if</span> (<span class="sigil">$msg</span> <span class="keyword">eq</span> <span class="string">"inc"</span>) { <span class="sigil">$st</span>-&gt;{<span class="string">"n"</span>} = <span class="sigil">$st</span>-&gt;{<span class="string">"n"</span>} + <span class="number">1</span>; }
+    <span class="keyword">return</span> <span class="sigil">$st</span>-&gt;{<span class="string">"n"</span>};
+}, { n =&gt; <span class="number">0</span> });
+
+<span class="sigil">$counter</span>-&gt;<span class="func">tell</span>(<span class="string">"inc"</span>);              <span class="comment"># fire and forget</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$n</span> = <span class="sigil">$counter</span>-&gt;<span class="func">ask</span>(<span class="string">"inc"</span>);  <span class="comment"># round-trip</span>
+<span class="sigil">$counter</span>-&gt;<span class="func">stop</span>();</code></pre>
 
             <h2>Channels</h2>
 
