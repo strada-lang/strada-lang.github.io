@@ -366,6 +366,32 @@ mv MathLib.so lib/</code></pre>
 <span class="func">say</span>(<span class="sigil">$result</span>);  <span class="comment"># 42</span>
 <span class="func">core::dl_close</span>(<span class="sigil">$lib</span>);</code></pre>
 
+            <h2>C Callbacks (<code>c::callback</code>)</h2>
+
+            <p>The reverse direction: hand a <strong>Strada closure to C code expecting a function pointer</strong> — qsort comparators, libcurl write callbacks, GTK signal handlers. <code>c::callback($fn, "ret", "args")</code> mints a fresh C function pointer (a libffi trampoline) that unmarshals its C arguments, invokes your closure, and marshals the return value back.</p>
+
+            <pre><code><span class="comment"># Sort a C int64 array with a Strada comparator</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$buf</span> = <span class="func">c::alloc</span>(<span class="number">8</span> * <span class="number">4</span>);
+<span class="func">c::write_int64</span>(<span class="sigil">$buf</span>,      <span class="number">42</span>);
+<span class="func">c::write_int64</span>(<span class="sigil">$buf</span> + <span class="number">8</span>,   <span class="number">7</span>);
+<span class="func">c::write_int64</span>(<span class="sigil">$buf</span> + <span class="number">16</span>, <span class="number">99</span>);
+<span class="func">c::write_int64</span>(<span class="sigil">$buf</span> + <span class="number">24</span>, -<span class="number">5</span>);
+
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$cmp</span> = <span class="func">c::callback</span>(<span class="keyword">fn</span> (<span class="type">scalar</span> <span class="sigil">$pa</span>, <span class="type">scalar</span> <span class="sigil">$pb</span>) <span class="type">int</span> {
+    <span class="keyword">return</span> <span class="func">c::read_int64</span>(<span class="sigil">$pa</span>) <=> <span class="func">c::read_int64</span>(<span class="sigil">$pb</span>);
+}, <span class="string">"int"</span>, <span class="string">"ptr,ptr"</span>);
+
+<span class="keyword">__C__</span> {
+    <span class="keyword">typedef</span> <span class="keyword">int</span> (*qsort_cmp_t)(<span class="keyword">const</span> <span class="keyword">void</span> *, <span class="keyword">const</span> <span class="keyword">void</span> *);
+    qsort((<span class="keyword">void</span> *)(intptr_t)strada_to_int(buf), <span class="number">4</span>, <span class="number">8</span>,
+          (qsort_cmp_t)(intptr_t)strada_to_int(cmp));
+}
+
+<span class="func">c::callback_free</span>(<span class="sigil">$cmp</span>);  <span class="comment"># optional — an exit-time sweep frees survivors</span>
+<span class="func">c::free</span>(<span class="sigil">$buf</span>);</code></pre>
+
+            <p>Signature strings: return type <code>void</code>/<code>int</code>/<code>int32</code>/<code>num</code>/<code>ptr</code>; arguments are a comma list of <code>int</code>/<code>int32</code>/<code>num</code>/<code>ptr</code>/<code>str</code> (max 8). <code>str</code> arguments arrive as Strada strings (NULL → undef); <code>ptr</code> values travel as int addresses — pair them with <code>c::read_*</code>/<code>c::write_*</code>. Closure captures and <code>our</code> globals work inside the callback. Requires libffi at build time (<code>./configure</code> auto-detects it; <code>--without-libffi</code> opts out).</p>
+
             <h2>Extern Functions (C-Callable)</h2>
 
             <p>Use the <code>extern</code> keyword to create functions with C-compatible calling conventions. These functions can be called directly from C code without wrappers or type conversions.</p>
