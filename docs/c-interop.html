@@ -390,7 +390,7 @@ mv MathLib.so lib/</code></pre>
 <span class="func">c::callback_free</span>(<span class="sigil">$cmp</span>);  <span class="comment"># optional — an exit-time sweep frees survivors</span>
 <span class="func">c::free</span>(<span class="sigil">$buf</span>);</code></pre>
 
-            <p>Signature strings: return type <code>void</code>/<code>int</code>/<code>int32</code>/<code>num</code>/<code>ptr</code>; arguments are a comma list of <code>int</code>/<code>int32</code>/<code>num</code>/<code>ptr</code>/<code>str</code> (max 8). <code>str</code> arguments arrive as Strada strings (NULL → undef); <code>ptr</code> values travel as int addresses — pair them with <code>c::read_*</code>/<code>c::write_*</code>. Closure captures and <code>our</code> globals work inside the callback. Requires libffi at build time (<code>./configure</code> auto-detects it; <code>--without-libffi</code> opts out).</p>
+            <p>Signature strings: return type <code>void</code>/<code>int</code>/<code>int32</code>/<code>num</code>/<code>ptr</code>; arguments are a comma list of <code>int</code>/<code>int32</code>/<code>num</code>/<code>ptr</code>/<code>str</code> (max 8). <code>str</code> arguments arrive as Strada strings (NULL → undef); <code>ptr</code> values travel as int addresses — pair them with <code>c::read_*</code>/<code>c::write_*</code>. Closure captures and <code>our</code> globals work inside the callback. No link dependency: <code>libffi.so</code> is loaded lazily at the first <code>c::callback</code> call (<code>ffi.h</code> is needed at build time only; <code>./configure</code> auto-detects it, <code>--without-libffi</code> opts out).</p>
 
             <h2>Extern Functions (C-Callable)</h2>
 
