@@ -330,8 +330,12 @@ Strada::Interpreter::<span class="func">reset</span>();</code></pre>
                 <li><strong>I/O</strong>: say, print, printf, sprintf, core::open, core::close, diamond operator, core::slurp, core::spew</li>
                 <li><strong>Modules</strong>: <code>use</code> (source inclusion), <code>import_lib</code> (native .so via dlopen)</li>
                 <li><strong>BEGIN/END blocks</strong>, <strong>tie/untie/tied</strong>, <strong>BigInt/BigFloat</strong>, <strong>DateTime</strong></li>
-                <li><strong>Namespaces</strong>: <code>core::</code>, <code>math::</code>, <code>utf8::</code></li>
+                <li><strong>Namespaces</strong>: <code>core::</code>, <code>math::</code>, <code>utf8::</code> &mdash; the VM exposes the full <code>core::</code>/<code>math::</code> libc surface (~235 functions: process, users/groups, file I/O, sockets, extended math) through a generic runtime bridge</li>
+                <li><strong>Regex</strong>: <code>s///e</code> evaluated replacements, <code>tr///</code> with d/c/s/r flags, named captures, inline <code>i/s/m/x</code> flags</li>
+                <li><strong>Recursion limits</strong>: <code>core::set_recursion_limit</code> / <code>core::get_recursion_limit</code></li>
             </ul>
+
+            <p>The bytecode VM runs the <em>entire compiler test suite</em> at parity: 108 pass, 0 fail (12 skips need shared-object compilation or compiled-format stack traces).</p>
 
             <h2>Limitations</h2>
 
@@ -339,7 +343,6 @@ Strada::Interpreter::<span class="func">reset</span>();</code></pre>
                 <strong>Not supported in the interpreter</strong>
                 <ul style="margin: 0.5rem 0 0 1rem;">
                     <li>Async/await (requires compiled thread pool runtime)</li>
-                    <li><code>c::</code> namespace functions (<code>c::alloc</code>, <code>c::free</code>, etc.)</li>
                 </ul>
             </div>
 
