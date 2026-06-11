@@ -232,7 +232,7 @@
 
             <h3>StringBuilder for String Building</h3>
 
-            <p>String concatenation creates new strings each time. For building large strings, use StringBuilder:</p>
+            <p>String concatenation creates new strings each time. For building large strings, use StringBuilder (the bare <code>sb_new</code>/<code>sb_append</code>/... spellings remain as legacy aliases):</p>
 
             <pre><code><span class="comment"># Inefficient: O(n²) - creates many intermediate strings</span>
 <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$result</span> = <span class="string">""</span>;
@@ -241,11 +241,11 @@
 }
 
 <span class="comment"># Efficient: O(n) - appends to buffer</span>
-<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$sb</span> = <span class="func">sb_new</span>();
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$sb</span> = <span class="func">sb::new</span>();
 <span class="keyword">for</span> (<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$i</span> = <span class="number">0</span>; <span class="sigil">$i</span> < <span class="number">10000</span>; <span class="sigil">$i</span>++) {
-    <span class="func">sb_append</span>(<span class="sigil">$sb</span>, <span class="string">"line "</span> . <span class="sigil">$i</span> . <span class="string">"\n"</span>);
+    <span class="func">sb::append</span>(<span class="sigil">$sb</span>, <span class="string">"line "</span> . <span class="sigil">$i</span> . <span class="string">"\n"</span>);
 }
-<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$result</span> = <span class="func">sb_to_string</span>(<span class="sigil">$sb</span>);</code></pre>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$result</span> = <span class="func">sb::to_string</span>(<span class="sigil">$sb</span>);</code></pre>
 
             <h3>Array Capacity Functions</h3>
 

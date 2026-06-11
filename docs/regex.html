@@ -326,16 +326,16 @@
     <span class="func">say</span>(<span class="sigil">$2</span>);  <span class="comment"># "world"</span>
 }</code></pre>
 
-            <p><code>$1</code>&ndash;<code>$9</code> return <code>undef</code> if the group doesn't exist. They are syntactic sugar for <code>captures()[N]</code>.</p>
+            <p><code>$1</code>&ndash;<code>$9</code> return <code>undef</code> if the group doesn't exist. They are syntactic sugar for <code>re::captures()[N]</code>.</p>
 
-            <h2>The captures() Function</h2>
+            <h2>The re::captures() Function</h2>
 
-            <p>Use <code>captures()</code> to get all capture groups as an array. Use this when you need the full match or more than 9 groups:</p>
+            <p>Use <code>re::captures()</code> to get all capture groups as an array. Use this when you need the full match or more than 9 groups:</p>
 
             <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$date</span> = <span class="string">"2024-01-15"</span>;
 
 <span class="keyword">if</span> (<span class="sigil">$date</span> =~ <span class="string">/(\d{4})-(\d{2})-(\d{2})/</span>) {
-    <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@parts</span> = <span class="func">captures</span>();
+    <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@parts</span> = <span class="func">re::captures</span>();
     <span class="func">say</span>(<span class="string">"Full match: "</span> . <span class="sigil">$parts</span>[<span class="number">0</span>]);   <span class="comment"># 2024-01-15</span>
     <span class="func">say</span>(<span class="string">"Year: "</span> . <span class="sigil">$parts</span>[<span class="number">1</span>]);        <span class="comment"># 2024</span>
     <span class="func">say</span>(<span class="string">"Month: "</span> . <span class="sigil">$parts</span>[<span class="number">2</span>]);       <span class="comment"># 01</span>
@@ -345,16 +345,16 @@
             <div class="info-box">
                 <strong>Capture Indices</strong>
                 <ul>
-                    <li><code>captures()[0]</code> is the <strong>full match</strong> (entire matched string)</li>
-                    <li><code>captures()[1]</code> / <code>$1</code> is the first capture group</li>
-                    <li><code>captures()[2]</code> / <code>$2</code> is the second capture group, and so on</li>
+                    <li><code>re::captures()[0]</code> is the <strong>full match</strong> (entire matched string)</li>
+                    <li><code>re::captures()[1]</code> / <code>$1</code> is the first capture group</li>
+                    <li><code>re::captures()[2]</code> / <code>$2</code> is the second capture group, and so on</li>
                 </ul>
             </div>
 
             <p>Always check that the pattern matched before accessing captures, and save the result immediately since captures are cleared on the next match:</p>
 
             <pre><code><span class="keyword">if</span> (<span class="sigil">$text</span> =~ <span class="string">/(\w+)@(\w+)/</span>) {
-    <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@saved</span> = <span class="func">captures</span>();  <span class="comment"># Save immediately</span>
+    <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@saved</span> = <span class="func">re::captures</span>();  <span class="comment"># Save immediately</span>
     <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$user</span> = <span class="sigil">$saved</span>[<span class="number">1</span>];
     <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$domain</span> = <span class="sigil">$saved</span>[<span class="number">2</span>];
     <span class="func">say</span>(<span class="string">"User: "</span> . <span class="sigil">$user</span> . <span class="string">", Domain: "</span> . <span class="sigil">$domain</span>);
@@ -362,12 +362,12 @@
 
             <h2>Named Captures</h2>
 
-            <p>Use <code>(?P&lt;name&gt;...)</code> to create named capture groups, then retrieve them with <code>named_captures()</code>:</p>
+            <p>Use <code>(?P&lt;name&gt;...)</code> to create named capture groups, then retrieve them with <code>re::named_captures()</code>:</p>
 
             <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$date</span> = <span class="string">"2024-01-15"</span>;
 
 <span class="keyword">if</span> (<span class="sigil">$date</span> =~ <span class="string">/(?P&lt;year&gt;\d{4})-(?P&lt;month&gt;\d{2})-(?P&lt;day&gt;\d{2})/</span>) {
-    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%nc</span> = <span class="func">named_captures</span>();
+    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%nc</span> = <span class="func">re::named_captures</span>();
     <span class="func">say</span>(<span class="string">"Year: "</span> . <span class="sigil">$nc</span>{<span class="string">"year"</span>});    <span class="comment"># 2024</span>
     <span class="func">say</span>(<span class="string">"Month: "</span> . <span class="sigil">$nc</span>{<span class="string">"month"</span>});  <span class="comment"># 01</span>
     <span class="func">say</span>(<span class="string">"Day: "</span> . <span class="sigil">$nc</span>{<span class="string">"day"</span>});      <span class="comment"># 15</span>
@@ -377,14 +377,14 @@
 <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$log</span> = <span class="string">"[2024-01-15 10:30:45] ERROR: connection refused"</span>;
 
 <span class="keyword">if</span> (<span class="sigil">$log</span> =~ <span class="string">/\[(?P&lt;timestamp&gt;[^\]]+)\]\s+(?P&lt;level&gt;\w+):\s+(?P&lt;message&gt;.*)/</span>) {
-    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%nc</span> = <span class="func">named_captures</span>();
+    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%nc</span> = <span class="func">re::named_captures</span>();
     <span class="func">say</span>(<span class="string">"Time: "</span> . <span class="sigil">$nc</span>{<span class="string">"timestamp"</span>});
     <span class="func">say</span>(<span class="string">"Level: "</span> . <span class="sigil">$nc</span>{<span class="string">"level"</span>});
     <span class="func">say</span>(<span class="string">"Msg: "</span> . <span class="sigil">$nc</span>{<span class="string">"message"</span>});
 }</code></pre>
 
             <div class="note">
-                <strong>Note:</strong> Named captures require PCRE2. If Strada was built with POSIX regex fallback, <code>named_captures()</code> returns an empty hash.
+                <strong>Note:</strong> Named captures require PCRE2. If Strada was built with POSIX regex fallback, <code>re::named_captures()</code> returns an empty hash.
             </div>
 
             <h2>Substitution</h2>
@@ -428,12 +428,12 @@
 
 <span class="comment"># Uppercase matched words</span>
 <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$words</span> = <span class="string">"hello world"</span>;
-<span class="sigil">$words</span> =~ s/(\w+)/uc(captures()[1])/eg;
+<span class="sigil">$words</span> =~ s/(\w+)/uc(re::captures()[1])/eg;
 <span class="func">say</span>(<span class="sigil">$words</span>);  <span class="comment"># "HELLO WORLD"</span>
 
 <span class="comment"># /ei - evaluate with case-insensitive match</span>
 <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$mixed</span> = <span class="string">"Hello HELLO hello"</span>;
-<span class="sigil">$mixed</span> =~ s/(hello)/lc(captures()[1])/eig;
+<span class="sigil">$mixed</span> =~ s/(hello)/lc(re::captures()[1])/eig;
 <span class="func">say</span>(<span class="sigil">$mixed</span>);  <span class="comment"># "hello hello hello"</span></code></pre>
 
             <h2>Variable Interpolation</h2>
@@ -492,42 +492,42 @@
 
             <h2>Built-in Functions</h2>
 
-            <p>Strada provides several built-in functions for regex and string operations.</p>
+            <p>Strada provides several built-in functions for regex and string operations. Regex function forms live in the <code>re::</code> namespace and literal (non-regex) string replacement in <code>str::</code>; the historical bare spellings (<code>match</code>, <code>replace</code>, <code>captures</code>, ...) still work as legacy aliases.</p>
 
-            <h3>match()</h3>
+            <h3>re::match()</h3>
 
             <p>Simple pattern match that returns <code>1</code> or <code>0</code>. Also sets capture variables.</p>
 
-            <pre><code><span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$found</span> = <span class="func">match</span>(<span class="sigil">$text</span>, <span class="string">"pattern"</span>);
+            <pre><code><span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$found</span> = <span class="func">re::match</span>(<span class="sigil">$text</span>, <span class="string">"pattern"</span>);
 
-<span class="keyword">if</span> (<span class="func">match</span>(<span class="sigil">$email</span>, <span class="string">"@"</span>)) {
+<span class="keyword">if</span> (<span class="func">re::match</span>(<span class="sigil">$email</span>, <span class="string">"@"</span>)) {
     <span class="func">say</span>(<span class="string">"Looks like an email"</span>);
 }</code></pre>
 
-            <h3>capture()</h3>
+            <h3>re::capture()</h3>
 
             <p>Get all capture groups as an array (pass the string and pattern as arguments):</p>
 
-            <pre><code><span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@groups</span> = <span class="func">capture</span>(<span class="sigil">$text</span>, <span class="string">"(\\d+)-(\\d+)"</span>);
+            <pre><code><span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@groups</span> = <span class="func">re::capture</span>(<span class="sigil">$text</span>, <span class="string">"(\\d+)-(\\d+)"</span>);
 <span class="comment"># @groups[0] = full match, @groups[1] = first group, etc.</span></code></pre>
 
-            <h3>captures()</h3>
+            <h3>re::captures()</h3>
 
             <p>Returns capture groups from the last <code>=~</code> match as an array:</p>
 
             <pre><code><span class="keyword">if</span> (<span class="sigil">$text</span> =~ <span class="string">/(\w+)\s+(\w+)/</span>) {
-    <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@all</span> = <span class="func">captures</span>();
+    <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@all</span> = <span class="func">re::captures</span>();
     <span class="func">say</span>(<span class="sigil">$all</span>[<span class="number">0</span>]);  <span class="comment"># Full match</span>
     <span class="func">say</span>(<span class="sigil">$all</span>[<span class="number">1</span>]);  <span class="comment"># First group (same as $1)</span>
     <span class="func">say</span>(<span class="sigil">$all</span>[<span class="number">2</span>]);  <span class="comment"># Second group (same as $2)</span>
 }</code></pre>
 
-            <h3>named_captures()</h3>
+            <h3>re::named_captures()</h3>
 
             <p>Returns named capture groups from the last <code>=~</code> match as a hash:</p>
 
             <pre><code><span class="keyword">if</span> (<span class="sigil">$text</span> =~ <span class="string">/(?P&lt;first&gt;\w+)\s+(?P&lt;last&gt;\w+)/</span>) {
-    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%nc</span> = <span class="func">named_captures</span>();
+    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%nc</span> = <span class="func">re::named_captures</span>();
     <span class="func">say</span>(<span class="sigil">$nc</span>{<span class="string">"first"</span>});  <span class="comment"># First name</span>
     <span class="func">say</span>(<span class="sigil">$nc</span>{<span class="string">"last"</span>});   <span class="comment"># Last name</span>
 }</code></pre>
@@ -560,22 +560,29 @@
             <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$result</span> = <span class="func">join</span>(<span class="string">", "</span>, <span class="sigil">@items</span>);
 <span class="func">say</span>(<span class="sigil">$result</span>);  <span class="comment"># "apple, banana, cherry"</span></code></pre>
 
-            <h3>replace() and replace_all()</h3>
+            <h3>re::replace(), re::replace_all(), str::replace()</h3>
 
-            <p>Functional alternatives to the <code>s///</code> operator:</p>
+            <p>Functional alternatives to the <code>s///</code> operator. The namespace makes the regex/literal split explicit:</p>
 
-            <pre><code><span class="comment"># replace() — regex replacement (returns new string)</span>
-<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$new</span> = <span class="func">replace</span>(<span class="sigil">$text</span>, <span class="string">"world"</span>, <span class="string">"Strada"</span>);
+            <pre><code><span class="comment"># re::replace() &mdash; regex replacement, FIRST match only (returns new string)</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$new</span> = <span class="func">re::replace</span>(<span class="sigil">$text</span>, <span class="string">"w\\w+"</span>, <span class="string">"Strada"</span>);
 
-<span class="comment"># replace_all() — plain string replacement (NOT regex)</span>
-<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$cleaned</span> = <span class="func">replace_all</span>(<span class="sigil">$text</span>, <span class="string">"foo"</span>, <span class="string">"bar"</span>);</code></pre>
+<span class="comment"># re::replace_all() &mdash; regex replacement, ALL matches</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$nums</span> = <span class="func">re::replace_all</span>(<span class="sigil">$text</span>, <span class="string">"\\d+"</span>, <span class="string">"N"</span>);
+
+<span class="comment"># str::replace() &mdash; plain string replacement (NOT regex), all occurrences</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$cleaned</span> = <span class="func">str::replace</span>(<span class="sigil">$text</span>, <span class="string">"foo"</span>, <span class="string">"bar"</span>);
+
+<span class="comment"># str::replace_first() &mdash; plain string replacement, first occurrence only</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$once</span> = <span class="func">str::replace_first</span>(<span class="sigil">$text</span>, <span class="string">"foo"</span>, <span class="string">"bar"</span>);</code></pre>
 
             <div class="note">
-                <strong>replace() vs replace_all() vs s///:</strong>
+                <strong>re:: vs str:: vs s///:</strong>
                 <ul>
-                    <li><code>replace()</code> uses <strong>regex</strong> and returns a new string (first match only). Supports <code>$1</code>, <code>$2</code> backreferences in the replacement.</li>
-                    <li><code>replace_all()</code> uses <strong>plain string</strong> matching (NOT regex) and returns a new string.</li>
+                    <li><code>re::replace()</code> / <code>re::replace_all()</code> use <strong>regex</strong> and return a new string. <code>re::replace()</code> supports <code>$1</code>, <code>$2</code> backreferences in the replacement.</li>
+                    <li><code>str::replace()</code> / <code>str::replace_first()</code> use <strong>plain string</strong> matching (NOT regex) and return a new string.</li>
                     <li><code>s///</code> uses <strong>regex</strong> and modifies the variable <strong>in place</strong>. Add <code>/g</code> for global.</li>
+                    <li>Legacy bare names (<code>replace</code> = regex-first, <code>replace_all</code> = literal-all, <code>str_replace</code>, <code>regex_replace</code>, ...) still work as aliases.</li>
                 </ul>
             </div>
 
@@ -671,13 +678,13 @@
             <h3>Email Validation</h3>
 
             <pre><code><span class="keyword">func</span> <span class="func">is_valid_email</span>(<span class="type">str</span> <span class="sigil">$email</span>) <span class="type">int</span> {
-    <span class="keyword">return</span> <span class="func">match</span>(<span class="sigil">$email</span>, <span class="string">"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"</span>);
+    <span class="keyword">return</span> <span class="func">re::match</span>(<span class="sigil">$email</span>, <span class="string">"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"</span>);
 }</code></pre>
 
             <h3>Phone Number</h3>
 
             <pre><code><span class="keyword">func</span> <span class="func">is_phone</span>(<span class="type">str</span> <span class="sigil">$phone</span>) <span class="type">int</span> {
-    <span class="keyword">return</span> <span class="func">match</span>(<span class="sigil">$phone</span>, <span class="string">"^\\d{3}[-.]?\\d{3}[-.]?\\d{4}$"</span>);
+    <span class="keyword">return</span> <span class="func">re::match</span>(<span class="sigil">$phone</span>, <span class="string">"^\\d{3}[-.]?\\d{3}[-.]?\\d{4}$"</span>);
 }</code></pre>
 
             <h3>URL Extraction</h3>
@@ -754,14 +761,14 @@
 
             <p><strong>Captures not working?</strong></p>
             <ul>
-                <li>Ensure the pattern actually matched before calling <code>captures()</code> or using <code>$1</code>&ndash;<code>$9</code></li>
-                <li>Remember <code>captures()[0]</code> is the full match &mdash; groups start at index 1</li>
+                <li>Ensure the pattern actually matched before calling <code>re::captures()</code> or using <code>$1</code>&ndash;<code>$9</code></li>
+                <li>Remember <code>re::captures()[0]</code> is the full match &mdash; groups start at index 1</li>
                 <li>Captures are cleared on each new match &mdash; save them immediately</li>
                 <li><code>$1</code>&ndash;<code>$9</code> return <code>undef</code> if the group doesn't exist</li>
             </ul>
 
             <pre><code><span class="keyword">if</span> (<span class="sigil">$text</span> =~ <span class="string">/(\w+)/</span>) {
-    <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@saved</span> = <span class="func">captures</span>();  <span class="comment"># Save immediately!</span>
+    <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@saved</span> = <span class="func">re::captures</span>();  <span class="comment"># Save immediately!</span>
 
     <span class="comment"># Don't do another match before using @saved</span>
     <span class="func">say</span>(<span class="string">"First word: "</span> . <span class="sigil">$saved</span>[<span class="number">1</span>]);

@@ -319,7 +319,10 @@
             <p>Built-in functions are organized into namespaces:</p>
 
             <h3>Core Functions (No Namespace)</h3>
-            <p>Common functions like <code>say()</code>, <code>print()</code>, <code>push()</code>, <code>pop()</code>, <code>len()</code>, etc.</p>
+            <p>Perl-heritage functions like <code>say()</code>, <code>print()</code>, <code>push()</code>, <code>pop()</code>, <code>length()</code>, etc.</p>
+
+            <h3>re::, str::, sb:: Namespaces</h3>
+            <p>Strada-specific built-ins use namespaced spellings (the historical bare names remain as legacy aliases): <code>re::match()</code>, <code>re::replace_all()</code>, <code>re::captures()</code> for regex function forms; <code>str::replace()</code>, <code>str::replace_first()</code> for literal string replacement; <code>sb::new()</code>, <code>sb::append()</code>, <code>sb::to_string()</code> for StringBuilder. See <a href="builtin-functions.html#namespaced-aliases">the built-in function reference</a> for the full alias list.</p>
 
             <h3>math:: Namespace</h3>
             <pre><code><span class="func">math::sin</span>(<span class="number">3.14</span>)

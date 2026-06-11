@@ -658,8 +658,18 @@
             <h2 id="bare">Bare built-ins (no namespace)</h2>
             <p>These match Perl built-ins. The most common are listed below; see <a href="../../docs/BUILTIN_FUNCTIONS.md">BUILTIN_FUNCTIONS.md</a> for the full alphabetical listing and signature details.</p>
 
+            <h3 id="namespaced-aliases">Namespaced aliases (preferred for non-Perl built-ins)</h3>
+            <p>Strada-specific built-ins that historically lived in the bare namespace now have preferred namespaced spellings; the bare names keep working as legacy aliases:</p>
+            <ul>
+                <li><strong><code>re::</code></strong> &mdash; regex function forms: <code>re::match</code>, <code>re::replace</code> (regex, <em>first</em> match), <code>re::replace_all</code>, <code>re::capture</code>, <code>re::captures</code>, <code>re::named_captures</code>.</li>
+                <li><strong><code>str::</code></strong> &mdash; literal (non-regex) replace: <code>str::replace</code> (all occurrences), <code>str::replace_first</code>.</li>
+                <li><strong><code>sb::</code></strong> &mdash; StringBuilder: <code>sb::new</code>, <code>sb::append</code>, <code>sb::to_string</code>, <code>sb::length</code>, <code>sb::clear</code>, <code>sb::free</code>.</li>
+                <li><strong><code>core::</code></strong> &mdash; qualified forms of: <code>hash_new</code>/<code>hash_get</code>/<code>hash_set</code>, <code>deref</code>/<code>deref_array</code>/<code>deref_hash</code>/<code>deref_set</code>, <code>refto</code>/<code>is_refto</code>/<code>derefto</code>/<code>is_ref</code>, <code>refcount</code>, <code>dumper</code>/<code>dumper_str</code>, <code>stacktrace</code>/<code>stacktrace_str</code>, <code>set_package</code>/<code>inherit</code>/<code>blessed</code>.</li>
+            </ul>
+            <p>Both spellings compile to identical code. Perl-heritage built-ins (<code>say</code>, <code>push</code>, <code>substr</code>, ...) stay unqualified.</p>
+
             <h3>Strings</h3>
-            <p><code>length</code>, <code>lc</code>/<code>lower</code>, <code>uc</code>/<code>upper</code>, <code>lcfirst</code>, <code>ucfirst</code>, <code>chomp</code>, <code>chop</code>, <code>chr</code>, <code>ord</code>, <code>reverse</code>, <code>substr</code>, <code>index</code>, <code>rindex</code>, <code>sprintf</code>, <code>printf</code>, <code>join</code>, <code>split</code>, <code>trim</code>, <code>ltrim</code>, <code>rtrim</code>, <code>quotemeta</code>, <code>match</code>, <code>replace</code>, <code>replace_all</code>, <code>captures</code>, <code>named_captures</code>, <code>pos</code>, <code>pack</code>, <code>unpack</code>.</p>
+            <p><code>length</code>, <code>lc</code>/<code>lower</code>, <code>uc</code>/<code>upper</code>, <code>lcfirst</code>, <code>ucfirst</code>, <code>chomp</code>, <code>chop</code>, <code>chr</code>, <code>ord</code>, <code>reverse</code>, <code>substr</code>, <code>index</code>, <code>rindex</code>, <code>sprintf</code>, <code>printf</code>, <code>join</code>, <code>split</code>, <code>trim</code>, <code>ltrim</code>, <code>rtrim</code>, <code>quotemeta</code>, <code>re::match</code>, <code>re::replace</code>, <code>re::replace_all</code>, <code>str::replace</code>, <code>re::captures</code>, <code>re::named_captures</code>, <code>pos</code>, <code>pack</code>, <code>unpack</code>.</p>
 
             <h3>Numbers</h3>
             <p><code>abs</code>, <code>int</code>, <code>hex</code>, <code>rand</code>, <code>srand</code>.</p>

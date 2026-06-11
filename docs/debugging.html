@@ -67,9 +67,9 @@
 
             <h2>Inspecting Variables</h2>
 
-            <h3>dumper() - Pretty Print Any Value</h3>
+            <h3>core::dumper() - Pretty Print Any Value</h3>
 
-            <p>The <code>dumper()</code> function returns a human-readable string representation of any value &mdash; pass it to <code>say()</code> (or <code>warn()</code>) to print it:</p>
+            <p>The <code>core::dumper()</code> function returns a human-readable string representation of any value &mdash; pass it to <code>say()</code> (or <code>warn()</code>) to print it. (The bare spellings <code>dumper</code>, <code>refcount</code>, <code>stacktrace</code>, ... remain as legacy aliases.)</p>
 
             <pre><code><span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%user</span> = {
     <span class="string">"name"</span> => <span class="string">"Alice"</span>,
@@ -77,7 +77,7 @@
     <span class="string">"tags"</span> => [<span class="string">"admin"</span>, <span class="string">"developer"</span>]
 };
 
-<span class="func">say</span>(<span class="func">dumper</span>(\<span class="sigil">%user</span>));
+<span class="func">say</span>(<span class="func">core::dumper</span>(\<span class="sigil">%user</span>));
 <span class="comment"># Output:</span>
 <span class="comment"># {</span>
 <span class="comment">#   "name" => "Alice",</span>
@@ -90,17 +90,17 @@
 
             <p>Works with all types:</p>
 
-            <pre><code><span class="func">say</span>(<span class="func">dumper</span>(<span class="number">42</span>));              <span class="comment"># 42</span>
-<span class="func">say</span>(<span class="func">dumper</span>(<span class="string">"hello"</span>));         <span class="comment"># "hello"</span>
-<span class="func">say</span>(<span class="func">dumper</span>([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]));       <span class="comment"># [1, 2, 3]</span>
-<span class="func">say</span>(<span class="func">dumper</span>(<span class="func">undef</span>));           <span class="comment"># undef</span></code></pre>
+            <pre><code><span class="func">say</span>(<span class="func">core::dumper</span>(<span class="number">42</span>));              <span class="comment"># 42</span>
+<span class="func">say</span>(<span class="func">core::dumper</span>(<span class="string">"hello"</span>));         <span class="comment"># "hello"</span>
+<span class="func">say</span>(<span class="func">core::dumper</span>([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>]));       <span class="comment"># [1, 2, 3]</span>
+<span class="func">say</span>(<span class="func">core::dumper</span>(<span class="func">undef</span>));           <span class="comment"># undef</span></code></pre>
 
-            <h3>dumper_str() - Alias</h3>
+            <h3>core::dumper_str() - Alias</h3>
 
-            <p><code>dumper_str()</code> is an alias for <code>dumper()</code> &mdash; both
+            <p><code>core::dumper_str()</code> is an alias for <code>core::dumper()</code> &mdash; both
             return the dump as a string:</p>
 
-            <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$debug</span> = <span class="func">dumper_str</span>(\<span class="sigil">%data</span>);
+            <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$debug</span> = <span class="func">core::dumper_str</span>(\<span class="sigil">%data</span>);
 <span class="func">Log::debug</span>(<span class="string">"Request data: "</span> . <span class="sigil">$debug</span>);</code></pre>
 
             <h3>typeof() - Get Type Name</h3>
@@ -115,15 +115,15 @@
 <span class="func">say</span>(<span class="func">typeof</span>(\<span class="sigil">$x</span>));          <span class="comment"># "ref"</span>
 <span class="func">say</span>(<span class="func">typeof</span>(<span class="func">undef</span>));        <span class="comment"># "undef"</span></code></pre>
 
-            <h3>refcount() - Check Reference Count</h3>
+            <h3>core::refcount() - Check Reference Count</h3>
 
             <p>Useful for debugging memory issues:</p>
 
             <pre><code><span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@arr</span> = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>];
-<span class="func">say</span>(<span class="func">refcount</span>(\<span class="sigil">@arr</span>));  <span class="comment"># 1</span>
+<span class="func">say</span>(<span class="func">core::refcount</span>(\<span class="sigil">@arr</span>));  <span class="comment"># 1</span>
 
 <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$ref</span> = \<span class="sigil">@arr</span>;
-<span class="func">say</span>(<span class="func">refcount</span>(\<span class="sigil">@arr</span>));  <span class="comment"># 2</span></code></pre>
+<span class="func">say</span>(<span class="func">core::refcount</span>(\<span class="sigil">@arr</span>));  <span class="comment"># 2</span></code></pre>
 
             <h2>Stack Traces</h2>
 
@@ -368,7 +368,7 @@ strada-profhtml strada-prof.out my-report/   <span class="comment"># Custom outp
 
             <pre><code><span class="keyword">func</span> <span class="func">assert</span>(<span class="type">int</span> <span class="sigil">$condition</span>, <span class="type">str</span> <span class="sigil">$msg</span>) <span class="type">void</span> {
     <span class="keyword">if</span> (<span class="sigil">$condition</span> == <span class="number">0</span>) {
-        <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$trace</span> = <span class="func">stacktrace_str</span>();
+        <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$trace</span> = <span class="func">core::stacktrace_str</span>();
         <span class="func">die</span>(<span class="string">"Assertion failed: "</span> . <span class="sigil">$msg</span> . <span class="string">"\n"</span> . <span class="sigil">$trace</span>);
     }
 }
@@ -399,7 +399,7 @@ strada-profhtml strada-prof.out my-report/   <span class="comment"># Custom outp
             <pre><code><span class="keyword">func</span> <span class="func">debug_dump</span>(<span class="type">str</span> <span class="sigil">$label</span>, <span class="type">scalar</span> <span class="sigil">$value</span>) <span class="type">void</span> {
     <span class="keyword">if</span> (<span class="sigil">$DEBUG</span>) {
         <span class="func">warn</span>(<span class="sigil">$label</span> . <span class="string">":"</span>);
-        <span class="func">dumper</span>(<span class="sigil">$value</span>);
+        <span class="func">core::dumper</span>(<span class="sigil">$value</span>);
     }
 }
 
@@ -439,13 +439,13 @@ gdb ./myprogram
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td><code>dumper($val)</code></td><td>Pretty-print value to stderr</td></tr>
-                    <tr><td><code>dumper_str($val)</code></td><td>Return dump as string</td></tr>
+                    <tr><td><code>core::dumper($val)</code></td><td>Pretty-print value to stderr</td></tr>
+                    <tr><td><code>core::dumper_str($val)</code></td><td>Return dump as string</td></tr>
                     <tr><td><code>dump($val, $indent)</code></td><td>Dump with indent level</td></tr>
                     <tr><td><code>typeof($val)</code></td><td>Get type name as string</td></tr>
-                    <tr><td><code>refcount($ref)</code></td><td>Get reference count</td></tr>
-                    <tr><td><code>stacktrace()</code></td><td>Print call stack</td></tr>
-                    <tr><td><code>stacktrace_str()</code></td><td>Return call stack as string</td></tr>
+                    <tr><td><code>core::refcount($ref)</code></td><td>Get reference count</td></tr>
+                    <tr><td><code>core::stacktrace()</code></td><td>Print call stack</td></tr>
+                    <tr><td><code>core::stacktrace_str()</code></td><td>Return call stack as string</td></tr>
                     <tr><td><code>caller($level)</code></td><td>Get caller function name</td></tr>
                     <tr><td><code>warn($msg)</code></td><td>Print warning to stderr</td></tr>
                     <tr><td><code>die($msg)</code></td><td>Print error and exit</td></tr>
