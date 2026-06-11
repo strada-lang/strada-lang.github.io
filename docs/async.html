@@ -431,6 +431,51 @@
                 <a href="memory.html" class="btn btn-secondary">&larr; Memory Management</a>
                 <a href="debugging.html" class="btn btn-primary">Debugging &rarr;</a>
             </div>
+
+            <h2>Event Loop and Green Tasks (Async::Loop)</h2>
+
+            <p>For servers, the thread pool's one-OS-thread-per-blocked-connection model
+            doesn't scale. <code>Async::Loop</code> multiplexes any number of connections
+            onto one thread (epoll on Linux, poll(2) on other POSIX systems), and
+            <strong>green tasks</strong> let handler code read like plain blocking Strada:</p>
+
+            <pre><code><span class="keyword">use</span> Async::Loop;
+<span class="keyword">use</span> Async::Task;
+
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$loop</span> = Async::Loop::new();
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$listener</span> = core::socket_server(<span class="number">8080</span>);
+
+<span class="sigil">$loop</span>-&gt;spawn(<span class="keyword">fn</span> () {
+    <span class="keyword">while</span> (<span class="number">1</span>) {
+        <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$conn</span> = Async::Task::accept(<span class="sigil">$listener</span>);
+        <span class="sigil">$loop</span>-&gt;spawn(<span class="keyword">fn</span> () {
+            <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$req</span> = Async::Task::readline(<span class="sigil">$conn</span>, <span class="number">5000</span>);
+            Async::Task::send(<span class="sigil">$conn</span>, <span class="string">"HTTP/1.0 200 OK\r\n\r\nhello"</span>);
+            core::socket_close(<span class="sigil">$conn</span>);
+        });
+    }
+});
+
+<span class="sigil">$loop</span>-&gt;run();</code></pre>
+
+            <ul>
+                <li><strong>Tasks park, the loop runs others</strong> — <code>Async::Task::recv/readline/send/accept/connect/sleep</code>
+                    look blocking but suspend the task (stackful coroutines) until the fd is ready. Optional trailing
+                    timeouts return <code>undef</code> on expiry. Outside a task the same calls fall back to plain blocking.</li>
+                <li><strong>try/catch works inside tasks</strong>, including across suspensions; an uncaught throw kills
+                    only its own task (reported via <code>$loop-&gt;{"on_task_error"}</code>).</li>
+                <li><strong>Callback style too</strong>: <code>$loop-&gt;watch($fd, "r", fn (int $fd, str $mask) {...})</code>,
+                    <code>$loop-&gt;timer_after($ms, $cb)</code>, multiple watchers per fd.</li>
+                <li><strong>TLS over tasks</strong> via <code>Async::TaskSSL</code> — the handshake and IO park on the exact
+                    readiness OpenSSL requests; hostname DNS resolves off-loop (<code>async::resolve</code>).</li>
+                <li><strong><code>async::io_wait($fd, "r", $ms)</code></strong> bridges the loop world and futures: a dedicated
+                    poller thread completes the future on readiness, so pool workers never block on sockets.</li>
+            </ul>
+
+            <p>One thread handles ~34k echo round-trips/s across 50 concurrent task connections
+            (loopback, -O2). See <code>docs/EVENT_LOOP.md</code> in the repository for the full API,
+            task rules, and design notes.</p>
+
         </main>
     </div>
 
