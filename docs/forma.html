@@ -82,7 +82,7 @@
                 <li>JSON output: <code>{{json object}}</code></li>
                 <li>Comments: <code>{{!-- comment --}}</code></li>
                 <li>Context switching with <code>{{#with}}</code></li>
-                <li>Template caching for performance</li>
+                <li>Compiled-template caching for performance (parse once, render many)</li>
                 <li>Layout/partial support</li>
                 <li>HTML escaping for XSS protection</li>
             </ul>
@@ -386,11 +386,16 @@ Price: ${{commas price}}    <span class="comment">&lt;!-- 1234567 -&gt; "1,234,5
             <pre><code>Forma::init(<span class="string">"./templates"</span>);</code></pre>
 
             <h3>Forma::render($name, $vars)</h3>
-            <p>Render a template file with variables.</p>
+            <p>Render a template file with variables. This is the cached fast path: the
+            template is compiled into a reusable form on first use and that compiled form
+            is reused on every subsequent render with the same name (see
+            <a href="#compiled-cache">Compiled-template caching</a>).</p>
             <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$html</span> = Forma::render(<span class="string">"page.html"</span>, \<span class="sigil">%vars</span>);</code></pre>
 
             <h3>Forma::render_string($template, $vars)</h3>
-            <p>Render a template string directly.</p>
+            <p>Render a template string directly. Unlike <code>render()</code>, this has no
+            name to key a cache on, so it compiles fresh on every call &mdash; prefer
+            <code>render($name)</code> on hot paths.</p>
             <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$html</span> = Forma::render_string(<span class="string">"Hello, {{name}}!"</span>, \<span class="sigil">%vars</span>);</code></pre>
 
             <h3>Forma::render_safe($name, $vars)</h3>
@@ -408,12 +413,17 @@ Price: ${{commas price}}    <span class="comment">&lt;!-- 1234567 -&gt; "1,234,5
             <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$sidebar</span> = Forma::include(<span class="string">"sidebar.html"</span>, \<span class="sigil">%vars</span>);</code></pre>
 
             <h3>Forma::set_cache($enabled)</h3>
-            <p>Enable or disable template caching.</p>
-            <pre><code>Forma::set_cache(<span class="number">0</span>);  <span class="comment"># Disable for development</span>
+            <p>Enable or disable caching (on by default). When enabled, <code>render($name)</code>
+            compiles each template once and reuses the compiled form on every later render
+            (see <a href="#compiled-cache">Compiled-template caching</a>). Disable it in
+            development so edits to template files are picked up without a restart &mdash;
+            each render then re-reads and re-compiles.</p>
+            <pre><code>Forma::set_cache(<span class="number">0</span>);  <span class="comment"># Disable for development (re-read + re-compile every render)</span>
 Forma::set_cache(<span class="number">1</span>);  <span class="comment"># Enable for production (default)</span></code></pre>
 
             <h3>Forma::clear_cache()</h3>
-            <p>Clear the template cache.</p>
+            <p>Clear both the raw-template-text cache and the compiled-template cache. Call
+            this after changing template files at runtime to force a recompile on next render.</p>
             <pre><code>Forma::clear_cache();</code></pre>
 
             <h3>Forma::escape_html($string)</h3>
@@ -740,6 +750,52 @@ Forma::init(<span class="string">"./templates"</span>);
                     <tr><td>json</td><td><code>{{json object}}</code></td></tr>
                 </tbody>
             </table>
+
+            <h2 id="compiled-cache">Compiled-template caching</h2>
+            <p>Rendering a template means walking its text and resolving every
+            <code>{{...}}</code> tag, loop, and conditional. Done naively that structural
+            work &mdash; splitting literals, finding block boundaries, and re-parsing each
+            loop and <code>if</code> body once per iteration &mdash; would repeat on every
+            single render. For a template rendered on every web request, that is pure waste.</p>
+
+            <p>Forma avoids it automatically. The first time you render a template by name,
+            <code>Forma::render($name, $vars)</code> parses it into a compiled form (a node
+            list) and caches that, keyed by the template name. Every later render with the
+            same name skips the parse entirely and just executes the compiled form against
+            your variables. Loop and conditional bodies are parsed <em>once</em> instead of
+            once per iteration. Output is byte-for-byte identical to the uncached path.</p>
+
+            <p>In practice this makes a hot template render several times faster &mdash;
+            roughly 3&times; on loop-heavy templates and 5&times; or more on
+            field-heavy ones.</p>
+
+            <h3>It is automatic &mdash; there is no special mode to enable</h3>
+            <p>Caching is on by default. You get the speedup simply by rendering the same
+            template name more than once (which a web server does on every request). The
+            only thing to know:</p>
+            <ul>
+                <li>Use <code>Forma::render("name.html", \%vars)</code> for the cached fast
+                path. Partials (<code>{{&gt; nav.html}}</code>) and layouts go through
+                <code>render()</code> too, so they are cached as well.</li>
+                <li><code>Forma::render_string($template, \%vars)</code> has no name to key a
+                cache on, so it compiles fresh every call. Prefer <code>render($name)</code>
+                on hot paths.</li>
+            </ul>
+
+            <pre><code><span class="comment"># Worker init (once)</span>
+Forma::init(<span class="string">"/var/www/templates"</span>);
+Forma::set_cache(<span class="number">1</span>);                  <span class="comment"># already the default</span>
+
+<span class="comment"># Per request: compiled once, reused on every later request</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$page</span> = Forma::render(<span class="string">"dashboard.html"</span>, \<span class="sigil">%vars</span>);</code></pre>
+
+            <h3>Development: live template edits</h3>
+            <p>While iterating on template files, disable caching so changes show up without
+            a restart (each render then re-reads and re-compiles), or clear the cache when a
+            file changes:</p>
+            <pre><code>Forma::set_cache(<span class="number">0</span>);   <span class="comment"># re-read + re-compile on every render</span>
+<span class="comment"># ...or, keep caching on and drop it when a template changes:</span>
+Forma::clear_cache();</code></pre>
 
             <h2>Best Practices</h2>
 
