@@ -96,7 +96,7 @@
                     <tr><td><code>ucfirst($str)</code></td><td>Uppercase first character</td></tr>
                     <tr><td><code>lcfirst($str)</code></td><td>Lowercase first character</td></tr>
                     <tr><td><code>trim($str)</code></td><td>Remove leading/trailing whitespace</td></tr>
-                    <tr><td><code>split($sep, $str)</code></td><td>Split string into array</td></tr>
+                    <tr><td><code>split($pat, $str [, $limit])</code></td><td>Split string into array (regex; Perl rules: trailing empty fields dropped, <code>" "</code> splits on whitespace) &mdash; <a href="regex.html">details</a></td></tr>
                     <tr><td><code>join($sep, @arr)</code></td><td>Join array into string</td></tr>
                     <tr><td><code>chr($code)</code></td><td>Character from ASCII code</td></tr>
                     <tr><td><code>ord($char)</code></td><td>ASCII code from character</td></tr>
@@ -510,8 +510,8 @@
                     <tr><td><code>core::fork()</code></td><td>Fork process</td></tr>
                     <tr><td><code>core::exec($cmd, @args)</code></td><td>Execute command</td></tr>
                     <tr><td><code>core::system($cmd)</code></td><td>Run shell command</td></tr>
-                    <tr><td><code>core::wait()</code></td><td>Wait for child process</td></tr>
-                    <tr><td><code>core::waitpid($pid)</code></td><td>Wait for specific process</td></tr>
+                    <tr><td><code>core::wait()</code></td><td>Wait for any child; returns its pid (-1 if none)</td></tr>
+                    <tr><td><code>core::waitpid($pid, $flags)</code></td><td>Wait for a specific child; returns its exit status (0 under WNOHANG while it is still running)</td></tr>
                     <tr><td><code>core::getpid()</code></td><td>Get process ID</td></tr>
                     <tr><td><code>core::getppid()</code></td><td>Get parent process ID</td></tr>
                     <tr><td><code>core::kill($pid, $sig)</code></td><td>Send signal to process</td></tr>

@@ -183,7 +183,7 @@
 
             <div class="note">
                 <strong>Spaceship operators:</strong> Use <code>&lt;=&gt;</code> for numeric sort and <code>cmp</code> for string sort:
-                <code>sort { $a &lt;=&gt; $b; } @nums</code> or <code>sort { $a cmp $b; } @strings</code>
+                <code>sort { $a &lt;=&gt; $b } @nums</code> or <code>sort { $a cmp $b } @strings</code>. The block is a single comparison expression; a trailing <code>;</code> or <code>return</code> is allowed.
             </div>
 
             <div class="info-box warning">

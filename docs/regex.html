@@ -553,6 +553,17 @@
 <span class="comment"># Split on literal pipe</span>
 <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@items</span> = <span class="func">split</span>(<span class="string">"\\|"</span>, <span class="sigil">$data</span>);</code></pre>
 
+            <p><code>split()</code> follows Perl's rules:</p>
+            <ul>
+                <li><strong>Trailing empty fields are removed</strong>, so <code>split(",", "a,b,,")</code> gives <code>("a", "b")</code>, and splitting an empty string gives an empty list. Leading and inner empty fields are kept: <code>split(",", ",a,,b")</code> gives <code>("", "a", "", "b")</code>.</li>
+                <li><strong><code>" "</code> is awk mode:</strong> leading whitespace is skipped and runs of any whitespace separate fields. <code>split(" ", "  a \t b  ")</code> gives <code>("a", "b")</code>. Use <code>"\\s+"</code> if you want a leading empty field instead.</li>
+                <li><strong>A limit</strong> caps the number of fields; the last field keeps the rest of the string, and trailing empty fields are kept. A negative limit means no cap but keeps trailing empty fields.</li>
+            </ul>
+
+            <pre><code><span class="func">split</span>(<span class="string">","</span>, <span class="string">"a,b,c,d"</span>, 2);    <span class="comment"># ("a", "b,c,d")</span>
+<span class="func">split</span>(<span class="string">","</span>, <span class="string">"a,b,,"</span>, -1);     <span class="comment"># ("a", "b", "", "")</span>
+<span class="func">split</span>(<span class="string">"\n"</span>, <span class="string">"one\ntwo\n"</span>);   <span class="comment"># ("one", "two") - no phantom last line</span></code></pre>
+
             <h3>join()</h3>
 
             <p>Join array elements with a separator (not regex, but commonly paired with <code>split()</code>):</p>

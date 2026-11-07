@@ -237,8 +237,8 @@
                     <tr><td><code>core::exec_argv(@argv)</code></td><td><code>array&rarr;int</code></td><td>execvp with argument list.</td></tr>
                     <tr><td><code>core::system(cmd)</code></td><td><code>str&rarr;int</code></td><td>Shell out via /bin/sh -c; returns exit status.</td></tr>
                     <tr><td><code>core::system_argv(@argv)</code></td><td><code>array&rarr;int</code></td><td>system with argv (no shell).</td></tr>
-                    <tr><td><code>core::wait()</code></td><td><code>&rarr;int</code></td><td>wait(2); returns child pid; updates $?.</td></tr>
-                    <tr><td><code>core::waitpid(pid, flags)</code></td><td><code>int,int&rarr;int</code></td><td>waitpid(2).</td></tr>
+                    <tr><td><code>core::wait()</code></td><td><code>&rarr;int</code></td><td>wait(2): blocks until any child exits; returns its pid, or -1 when there are no children.</td></tr>
+                    <tr><td><code>core::waitpid(pid, flags)</code></td><td><code>int,int&rarr;int</code></td><td>waitpid(2), but returns the child's raw exit <em>status</em> (exit code is <code>($st &gt;&gt; 8) &amp; 255</code>), not its pid. With <code>flags</code> = 1 (WNOHANG) it returns 0 while the child is still running; -1 on error. Use <code>core::wait()</code> to learn which child exited.</td></tr>
                     <tr><td><code>core::kill(sig, pid)</code></td><td><code>str/int,int&rarr;int</code></td><td>Send signal. Sig may be name ("USR1") or number.</td></tr>
                     <tr><td><code>core::killpg(pgid, sig)</code></td><td><code>int,int&rarr;int</code></td><td>killpg(2).</td></tr>
                     <tr><td><code>core::exit(code)</code></td><td><code>int&rarr;void</code></td><td>Run END blocks then exit(code).</td></tr>
