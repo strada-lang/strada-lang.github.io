@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Benchmarks - Strada vs Perl vs Python vs Ruby vs Node.js vs PHP | Performance</title>
-    <meta name="description" content="Strada benchmark results compared to Perl, Python, Ruby, Node.js, and PHP. Strada is 101x faster than Perl at compute, 79x faster at function calls, and beats every language on every benchmark.">
+    <meta name="description" content="Strada benchmark results compared to Perl, Python, Ruby, Node.js, and PHP. Strada is 204x faster than Perl at compute, 384x faster at function calls, and beats every language on every benchmark.">
     <link rel="stylesheet" href="style.css">
     <style>
         .bench-table {
@@ -236,22 +236,22 @@
 
             <div class="highlight-card">
                 <div class="stat">
-                    <div class="stat-number">101x</div>
+                    <div class="stat-number">204x</div>
                     <div class="stat-label">faster than Perl at compute</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-number">79x</div>
+                    <div class="stat-number">384x</div>
                     <div class="stat-label">faster than Perl at functions</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-number">2,524x</div>
+                    <div class="stat-number">2,233x</div>
                     <div class="stat-label">faster than Python at strings</div>
                 </div>
             </div>
 
             <h2>Results</h2>
 
-            <p>All times are wall-clock seconds, best of 3 runs, from the 2026-06-19 sweep (<code>benchmarks/RESULTS_2026-06-19.md</code>). Lower is better.</p>
+            <p>All times are wall-clock seconds, best of 3 runs, from the 2026-11-18 sweep (<code>benchmarks/RESULTS_2026-11-18.md</code>). Lower is better. The Functions benchmark finishes in about 3&nbsp;ms, close to the timer&rsquo;s resolution, so its speedups are approximate.</p>
 
             <table class="bench-table">
                 <thead>
@@ -268,48 +268,48 @@
                 <tbody>
                     <tr>
                         <td>Compute</td>
-                        <td class="winner">0.912s</td>
-                        <td class="slower">92.25s</td>
-                        <td class="slower">27.35s</td>
-                        <td class="slower">19.67s</td>
-                        <td class="slower">2.51s</td>
-                        <td class="slower">11.90s</td>
+                        <td class="winner">0.474s</td>
+                        <td class="slower">96.60s</td>
+                        <td class="slower">28.33s</td>
+                        <td class="slower">20.21s</td>
+                        <td class="slower">2.629s</td>
+                        <td class="slower">12.09s</td>
                     </tr>
                     <tr>
                         <td>Functions</td>
-                        <td class="winner">0.014s</td>
-                        <td class="slower">1.102s</td>
-                        <td class="slower">0.888s</td>
-                        <td class="slower">0.385s</td>
-                        <td class="slower">0.041s</td>
-                        <td class="slower">0.173s</td>
+                        <td class="winner">0.003s</td>
+                        <td class="slower">1.153s</td>
+                        <td class="slower">0.938s</td>
+                        <td class="slower">0.395s</td>
+                        <td class="slower">0.039s</td>
+                        <td class="slower">0.179s</td>
                     </tr>
                     <tr>
                         <td>Strings</td>
-                        <td class="winner">0.055s</td>
-                        <td class="slower">0.145s</td>
-                        <td class="slower">138.83s</td>
-                        <td class="slower">60.60s</td>
-                        <td class="slower">0.131s</td>
-                        <td class="slower">0.075s</td>
+                        <td class="winner">0.064s</td>
+                        <td class="slower">0.148s</td>
+                        <td class="slower">142.93s</td>
+                        <td class="slower">61.12s</td>
+                        <td class="slower">0.141s</td>
+                        <td class="slower">0.080s</td>
                     </tr>
                     <tr>
                         <td>Array/Hash</td>
-                        <td class="winner">0.101s</td>
-                        <td class="slower">0.672s</td>
-                        <td class="slower">0.524s</td>
-                        <td class="slower">0.708s</td>
-                        <td class="slower">0.547s</td>
-                        <td class="slower">0.135s</td>
+                        <td class="winner">0.126s</td>
+                        <td class="slower">0.698s</td>
+                        <td class="slower">0.534s</td>
+                        <td class="slower">0.778s</td>
+                        <td class="slower">0.569s</td>
+                        <td class="slower">0.142s</td>
                     </tr>
                     <tr>
                         <td>OOP</td>
-                        <td class="winner">0.023s</td>
-                        <td class="slower">1.299s</td>
-                        <td class="slower">0.570s</td>
-                        <td class="slower">0.516s</td>
-                        <td class="slower">0.044s</td>
-                        <td class="slower">0.135s</td>
+                        <td class="winner">0.036s</td>
+                        <td class="slower">1.375s</td>
+                        <td class="slower">0.578s</td>
+                        <td class="slower">0.520s</td>
+                        <td class="slower">0.045s</td>
+                        <td class="slower">0.136s</td>
                     </tr>
                 </tbody>
             </table>
@@ -320,70 +320,70 @@
 
             <div class="bench-group">
                 <div class="ratio-bar">
-                    <span class="ratio-label">Compute</span>
+                    <span class="ratio-label">Functions</span>
                     <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 100%;">101x faster</div>
+                        <div class="ratio-fill strada" style="width: 100%;">384x faster</div>
                     </div>
                 </div>
                 <div class="ratio-bar">
-                    <span class="ratio-label">Functions</span>
+                    <span class="ratio-label">Compute</span>
                     <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 78%;">79x faster</div>
+                        <div class="ratio-fill strada" style="width: 53%;">204x faster</div>
                     </div>
                 </div>
                 <div class="ratio-bar">
                     <span class="ratio-label">OOP</span>
                     <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 55%;">56x faster</div>
+                        <div class="ratio-fill strada" style="width: 10%;">38x faster</div>
                     </div>
                 </div>
                 <div class="ratio-bar">
                     <span class="ratio-label">Array/Hash</span>
                     <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 8%;">6.7x faster</div>
+                        <div class="ratio-fill strada" style="width: 1%;">5.5x faster</div>
                     </div>
                 </div>
                 <div class="ratio-bar">
                     <span class="ratio-label">Strings</span>
                     <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 5%;">2.6x faster</div>
+                        <div class="ratio-fill strada" style="width: 1%;">2.3x faster</div>
                     </div>
                 </div>
             </div>
 
             <h2>Strada vs Python</h2>
 
-            <p>Python's interpreted bytecode VM adds overhead to every operation. Strada compiles to native code, making it dramatically faster across the board. Python's string concatenation with <code>+=</code> is catastrophically slow due to immutable string copies &mdash; over 2,500x slower than Strada.</p>
+            <p>Python's interpreted bytecode VM adds overhead to every operation. Strada compiles to native code, making it dramatically faster across the board. Python's string concatenation with <code>+=</code> is catastrophically slow due to immutable string copies &mdash; over 2,200x slower than Strada.</p>
 
             <div class="bench-group">
                 <div class="ratio-bar">
                     <span class="ratio-label">Strings</span>
                     <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 100%;">2,524x faster</div>
+                        <div class="ratio-fill strada" style="width: 100%;">2,233x faster</div>
                     </div>
                 </div>
                 <div class="ratio-bar">
                     <span class="ratio-label">Functions</span>
                     <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 3%;">63x faster</div>
+                        <div class="ratio-fill strada" style="width: 14%;">313x faster</div>
                     </div>
                 </div>
                 <div class="ratio-bar">
                     <span class="ratio-label">Compute</span>
                     <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 2%;">30x faster</div>
+                        <div class="ratio-fill strada" style="width: 3%;">60x faster</div>
                     </div>
                 </div>
                 <div class="ratio-bar">
                     <span class="ratio-label">OOP</span>
                     <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 1%;">25x faster</div>
+                        <div class="ratio-fill strada" style="width: 1%;">16x faster</div>
                     </div>
                 </div>
                 <div class="ratio-bar">
                     <span class="ratio-label">Array/Hash</span>
                     <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 1%;">5.2x faster</div>
+                        <div class="ratio-fill strada" style="width: 1%;">4.2x faster</div>
                     </div>
                 </div>
             </div>
@@ -396,31 +396,31 @@
                 <div class="ratio-bar">
                     <span class="ratio-label">Strings</span>
                     <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 100%;">1,102x faster</div>
+                        <div class="ratio-fill strada" style="width: 100%;">955x faster</div>
                     </div>
                 </div>
                 <div class="ratio-bar">
                     <span class="ratio-label">Functions</span>
                     <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 3%;">28x faster</div>
-                    </div>
-                </div>
-                <div class="ratio-bar">
-                    <span class="ratio-label">OOP</span>
-                    <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 2%;">22x faster</div>
+                        <div class="ratio-fill strada" style="width: 14%;">132x faster</div>
                     </div>
                 </div>
                 <div class="ratio-bar">
                     <span class="ratio-label">Compute</span>
                     <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 2%;">22x faster</div>
+                        <div class="ratio-fill strada" style="width: 4%;">43x faster</div>
+                    </div>
+                </div>
+                <div class="ratio-bar">
+                    <span class="ratio-label">OOP</span>
+                    <div class="ratio-track">
+                        <div class="ratio-fill strada" style="width: 2%;">14x faster</div>
                     </div>
                 </div>
                 <div class="ratio-bar">
                     <span class="ratio-label">Array/Hash</span>
                     <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 1%;">7.0x faster</div>
+                        <div class="ratio-fill strada" style="width: 1%;">6.2x faster</div>
                     </div>
                 </div>
             </div>
@@ -431,33 +431,33 @@
 
             <div class="bench-group">
                 <div class="ratio-bar">
-                    <span class="ratio-label">Array/Hash</span>
-                    <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 100%;">5.4x faster</div>
-                    </div>
-                </div>
-                <div class="ratio-bar">
                     <span class="ratio-label">Functions</span>
                     <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 54%;">2.9x faster</div>
+                        <div class="ratio-fill strada" style="width: 100%;">13x faster</div>
                     </div>
                 </div>
                 <div class="ratio-bar">
                     <span class="ratio-label">Compute</span>
                     <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 51%;">2.8x faster</div>
+                        <div class="ratio-fill strada" style="width: 43%;">5.5x faster</div>
+                    </div>
+                </div>
+                <div class="ratio-bar">
+                    <span class="ratio-label">Array/Hash</span>
+                    <div class="ratio-track">
+                        <div class="ratio-fill strada" style="width: 35%;">4.5x faster</div>
                     </div>
                 </div>
                 <div class="ratio-bar">
                     <span class="ratio-label">Strings</span>
                     <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 44%;">2.4x faster</div>
+                        <div class="ratio-fill strada" style="width: 17%;">2.2x faster</div>
                     </div>
                 </div>
                 <div class="ratio-bar">
                     <span class="ratio-label">OOP</span>
                     <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 35%;">1.9x faster</div>
+                        <div class="ratio-fill strada" style="width: 10%;">1.2x faster</div>
                     </div>
                 </div>
             </div>
@@ -468,33 +468,33 @@
 
             <div class="bench-group">
                 <div class="ratio-bar">
-                    <span class="ratio-label">Compute</span>
+                    <span class="ratio-label">Functions</span>
                     <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 100%;">13x faster</div>
+                        <div class="ratio-fill strada" style="width: 100%;">60x faster</div>
                     </div>
                 </div>
                 <div class="ratio-bar">
-                    <span class="ratio-label">Functions</span>
+                    <span class="ratio-label">Compute</span>
                     <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 95%;">12x faster</div>
+                        <div class="ratio-fill strada" style="width: 43%;">26x faster</div>
                     </div>
                 </div>
                 <div class="ratio-bar">
                     <span class="ratio-label">OOP</span>
                     <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 45%;">5.9x faster</div>
+                        <div class="ratio-fill strada" style="width: 6%;">3.8x faster</div>
                     </div>
                 </div>
                 <div class="ratio-bar">
                     <span class="ratio-label">Strings</span>
                     <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 11%;">1.4x faster</div>
+                        <div class="ratio-fill strada" style="width: 2%;">1.2x faster</div>
                     </div>
                 </div>
                 <div class="ratio-bar">
                     <span class="ratio-label">Array/Hash</span>
                     <div class="ratio-track">
-                        <div class="ratio-fill strada" style="width: 10%;">1.3x faster</div>
+                        <div class="ratio-fill strada" style="width: 2%;">1.1x faster</div>
                     </div>
                 </div>
             </div>
@@ -508,22 +508,22 @@
 
             <div class="why-section">
                 <h3>Zero-overhead function calls</h3>
-                <p>Interpreted languages look up function names at runtime. Strada compiles function calls to direct C function calls &mdash; a single <code>call</code> instruction. With inline fast-path wrappers for tagged integer operations, function call overhead approaches zero. This makes Strada <strong>79x faster than Perl</strong>, <strong>63x faster than Python</strong>, <strong>28x faster than Ruby</strong>, <strong>12x faster than PHP</strong>, and <strong>2.9x faster than Node.js</strong> at function-heavy workloads.</p>
+                <p>Interpreted languages look up function names at runtime. Strada compiles function calls to direct C function calls &mdash; a single <code>call</code> instruction. With inline fast-path wrappers for tagged integer operations, function call overhead approaches zero. This makes Strada <strong>384x faster than Perl</strong>, <strong>313x faster than Python</strong>, <strong>132x faster than Ruby</strong>, <strong>60x faster than PHP</strong>, and <strong>13x faster than Node.js</strong> at function-heavy workloads.</p>
             </div>
 
             <div class="why-section">
                 <h3>Tagged integers: zero-allocation arithmetic</h3>
-                <p>Strada encodes integers directly inside pointers &mdash; no heap allocation, no reference counting, no free. When both operands are <code>int</code>-typed, <code>$a + $b</code> compiles to plain 64-bit C arithmetic; on untyped values it takes an inline tagged-integer fast path (with an overflow check that promotes to an unsigned or floating-point result instead of wrapping). Reference counting and type conversion functions are inlined at every call site, short-circuiting to a single pointer-bit check for the common integer case. This makes compute-heavy code <strong>101x faster than Perl</strong>, <strong>30x faster than Python</strong>, <strong>22x faster than Ruby</strong>, <strong>13x faster than PHP</strong>, and <strong>2.8x faster than Node.js</strong>.</p>
+                <p>Strada encodes integers directly inside pointers &mdash; no heap allocation, no reference counting, no free. When both operands are <code>int</code>-typed, <code>$a + $b</code> compiles to plain 64-bit C arithmetic; on untyped values it takes an inline tagged-integer fast path (with an overflow check that promotes to an unsigned or floating-point result instead of wrapping). Reference counting and type conversion functions are inlined at every call site, short-circuiting to a single pointer-bit check for the common integer case. This makes compute-heavy code <strong>204x faster than Perl</strong>, <strong>60x faster than Python</strong>, <strong>43x faster than Ruby</strong>, <strong>26x faster than PHP</strong>, and <strong>5.5x faster than Node.js</strong>.</p>
             </div>
 
             <div class="why-section">
                 <h3>Refcounted strings: zero-copy sharing</h3>
-                <p>Strada uses <code>StradaString</code> &mdash; a refcounted string with the data stored inline (single allocation). When a string is passed to a function or used as a hash key, Strada increments the reference count instead of copying. String literals appended with <code>.=</code> bypass allocation entirely, appending bytes directly to the existing buffer. Short strings are recycled via a pool. This makes string operations <strong>2,524x faster than Python</strong>, <strong>1,102x faster than Ruby</strong>, <strong>2.6x faster than Perl</strong>, and <strong>2.4x faster than Node.js</strong>.</p>
+                <p>Strada uses <code>StradaString</code> &mdash; a refcounted string with the data stored inline (single allocation). When a string is passed to a function or used as a hash key, Strada increments the reference count instead of copying. String literals appended with <code>.=</code> bypass allocation entirely, appending bytes directly to the existing buffer. Short strings are recycled via a pool. This makes string operations <strong>2,233x faster than Python</strong>, <strong>955x faster than Ruby</strong>, <strong>2.3x faster than Perl</strong>, and <strong>2.2x faster than Node.js</strong>.</p>
             </div>
 
             <div class="why-section">
                 <h3>Inline accessor &amp; constructor optimization</h3>
-                <p>When you write <code>$self->x()</code> on a <code>has</code> attribute, Strada detects that the method is a simple accessor and compiles it to a direct hash fetch &mdash; skipping method dispatch entirely. For constructors like <code>Point::new("x", 1, "y", 2)</code>, the compiler pre-computes attribute key hashes at compile time, emits direct hash construction code, and devirtualizes method calls for known types. This makes Strada OOP <strong>56x faster than Perl</strong>, <strong>25x faster than Python</strong>, <strong>22x faster than Ruby</strong>, <strong>5.9x faster than PHP</strong>, and <strong>1.9x faster than Node.js</strong>.</p>
+                <p>When you write <code>$self->x()</code> on a <code>has</code> attribute, Strada detects that the method is a simple accessor and compiles it to a direct hash fetch &mdash; skipping method dispatch entirely. For constructors like <code>Point::new("x", 1, "y", 2)</code>, the compiler pre-computes attribute key hashes at compile time, emits direct hash construction code, and devirtualizes method calls for known types. This makes Strada OOP <strong>38x faster than Perl</strong>, <strong>16x faster than Python</strong>, <strong>14x faster than Ruby</strong>, <strong>3.8x faster than PHP</strong>, and <strong>1.2x faster than Node.js</strong>.</p>
             </div>
 
             <div class="why-section">
@@ -585,7 +585,7 @@ time php benchmarks/bench_compute.php</code></pre>
 
             <div class="info-box">
                 <strong>Environment</strong>
-                Benchmarks measured on 2026-06-19 on a 2-core Linux x86_64 host with GCC -O2 -flto for Strada (the <code>strada</code> default), Perl 5.38, Python 3.12, Ruby 3.2, Node.js 24 (V8), and PHP 8.3. Times are best of 3 runs (wall-clock time). Each benchmark runs the same algorithm with the same input across all languages.
+                Benchmarks measured on 2026-11-18 on a 2-core Linux x86_64 host with GCC -O2 -flto for Strada (the <code>strada</code> default), Perl 5.38, Python 3.12, Ruby 3.2, Node.js 24 (V8), and PHP 8.3. Times are best of 3 runs (wall-clock time). Each benchmark runs the same algorithm with the same input across all languages.
             </div>
 
             <div class="page-nav">
