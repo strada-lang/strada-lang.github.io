@@ -68,6 +68,7 @@
             <div class="info-box">
                 <strong>PCRE2-Powered</strong>
                 <p>Strada uses <strong>PCRE2</strong> (Perl Compatible Regular Expressions) for full Perl-style regex support, including lookahead, lookbehind, named captures, lazy quantifiers, and more. If PCRE2 is not available at build time, Strada falls back to POSIX Extended Regular Expressions with reduced functionality.</p>
+                <p>Everything on this page behaves the same in compiled programs and in the bytecode VM (<code>strada-interp</code>). Match state (<code>$1</code>, <code>re::captures()</code>) is per thread.</p>
             </div>
 
             <h2>Pattern Matching</h2>
@@ -277,7 +278,7 @@
                     <tr><td><code>m</code></td><td>Multi-line mode (<code>^</code> and <code>$</code> match line boundaries)</td></tr>
                     <tr><td><code>s</code></td><td>Single-line/dotall mode (<code>.</code> matches newline)</td></tr>
                     <tr><td><code>x</code></td><td>Extended mode (whitespace and comments ignored in pattern)</td></tr>
-                    <tr><td><code>g</code></td><td>Global (for substitution &mdash; replace all occurrences)</td></tr>
+                    <tr><td><code>g</code></td><td>Global: <code>s///g</code> replaces all occurrences; <code>while (S =~ /.../g)</code> iterates over matches</td></tr>
                     <tr><td><code>e</code></td><td>Evaluate replacement as expression (substitution only)</td></tr>
                 </tbody>
             </table>
@@ -326,11 +327,11 @@
     <span class="func">say</span>(<span class="sigil">$2</span>);  <span class="comment"># "world"</span>
 }</code></pre>
 
-            <p><code>$1</code>&ndash;<code>$9</code> return <code>undef</code> if the group doesn't exist. They are syntactic sugar for <code>re::captures()[N]</code>.</p>
+            <p><code>$1</code>&ndash;<code>$9</code> are <code>undef</code> if the group doesn't exist or did not take part in the match (for example an optional <code>(b)?</code> that matched nothing). They are syntactic sugar for <code>re::captures()[N]</code>. There is no <code>$10</code> variable: read group 10 and above from <code>re::captures()</code>.</p>
 
             <h2>The re::captures() Function</h2>
 
-            <p>Use <code>re::captures()</code> to get all capture groups as an array. Use this when you need the full match or more than 9 groups:</p>
+            <p>Use <code>re::captures()</code> to get all capture groups as an array. Use this when you need the full match or more than 9 groups. Every group in the pattern gets a slot; a group that did not participate is <code>undef</code>:</p>
 
             <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$date</span> = <span class="string">"2024-01-15"</span>;
 
@@ -340,6 +341,18 @@
     <span class="func">say</span>(<span class="string">"Year: "</span> . <span class="sigil">$parts</span>[<span class="number">1</span>]);        <span class="comment"># 2024</span>
     <span class="func">say</span>(<span class="string">"Month: "</span> . <span class="sigil">$parts</span>[<span class="number">2</span>]);       <span class="comment"># 01</span>
     <span class="func">say</span>(<span class="string">"Day: "</span> . <span class="sigil">$parts</span>[<span class="number">3</span>]);         <span class="comment"># 15</span>
+}</code></pre>
+
+            <pre><code><span class="comment"># More than 9 groups</span>
+<span class="keyword">if</span> (<span class="string">"abcdefghijkl"</span> =~ <span class="string">/(a)(b)(c)(d)(e)(f)(g)(h)(i)(j)(k)(l)/</span>) {
+    <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@c</span> = <span class="func">re::captures</span>();
+    <span class="func">say</span>(<span class="sigil">$c</span>[<span class="number">10</span>] . <span class="sigil">$c</span>[<span class="number">12</span>]);   <span class="comment"># jl</span>
+}
+
+<span class="comment"># Unmatched optional group</span>
+<span class="keyword">if</span> (<span class="string">"ac"</span> =~ <span class="string">/(a)(b)?(c)/</span>) {
+    <span class="func">say</span>(<span class="func">defined</span>(<span class="sigil">$2</span>) ? <span class="string">"set"</span> : <span class="string">"undef"</span>);   <span class="comment"># undef</span>
+    <span class="func">say</span>(<span class="sigil">$3</span>);                                 <span class="comment"># c</span>
 }</code></pre>
 
             <div class="info-box">
@@ -359,6 +372,19 @@
     <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$domain</span> = <span class="sigil">$saved</span>[<span class="number">2</span>];
     <span class="func">say</span>(<span class="string">"User: "</span> . <span class="sigil">$user</span> . <span class="string">", Domain: "</span> . <span class="sigil">$domain</span>);
 }</code></pre>
+
+            <h2>Global Matching (/g)</h2>
+
+            <p>In a <code>while</code> condition, <code>/g</code> resumes each match where the previous one ended, so the loop visits every match in turn. In list context, <code>/g</code> returns all captured groups of all matches:</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$text</span> = <span class="string">"a=1, b=22, c=333"</span>;
+
+<span class="keyword">while</span> (<span class="sigil">$text</span> =~ <span class="string">/(\w)=(\d+)/g</span>) {
+    <span class="func">say</span>(<span class="sigil">$1</span> . <span class="string">" -&gt; "</span> . <span class="sigil">$2</span>);   <span class="comment"># a -&gt; 1, b -&gt; 22, c -&gt; 333</span>
+}
+
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@pairs</span> = (<span class="string">"k1=v1 k2=v2"</span> =~ <span class="string">/(\w+)=(\w+)/g</span>);
+<span class="func">say</span>(<span class="func">join</span>(<span class="string">","</span>, <span class="sigil">@pairs</span>));   <span class="comment"># k1,v1,k2,v2</span></code></pre>
 
             <h2>Named Captures</h2>
 
@@ -438,7 +464,7 @@
 
             <h2>Variable Interpolation</h2>
 
-            <p>Variables are interpolated inside regex patterns when prefixed with <code>$</code>:</p>
+            <p>Variables are interpolated inside regex patterns (and in both halves of <code>s///</code>) when prefixed with <code>$</code>. <code>${name}</code>, a hash element <code>$name{key}</code> (when <code>%name</code> is declared) and an array element <code>$name[0]</code> or <code>$name[$i]</code> (when <code>@name</code> is declared) work too:</p>
 
             <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$search</span> = <span class="string">"world"</span>;
 
@@ -739,11 +765,11 @@
                     <tr><td>Positive lookbehind</td><td><code>(?&lt;=...)</code></td><td>Supported</td></tr>
                     <tr><td>Negative lookbehind</td><td><code>(?&lt;!...)</code></td><td>Supported</td></tr>
                     <tr><td>Word boundaries</td><td><code>\b</code>, <code>\B</code></td><td>Supported</td></tr>
-                    <tr><td>Backreferences</td><td><code>$1</code>&ndash;<code>$9</code></td><td>Supported</td></tr>
+                    <tr><td>Backreferences</td><td><code>\1</code> in the pattern, <code>$1</code>&ndash;<code>$9</code> after the match</td><td>Supported</td></tr>
                     <tr><td>Character class shortcuts</td><td><code>\d</code>, <code>\w</code>, <code>\s</code></td><td>Supported</td></tr>
                     <tr><td>Flags</td><td><code>/i</code>, <code>/m</code>, <code>/s</code>, <code>/x</code>, <code>/g</code>, <code>/e</code></td><td>Supported</td></tr>
-                    <tr><td>Possessive quantifiers</td><td><code>*+</code>, <code>++</code></td><td>Not supported</td></tr>
-                    <tr><td>Unicode properties</td><td><code>\p{...}</code></td><td>Not supported</td></tr>
+                    <tr><td>Possessive quantifiers</td><td><code>*+</code>, <code>++</code></td><td>Supported</td></tr>
+                    <tr><td>Unicode properties</td><td><code>\p{...}</code>, <code>\p{^...}</code></td><td>Supported</td></tr>
                 </tbody>
             </table>
 
@@ -755,7 +781,7 @@
                     <li>Compiled PCRE2 patterns are cached (128-slot cache) for fast repeated matching</li>
                     <li>Use anchors (<code>^</code>, <code>$</code>) when possible to limit the search space</li>
                     <li>Prefer <code>index()</code> for simple substring searches (no regex overhead)</li>
-                    <li>Use <code>replace_all()</code> for literal string replacement (faster than regex)</li>
+                    <li>Use <code>str::replace()</code> for literal string replacement (faster than regex)</li>
                     <li>Use non-capturing groups <code>(?:...)</code> when you don't need the captured text</li>
                 </ul>
             </div>

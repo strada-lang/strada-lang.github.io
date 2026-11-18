@@ -73,47 +73,52 @@
                 <div class="card">
                     <h4>SQLite</h4>
                     <p>Lightweight, file-based database. No server required.</p>
-                    <p><strong>Link with:</strong> <code>-lsqlite3</code></p>
+                    <p><strong>Requires:</strong> libsqlite3 (<code>HAVE_SQLITE3</code>)</p>
                 </div>
                 <div class="card">
                     <h4>MySQL / MariaDB</h4>
                     <p>Popular open-source relational database.</p>
-                    <p><strong>Link with:</strong> <code>-lmysqlclient</code></p>
+                    <p><strong>Requires:</strong> libmysqlclient (<code>HAVE_MYSQL</code>)</p>
                 </div>
                 <div class="card">
                     <h4>PostgreSQL</h4>
                     <p>Advanced open-source object-relational database.</p>
-                    <p><strong>Link with:</strong> <code>-lpq</code></p>
+                    <p><strong>Requires:</strong> libpq (<code>HAVE_POSTGRES</code>)</p>
                 </div>
             </div>
+
+            <p>Drivers are enabled by <code>./configure</code> (it detects which client libraries are installed; <code>--with-mysql</code> / <code>--without-postgres</code> etc. override). <code>use DBI;</code> picks up the configured drivers and links their libraries automatically, so no <code>-l</code> flags are needed on the <code>strada</code> command line.</p>
 
             <h2>Quick Start</h2>
 
             <pre><code><span class="keyword">use</span> <span class="keyword">lib</span> <span class="string">"lib"</span>;
 <span class="keyword">use</span> <span class="type">DBI</span>;
 
-<span class="comment"># Connect to SQLite</span>
-<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$dbh</span> = <span class="type">DBI</span>::<span class="func">connect</span>(<span class="string">"dbi:SQLite:myapp.db"</span>, <span class="string">""</span>, <span class="string">""</span>);
+<span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
+    <span class="comment"># Connect to SQLite</span>
+    <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$dbh</span> = <span class="type">DBI</span>::<span class="func">connect</span>(<span class="string">"dbi:SQLite:myapp.db"</span>, <span class="string">""</span>, <span class="string">""</span>);
 
-<span class="comment"># Create table</span>
-<span class="type">DBI</span>::<span class="func">exec</span>(<span class="sigil">$dbh</span>, <span class="string">"CREATE TABLE IF NOT EXISTS users (
-    id INTEGER PRIMARY KEY,
-    name TEXT NOT NULL,
-    email TEXT
-)"</span>, []);
+    <span class="comment"># Create table</span>
+    <span class="type">DBI</span>::<span class="func">exec</span>(<span class="sigil">$dbh</span>, <span class="string">"CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY,
+        name TEXT NOT NULL,
+        email TEXT
+    )"</span>, []);
 
-<span class="comment"># Insert with placeholders (safe from SQL injection)</span>
-<span class="type">DBI</span>::<span class="func">exec</span>(<span class="sigil">$dbh</span>, <span class="string">"INSERT INTO users (name, email) VALUES (?, ?)"</span>,
-    [<span class="string">"Alice"</span>, <span class="string">"alice@example.com"</span>]);
+    <span class="comment"># Insert with placeholders (safe from SQL injection)</span>
+    <span class="type">DBI</span>::<span class="func">exec</span>(<span class="sigil">$dbh</span>, <span class="string">"INSERT INTO users (name, email) VALUES (?, ?)"</span>,
+        [<span class="string">"Alice"</span>, <span class="string">"alice@example.com"</span>]);
 
-<span class="comment"># Query all rows</span>
-<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$users</span> = <span class="type">DBI</span>::<span class="func">selectall_hashref</span>(<span class="sigil">$dbh</span>, <span class="string">"SELECT * FROM users"</span>, []);
-<span class="keyword">foreach</span> <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$user</span> (<span class="sigil">@{$users}</span>) {
-    <span class="func">say</span>(<span class="sigil">$user</span>-&gt;{<span class="string">"name"</span>} . <span class="string">" &lt;"</span> . <span class="sigil">$user</span>-&gt;{<span class="string">"email"</span>} . <span class="string">"&gt;"</span>);
-}
+    <span class="comment"># Query all rows</span>
+    <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$users</span> = <span class="type">DBI</span>::<span class="func">selectall_hashref</span>(<span class="sigil">$dbh</span>, <span class="string">"SELECT * FROM users"</span>, []);
+    <span class="keyword">foreach</span> <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$user</span> (<span class="sigil">@{$users}</span>) {
+        <span class="func">say</span>(<span class="sigil">$user</span>-&gt;{<span class="string">"name"</span>} . <span class="string">" &lt;"</span> . <span class="sigil">$user</span>-&gt;{<span class="string">"email"</span>} . <span class="string">"&gt;"</span>);
+    }
 
-<span class="comment"># Disconnect</span>
-<span class="type">DBI</span>::<span class="func">disconnect</span>(<span class="sigil">$dbh</span>);</code></pre>
+    <span class="comment"># Disconnect</span>
+    <span class="type">DBI</span>::<span class="func">disconnect</span>(<span class="sigil">$dbh</span>);
+    <span class="keyword">return</span> <span class="number">0</span>;
+}</code></pre>
 
             <h2>DSN Formats</h2>
 
@@ -394,19 +399,27 @@
                     <tr><td><code>do_sql($dbh, $sql)</code></td><td>Execute without params</td></tr>
                     <tr><td><code>prepare($dbh, $sql)</code></td><td>Prepare statement</td></tr>
                     <tr><td><code>execute($sth, $params)</code></td><td>Execute prepared</td></tr>
-                    <tr><td rowspan="5">Fetching</td><td><code>selectall_hashref($dbh, $sql, $params)</code></td><td>All rows as hashes</td></tr>
+                    <tr><td rowspan="9">Fetching</td><td><code>selectall_hashref($dbh, $sql, $params)</code></td><td>All rows as hashes</td></tr>
                     <tr><td><code>selectrow_hashref($dbh, $sql, $params)</code></td><td>First row as hash</td></tr>
                     <tr><td><code>selectcol($dbh, $sql, $params)</code></td><td>First column value</td></tr>
                     <tr><td><code>fetchrow_hashref($sth)</code></td><td>Next row as hash</td></tr>
-                    <tr><td><code>fetchrow_array($sth)</code></td><td>Next row as array</td></tr>
+                    <tr><td><code>fetchrow_array($sth)</code></td><td>Next row as array ref</td></tr>
+                    <tr><td><code>fetchall_arrayref($sth)</code></td><td>Remaining rows as array refs</td></tr>
+                    <tr><td><code>selectall_arrayref($dbh, $sql)</code></td><td>All rows as array refs</td></tr>
+                    <tr><td><code>selectall_arrayref_bind($dbh, $sql, $params)</code></td><td>All rows as array refs, with params</td></tr>
+                    <tr><td><code>finish($sth)</code></td><td>Release a statement</td></tr>
                     <tr><td rowspan="3">Transactions</td><td><code>begin_work($dbh)</code></td><td>Begin transaction</td></tr>
                     <tr><td><code>commit($dbh)</code></td><td>Commit transaction</td></tr>
                     <tr><td><code>rollback($dbh)</code></td><td>Rollback transaction</td></tr>
-                    <tr><td rowspan="5">Utility</td><td><code>insert_get_id($dbh, $sql, $params)</code></td><td>Insert and get ID</td></tr>
+                    <tr><td rowspan="9">Utility</td><td><code>insert_get_id($dbh, $sql, $params)</code></td><td>Insert and get ID</td></tr>
+                    <tr><td><code>last_insert_id($dbh)</code></td><td>ID of the last inserted row</td></tr>
                     <tr><td><code>quote($dbh, $value)</code></td><td>Quote string value</td></tr>
+                    <tr><td><code>quote_identifier($dbh, $name)</code></td><td>Quote a table/column name</td></tr>
                     <tr><td><code>errstr($dbh)</code></td><td>Last error message</td></tr>
                     <tr><td><code>err($dbh)</code></td><td>Last error code</td></tr>
                     <tr><td><code>rows($sth)</code></td><td>Affected row count</td></tr>
+                    <tr><td><code>column_names($sth)</code></td><td>Column names (array ref)</td></tr>
+                    <tr><td><code>set_raise_error($dbh, $flag)</code></td><td>Throw on database errors</td></tr>
                 </tbody>
             </table>
 

@@ -63,16 +63,17 @@
         <!-- ============================================================ -->
         <h2 id="compiling">Compiling &amp; Running</h2>
 
-        <p>perla has four main modes of invocation:</p>
+        <p>The main ways to invoke perla:</p>
 
         <table>
             <tr><th>Command</th><th>What it does</th></tr>
-            <tr><td><code>perla script.pl</code></td><td>Compile and run. Cleans up the binary after.</td></tr>
+            <tr><td><code>perla script.pl</code></td><td>Compile and run. The binary is kept in perla's link cache (<code>~/.cache/perla</code>), not in your directory, so an unchanged script re-runs without recompiling; a background job builds an <code>-O1</code> copy for later runs.</td></tr>
             <tr><td><code>perla -o prog script.pl</code></td><td>Compile to <code>./prog</code>, don't run.</td></tr>
             <tr><td><code>perla -c -o out.c script.pl</code></td><td>Emit C code only; skip the cc step.</td></tr>
-            <tr><td><code>perla -M Module.pm</code></td><td>Precompile the module to <code>Module.pm.o</code>.</td></tr>
+            <tr><td><code>perla -M Module.pm</code></td><td>Precompile the module to <code>Module.pm.o</code> (plus <code>Module.pm.so</code> with <code>PERLA_BUILD_PM_SO=1</code>).</td></tr>
             <tr><td><code>perla -M dir/</code></td><td>Recursively precompile every <code>.pm</code> under <code>dir/</code>.</td></tr>
             <tr><td><code>perla -e 'code'</code></td><td>Run a one-liner.</td></tr>
+            <tr><td><code>perla</code></td><td>With no arguments: interactive REPL.</td></tr>
         </table>
 
         <h3>All command-line flags</h3>
@@ -83,15 +84,17 @@
             <tr><td><code>-e 'CODE'</code></td><td>Execute an inline one-liner.</td></tr>
             <tr><td><code>-M FILE</code></td><td>Precompile module/directory.</td></tr>
             <tr><td><code>-I PATH</code></td><td>Add to compile-time <code>@INC</code>.</td></tr>
-            <tr><td><code>--cc BIN</code></td><td>Use a specific C compiler (default <code>gcc</code>, alternative <code>tcc</code>).</td></tr>
+            <tr><td><code>--cc BIN</code></td><td>Use a specific C compiler (default <code>gcc</code>; <code>tcc</code> needs perla built with <code>TCC_RUNTIME=1</code>, otherwise perla falls back to gcc). Same as <code>PERLA_CC</code>.</td></tr>
             <tr><td><code>--debug</code></td><td>Verbose compile-time tracing. Prints module search, cache events, cc command.</td></tr>
-            <tr><td><code>--keep</code></td><td>Don't delete the intermediate <code>.c</code> after compile.</td></tr>
+            <tr><td><code>--keep</code>, <code>--keep-c</code></td><td>Don't delete the intermediate <code>.c</code> after compile. (No <code>.c</code> is written when the build comes from the link cache; set <code>PERLA_NO_LINK_CACHE=1</code>.)</td></tr>
+            <tr><td><code>-g</code>, <code>--debug-symbols</code></td><td>gdb-debuggable binary: DWARF, var-tracking and unwind tables, and the generated <code>.c</code> kept next to it.</td></tr>
             <tr><td><code>-O0</code> .. <code>-O3</code>, <code>-Os</code>, <code>-Ofast</code></td><td>gcc optimization (default <code>-O0</code>; see below).</td></tr>
             <tr><td><code>--precompile-deps</code></td><td>Auto-build <code>.pm.o</code>+<code>.pm.so</code> for every module encountered.</td></tr>
             <tr><td><code>--shared</code></td><td>Prefer <code>.pm.so</code> (runtime dlopen) over <code>.pm.o</code> (static link).</td></tr>
             <tr><td><code>--force-rebuild</code></td><td><code>perla -M</code> rebuilds every module, even cached ones.</td></tr>
-            <tr><td><code>--vm</code></td><td>Run via Strada codegen interpreter path (no cc step).</td></tr>
+            <tr><td><code>--vm</code></td><td>Lower to Strada and run it with Strada's interpreter (no cc step when no precompiled modules are used). Experimental and less complete than compiled mode; set <code>STRADA_DIR</code> to a Strada source tree with the interpreter built.</td></tr>
             <tr><td><code>--strada</code></td><td>Emit Strada source instead of C.</td></tr>
+            <tr><td><code>-v</code>, <code>--version</code> / <code>-h</code>, <code>--help</code></td><td>Version / usage.</td></tr>
         </table>
 
         <h3>Optimization levels</h3>
@@ -111,7 +114,7 @@
         <!-- ============================================================ -->
         <h2 id="c-blocks"><code>__C__</code> Blocks</h2>
 
-        <p><code>__C__ { ... }</code> drops raw C into the generated output. perla doesn't parse or rewrite the block — it's emitted verbatim. Three valid positions:</p>
+        <p><code>__C__ { ... }</code> drops raw C into the generated output. perla doesn't parse or rewrite the block — it's emitted verbatim. Two valid positions (a <code>__C__</code> block used as an expression, e.g. <code>my $x = __C__ { ... };</code>, currently yields <code>undef</code>):</p>
 
         <h3>File scope</h3>
         <p>Place outside any sub. Use for <code>#include</code>s, <code>static</code> state, and helper functions that you'll call from multiple <code>__C__</code> blocks.</p>
@@ -136,11 +139,6 @@
     }
     <span class="kw">return</span> $sum;
 }</pre>
-
-        <h3>Expression context (GCC statement-expression)</h3>
-<pre><span class="kw">my</span> $pid = __C__ {
-    ({ StradaValue *__r = strada_new_int((int64_t)getpid()); __r; })
-};</pre>
 
         <h3>Variable name mapping</h3>
         <div class="callout">
@@ -240,7 +238,7 @@ printf <span class="str">"RSS: %d MB\n"</span>, <span class="kw">int</span>(rss_
         <p><strong>Not included by default:</strong> <code>/opt/bzperl/...</code> or any large CPAN tree. Including it would trigger transitive source parsing of every module in the tree, blowing compile time. Add it via <code>use lib "..."</code> in your script if you need it.</p>
 
         <h3>Runtime path (consulted for <code>require</code> and lazy-loads)</h3>
-        <p>Baked into the executable at compile time. Plus at startup: <code>$PERLA_LIB</code>, <code>~/.perla.conf</code>, <code>/etc/perla.conf</code>. Also probes archlib subdirs (<code>x86_64-linux/</code>) for each path.</p>
+        <p>Baked into the executable at compile time. Plus at startup: <code>$PERLA_LIB</code>, <code>lib_path</code> from <code>~/.perla/perla.conf</code> or <code>/etc/perla.conf</code>. Also probes archlib subdirs (<code>x86_64-linux/</code>) for each path.</p>
 
         <h3>Dedup</h3>
         <p>Two layers prevent re-parsing:</p>
@@ -254,6 +252,7 @@ printf <span class="str">"RSS: %d MB\n"</span>, <span class="kw">int</span>(rss_
         <ul>
             <li><code>Foo/Bar.pm.o</code> — object file for static linking</li>
             <li><code>Foo/Bar.pm.deps</code> — transitive dependency list</li>
+            <li><code>Foo/Bar.pm.export</code> — the subs the object defines; <code>Foo/Bar.pm.cgv</code> — codegen version stamp (stale artifacts are rebuilt)</li>
             <li><code>Foo/Bar.pm.so</code> — shared library (if <code>PERLA_BUILD_PM_SO=1</code> or <code>--shared</code>)</li>
         </ul>
 
@@ -272,8 +271,8 @@ printf <span class="str">"RSS: %d MB\n"</span>, <span class="kw">int</span>(rss_
 
         <table>
             <tr><th>Tool</th><th>Purpose</th></tr>
-            <tr><td><code>perla-cpan</code></td><td>End-user installer. Fetches a module by name from MetaCPAN, resolves transitive deps, compiles XS, installs <code>.pm</code> + <code>.so</code> into a prefix.</td></tr>
-            <tr><td><code>perla-xs-build</code></td><td>Low-level XS compiler: turns a <code>.xs</code> into <code>.o</code>/<code>.so</code> against perla's <code>perl.h</code> shim. Called for you by <code>perla-cpan</code>.</td></tr>
+            <tr><td><code>tools/perla-cpan</code></td><td>End-user installer. Fetches a module by name from MetaCPAN, resolves transitive deps, compiles XS, installs <code>.pm</code> + <code>.so</code> into a prefix. (The <code>perla-cpan</code> binary that <code>make install</code> currently installs is an older tool with a different syntax, <code>perla-cpan install Module::Name</code>; the commands below are for <code>tools/perla-cpan</code>.)</td></tr>
+            <tr><td><code>tools/perla-xs-build</code></td><td>Low-level XS compiler: turns a <code>.xs</code> into <code>.o</code>/<code>.so</code> against perla's <code>perl.h</code> shim. Called for you by <code>perla-cpan</code>.</td></tr>
         </table>
 
         <h3>Quick start</h3>
@@ -304,7 +303,7 @@ printf <span class="str">"RSS: %d MB\n"</span>, <span class="kw">int</span>(rss_
         </table>
 
         <div class="callout info">
-            <p><strong>How it differs from <code>cpanm</code>.</strong> There's no live <code>perl</code> in the loop and no DynaLoader at runtime — XS is compiled <em>ahead of time</em> against perla's <code>perl.h</code> shim and linked into your binary. Most distributions build cleanly. A complex XS dist may reference a Perl-internals macro the shim doesn't define yet; that's usually a one-line addition. <code>perla-cpan</code> installs the current release and doesn't run a dist's <code>Makefile.PL</code> configure logic or satisfy version-range constraints.</p>
+            <p><strong>How it differs from <code>cpanm</code>.</strong> There's no live <code>perl</code> in the loop and no perl DynaLoader — XS is compiled <em>ahead of time</em> against perla's <code>perl.h</code> shim into <code>auto/…/*.so</code>, which perla's own <code>XSLoader</code> loads at run time (<code>--xs-static</code> builds a <code>.o</code> for static linking instead). Most distributions build cleanly. A complex XS dist may reference a Perl-internals macro the shim doesn't define yet; that's usually a one-line addition. <code>perla-cpan</code> installs the current release and doesn't run a dist's <code>Makefile.PL</code> configure logic or satisfy version-range constraints.</p>
         </div>
 
         <!-- ============================================================ -->
@@ -317,10 +316,10 @@ printf <span class="str">"RSS: %d MB\n"</span>, <span class="kw">int</span>(rss_
             <tr><td><code>use Foo -&gt; already loaded (skip)</code></td><td>Name-keyed dedup hit</td></tr>
             <tr><td><code>Foo: resolved to already-loaded path ...</code></td><td>Path-keyed dedup hit</td></tr>
             <tr><td><code>Foo: cache HIT /path [.pm.o (static)]</code></td><td>Found precompiled artifact, will link</td></tr>
-            <tr><td><code>Foo: cache MISS /path — auto-building</code></td><td>Narrow heuristic matched, spawning <code>perla -M</code></td></tr>
+            <tr><td><code>Foo: cache MISS /path - auto-building via perla -M</code></td><td>Narrow heuristic matched, spawning <code>perla -M</code></td></tr>
             <tr><td><code>Foo: source /path (non-tree, will inline)</code></td><td>Project-local module, inlining source</td></tr>
-            <tr><td><code>Foo: XS module detected — skipping</code></td><td>Found <code>auto/.../*.so</code>, avoiding DynaLoader</td></tr>
-            <tr><td><code>[cc] gcc ...</code></td><td>Full C compiler invocation (grep for this!)</td></tr>
+            <tr><td><code>Foo: XS module detected - skipping (runtime require will handle)</code></td><td>Found <code>auto/.../*.so</code>; the module is loaded at run time through perla's XSLoader</td></tr>
+            <tr><td><code>[cc] gcc ...</code> / <code>[cc] ccache gcc ...</code></td><td>Full C compiler invocation (grep for this!)</td></tr>
             <tr><td><code>[cc] done in XX.XXs (ok)</code></td><td>cc finished with timing</td></tr>
             <tr><td><code>[require] ...</code></td><td>Runtime <code>require</code> activity (inside the compiled binary)</td></tr>
         </table>
@@ -368,17 +367,17 @@ printf <span class="str">"RSS: %d MB\n"</span>, <span class="kw">int</span>(rss_
             <li><strong>Exception handling</strong>: <code>eval { }</code>, <code>die</code>, <code>$@</code>, <code>Try::Tiny</code>, typed <code>catch</code>.</li>
             <li><strong>Text &amp; symbol-table features</strong>: <code>format</code>/<code>write</code> reports (incl. <code>$~</code>/<code>$^</code>/<code>$=</code>/<code>$%</code>/<code>$^A</code>, <code>formline</code>), <code>tie</code>/<code>untie</code>/<code>tied</code> on scalars, hashes, arrays, and filehandles, typeglobs and aliasing (<code>*A = *B</code>, <code>*A = \$x</code>), <code>goto LABEL</code>, <code>state</code> variables, <code>local</code> on slices.</li>
             <li><strong>Full Unicode</strong>: UTF-8 string semantics (the <code>SVf_UTF8</code> flag), <code>Unicode::Normalize</code> / <code>utf8::</code> NFC/NFD/NFKC/NFKD, and <code>Encode</code> transcoding (Latin-1, CP1252, ASCII). Plus unsigned 64-bit (UV) integer arithmetic.</li>
-            <li><strong>Core modules</strong>: <code>strict</code>, <code>warnings</code>, <code>Carp</code>, <code>Data::Dumper</code>, <code>JSON</code>, <code>YAML</code>, <code>URI::Escape</code>, <code>File::Spec</code>, <code>File::Temp</code>, <code>File::Find</code>, <code>List::Util</code>, <code>Scalar::Util</code>, <code>Time::HiRes</code>, <code>Encode</code>, <code>Digest::MD5</code>/<code>SHA</code>, <code>MIME::Base64</code>, <code>HTTP::Date</code>, <code>Storable::dclone</code>.</li>
+            <li><strong>Core modules</strong>: <code>strict</code>, <code>warnings</code>, <code>Carp</code>, <code>Data::Dumper</code>, <code>JSON</code>, <code>URI::Escape</code>, <code>File::Spec</code>, <code>File::Temp</code>, <code>File::Find</code>, <code>List::Util</code>, <code>Scalar::Util</code>, <code>Time::HiRes</code>, <code>Encode</code>, <code>Digest::MD5</code>/<code>SHA</code>, <code>MIME::Base64</code>, <code>HTTP::Date</code>, <code>Storable::dclone</code>.</li>
             <li><strong>DBI</strong>: connection, prepare, execute, bind, fetchrow_hashref/array, selectrow_array, transactions (<code>begin_work</code>/<code>commit</code>/<code>rollback</code>), etc. SQLite, MySQL/MariaDB, and PostgreSQL drivers via native implementation.</li>
             <li><strong>CPAN modules</strong>: install pure-Perl <em>and</em> XS distributions with <a href="#cpan"><code>perla-cpan</code></a> — it fetches from MetaCPAN, resolves transitive deps, and compiles XS against perla's <code>perl.h</code> shim.</li>
-            <li><strong>DBIx::Class</strong>: a minimal stub in your <code>lib/DBIx/Class/</code> provides <code>has_one</code>/<code>has_many</code>/<code>belongs_to</code>, <code>ResultSet::search</code>/<code>first</code>/<code>all</code>, <code>Bootstrap::Simple</code>. Not the real DBIC — it's a re-implementation of its public API.</li>
-            <li><strong>Drogo</strong> (web framework): works, including <code>Drogo::Server::Cannoli</code>.</li>
+            <li><strong>DBIx::Class</strong>: a minimal stub in your <code>lib/DBIx/Class/</code> provides <code>has_one</code>/<code>has_many</code>/<code>belongs_to</code>, <code>ResultSet::search</code>/<code>first</code>/<code>all</code>, <code>Bootstrap::Simple</code>. Not the real DBIC — it's a re-implementation of its public API, and it is not shipped with perla.</li>
+            <li><strong>Drogo</strong> (web framework): mostly works, including <code>Drogo::Server::Cannoli</code>.</li>
         </ul>
 
         <h3>What doesn't work (yet)</h3>
         <ul>
-            <li><strong><code>eval STRING</code> at runtime</strong>. Has an opt-in path via <code>core::full_eval_on()</code> but it shells out to a child <code>perla</code> compile — slow and not ergonomic. <code>eval BLOCK</code> works normally for exception handling.</li>
-            <li><strong>Runtime <code>DynaLoader</code>/<code>XSLoader</code> bootstrap of arbitrary <code>.so</code>s</strong>. XS is compiled <em>ahead of time</em> by <a href="#cpan"><code>perla-cpan</code></a> against perla's <code>perl.h</code> shim and linked in — there's no <code>perl</code>-style runtime loader. Most distributions build cleanly; a complex one may surface a missing macro in the shim (usually a one-line addition).</li>
+            <li><strong><code>eval STRING</code> as an interpreter</strong>. <code>eval STRING</code> works, but each new string is compiled by a child <code>perla</code> + gcc into a shared object at run time (about 0.1&nbsp;s the first time, cached in <code>~/.cache/perla/evals</code> afterwards), so a binary that evals new strings needs perla and gcc where it runs. <code>eval BLOCK</code> works normally for exception handling.</li>
+            <li><strong>Loading XS <code>.so</code>s built for perl</strong>. perl's own XS objects (for example the system <code>List/Util.so</code>) don't load; perla falls back to its native implementation where it has one. XS must be compiled by <a href="#cpan"><code>perla-cpan</code></a> against perla's <code>perl.h</code> shim, and perla's <code>XSLoader</code> loads the result. Most distributions build cleanly; a complex one may surface a missing macro in the shim (usually a one-line addition).</li>
             <li><strong>CPAN version constraints &amp; <code>Makefile.PL</code> configure logic</strong>. <code>perla-cpan</code> installs the current release and reads <code>lib/</code> directly; it doesn't run a dist's configure-time code or satisfy <code>&gt;=1.0, &lt;2.0</code> ranges.</li>
             <li><strong>Threads</strong> (Perl's <code>threads</code> module). perla is single-threaded per process; use <code>fork</code> for concurrency (<code>async::*</code> helpers work).</li>
             <li><strong>Source filters</strong>. Parse happens before any runtime, so source filters that modify the source at <code>use</code>-time don't apply.</li>
@@ -400,7 +399,7 @@ printf <span class="str">"RSS: %d MB\n"</span>, <span class="kw">int</span>(rss_
 <span class="sigil">$a</span>-&gt;{peer} = <span class="sigil">$b</span>;
 <span class="sigil">$b</span>-&gt;{peer} = <span class="sigil">$a</span>;        <span class="comment"># no weaken needed</span></code></pre>
 
-        <p><code>Scalar::Util::weaken</code> still works as before and is the right choice when you need deterministic teardown or are targeting a runtime built <code>--without-cycle-gc</code>. Cycles that close only through a closure capture or a tied container fall back to <code>weaken</code>; those aren't handled by the collector. Cyclic <strong>blessed</strong> objects reclaimed by the collector skip <code>DESTROY</code> &mdash; this matches Perl's own global-destruction behaviour for unreachable cycles.</p>
+        <p><code>Scalar::Util::weaken</code> still works as before and is the right choice when you need deterministic teardown or are targeting a runtime built <code>--without-cycle-gc</code>. Cycles that close through a tied container aren't handled by the collector, and a cycle through a closure capture was not reclaimed by <code>Strada::gc_collect()</code> in our tests (it was freed only at exit); use <code>weaken</code> for those. Cyclic <strong>blessed</strong> objects reclaimed by the collector run <code>DESTROY</code>.</p>
 
         <p>Explicit controls are exposed under <code>Strada::</code>:</p>
 
@@ -435,7 +434,7 @@ Strada::arena_end();        <span class="comment"># reclaims everything allocate
         <div class="info-box">
             <strong>Arena rules &mdash; read these before adopting:</strong>
             <ul>
-                <li><strong>Values created inside an arena must not escape <code>arena_end</code>.</strong> Storing one into a longer-lived structure leaves a dangling reference.</li>
+                <li><strong>Don't use a value created inside an arena after <code>arena_end</code>.</strong> Releasing a variable that still holds one is safe (<code>arena_end</code> neutralizes arena values instead of freeing their memory), but reading it is not.</li>
                 <li>An arena container that references a <em>persistent</em> (pre-arena) value leaks one reference on that value; keep arena data self-contained.</li>
                 <li><code>DESTROY</code> is <em>not</em> invoked for objects reclaimed by the arena. Allocate file handles, sockets, mutexes, etc. <em>outside</em> the arena.</li>
                 <li>Single-threaded scope only. Cannoli's preforking model (one process per worker, single-threaded inside) is the intended use case.</li>
@@ -443,7 +442,7 @@ Strada::arena_end();        <span class="comment"># reclaims everything allocate
             </ul>
         </div>
 
-        <p>See <a href="../docs/memory.html">the Strada memory documentation</a> for the deeper design notes (side-table cycle collector, ARENA_OWNS skip in <code>strada_free_value</code>, the cycle collector's <code>cc_free_shell</code>).</p>
+        <p>See <a href="../docs/memory.html">the Strada memory documentation</a> for the deeper design notes (the cycle collector, and the <code>ARENA_OWNS</code> ownership check that makes <code>strada_free_value</code> skip arena values).</p>
 
         <!-- ============================================================ -->
         <h2 id="cannoli">Cannoli Integration</h2>
@@ -452,7 +451,7 @@ Strada::arena_end();        <span class="comment"># reclaims everything allocate
 
 <pre><span class="prompt">$</span> <span class="kw">cd</span> /path/to/cannoli/lib/perla
 <span class="prompt">$</span> make                            <span class="comment"># builds cannoli_perla.so</span>
-<span class="prompt">$</span> make demo                       <span class="comment"># builds Demo.pm.so</span>
+<span class="prompt">$</span> make demo PERLA_BIN=/path/to/perla/perla   <span class="comment"># builds Demo.pm.so</span>
 <span class="prompt">$</span> /path/to/cannoli/cannoli \
     --library <span class="str">"./cannoli_perla.so:\
         so=$(pwd)/Demo.pm.so;\
@@ -461,7 +460,7 @@ Strada::arena_end();        <span class="comment"># reclaims everything allocate
     --dev -p 8080
 
 <span class="prompt">$</span> curl http://127.0.0.1:8080/
-Hello from a perla-compiled handler!</pre>
+Hello from a Perla-compiled handler!</pre>
 
         <p>The bridge parses three config options:</p>
         <ul>
@@ -482,7 +481,7 @@ Hello from a perla-compiled handler!</pre>
             </a>
             <a href="https://github.com/strada-lang/perla/tree/main/t" class="card">
                 <h3>Test suite →</h3>
-                <p>119 tests covering the features perla guarantees. Good reference for what definitely works.</p>
+                <p>169 test programs covering the features perla guarantees. Good reference for what works.</p>
             </a>
             <a href="../docs/reference.html" class="card">
                 <h3>Strada reference →</h3>

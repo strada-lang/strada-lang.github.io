@@ -284,15 +284,16 @@
 
             <h3>Binary Data</h3>
 
-            <p>For binary data that may contain null bytes, use <code>strada_new_str_len()</code>:</p>
+            <p>For binary data that may contain null bytes, use <code>strada_new_str_len()</code> to create the value and <code>strada_str_len(sv)</code> (not <code>strlen()</code>) to get a string's byte length:</p>
 
             <pre><code><span class="keyword">func</span> <span class="func">read_binary</span>(<span class="type">int</span> <span class="sigil">$fd</span>, <span class="type">int</span> <span class="sigil">$len</span>) <span class="type">str</span> {
     <span class="keyword">__C__</span> {
-        <span class="keyword">int</span> fd = (<span class="keyword">int</span>)strada_to_int(fd_arg);
-        <span class="keyword">size_t</span> len = (<span class="keyword">size_t</span>)strada_to_int(len_arg);
+        <span class="comment">// $fd and $len are the StradaValue* variables fd and len</span>
+        <span class="keyword">int</span> cfd = (<span class="keyword">int</span>)strada_to_int(fd);
+        <span class="keyword">size_t</span> clen = (<span class="keyword">size_t</span>)strada_to_int(len);
 
-        <span class="keyword">char</span> *buf = malloc(len);
-        <span class="keyword">ssize_t</span> n = read(fd, buf, len);
+        <span class="keyword">char</span> *buf = malloc(clen);
+        <span class="keyword">ssize_t</span> n = read(cfd, buf, clen);
 
         <span class="keyword">if</span> (n <= 0) {
             free(buf);
@@ -479,6 +480,8 @@ mv MathLib.so lib/</code></pre>
                 <strong>When to use extern:</strong> Use <code>extern func</code> when you need to call Strada code from C programs, embedded systems, or other languages with C FFI capabilities. For Strada-to-Strada library calls, regular functions with <code>import_lib</code> are preferred.
             </div>
 
+            <p>A <code>--shared</code> library does not bundle the Strada runtime. A plain C host can <code>dlopen</code> it on its own only when the extern functions don't call into the runtime (like the arithmetic above); otherwise the host must also link the Strada runtime.</p>
+
             <h3>Extern vs Regular Functions</h3>
 
             <table>
@@ -508,10 +511,10 @@ mv MathLib.so lib/</code></pre>
 <span class="keyword">func</span> <span class="func">gzip</span>(<span class="type">str</span> <span class="sigil">$data</span>) <span class="type">str</span> {
     <span class="keyword">__C__</span> {
         <span class="keyword">char</span> *input = strada_to_str(data);
-        <span class="keyword">size_t</span> input_len = strlen(input);
+        <span class="keyword">size_t</span> input_len = strada_str_len(data);  <span class="comment">// binary-safe length</span>
 
         <span class="comment">// Allocate output buffer (worst case: slightly larger than input)</span>
-        <span class="keyword">size_t</span> output_len = compressBound(input_len);
+        <span class="keyword">uLongf</span> output_len = compressBound(input_len);
         <span class="keyword">char</span> *output = malloc(output_len);
 
         <span class="comment">// Compress</span>
@@ -534,8 +537,8 @@ mv MathLib.so lib/</code></pre>
 <span class="keyword">func</span> <span class="func">gunzip</span>(<span class="type">str</span> <span class="sigil">$data</span>, <span class="type">int</span> <span class="sigil">$max_size</span>) <span class="type">str</span> {
     <span class="keyword">__C__</span> {
         <span class="keyword">char</span> *input = strada_to_str(data);
-        <span class="keyword">size_t</span> input_len = strlen(input);
-        <span class="keyword">size_t</span> output_len = (<span class="keyword">size_t</span>)strada_to_int(max_size);
+        <span class="keyword">size_t</span> input_len = strada_str_len(data);  <span class="comment">// binary-safe length</span>
+        <span class="keyword">uLongf</span> output_len = (<span class="keyword">uLongf</span>)strada_to_int(max_size);
 
         <span class="keyword">char</span> *output = malloc(output_len);
 
@@ -557,7 +560,18 @@ mv MathLib.so lib/</code></pre>
 
             <p>Compile with the zlib library:</p>
 
-            <pre><code>./strada --shared compress.strada -- -lz</code></pre>
+            <pre><code>./strada --shared compress.strada -lz</code></pre>
+
+            <h2>C Interop in the Interpreter</h2>
+
+            <p>Programs that use C interop also run under the bytecode VM (<code>strada-interp</code>):</p>
+
+            <ul>
+                <li><strong><code>__C__</code> blocks are JIT-compiled</strong>: the VM compiles a program's <code>__C__</code> blocks with the C compiler into one shared object (so file-scope <code>static</code> state is shared between blocks), caches it in <code>~/.cache/strada/cblocks/</code>, and loads it with <code>dlopen</code>. Libraries a module declares with <code>link_lib</code> are linked into that object. A C compiler is therefore needed at run time for such programs.</li>
+                <li><strong><code>c::callback</code></strong>, the <code>c::</code> memory helpers, <code>import_lib</code> libraries and the <code>core::dl_*</code> functions work as in compiled programs.</li>
+                <li><strong>Body-less <code>extern func</code> declarations</strong> (<code>extern func my_c_function(int $x) int;</code>) call the C function in the VM too: the arguments and result are converted with the same C types as in compiled code.</li>
+                <li><strong>Compiled-only</strong>: functions declared in an <code>extern "C" { ... }</code> block are not callable in the VM &mdash; calling one throws <code>extern "C" function NAME() is not available in the bytecode VM (compiled backend only)</code>. Raw pointers into Strada variables (<code>core::int_ptr(\$x)</code>, <code>core::num_ptr</code>) are also compiled-only; the VM raises an error.</li>
+            </ul>
 
             <h2>Best Practices</h2>
 

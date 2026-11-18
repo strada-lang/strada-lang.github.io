@@ -104,6 +104,8 @@
     <span class="func">say</span>(<span class="sigil">$label</span> . <span class="string">": "</span> . (<span class="sigil">$n</span> * <span class="sigil">$factor</span>));
 }</code></pre>
 
+            <p>An <code>int</code> parameter is converted to an integer once, when the function is entered: <code>process("3abc", "x", 1.5)</code> sees <code>$n</code> as 3.</p>
+
             <h3>Array Parameters</h3>
 
             <pre><code><span class="keyword">func</span> <span class="func">sum_array</span>(<span class="type">array</span> <span class="sigil">@numbers</span>) <span class="type">int</span> {
@@ -114,7 +116,7 @@
     <span class="keyword">return</span> <span class="sigil">$total</span>;
 }
 
-<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@nums</span> = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>];
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@nums</span> = (<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>);
 <span class="func">say</span>(<span class="func">sum_array</span>(<span class="sigil">@nums</span>));  <span class="comment"># 15</span></code></pre>
 
             <h3>Hash Parameters</h3>
@@ -176,7 +178,7 @@
             </table>
 
             <h3>Dynamic Return Type</h3>
-            <p>The <code>dynamic</code> return type enables functions to check how their result will be used and return different types accordingly:</p>
+            <p>The <code>dynamic</code> return type enables functions to check how their result will be used and return different types accordingly. (<code>core::wantarray()</code> also works in functions with any other return type.)</p>
 <pre><code>func flexible() dynamic {
     if (core::wantarray()) {
         my array @r = (1, 2, 3);
@@ -209,7 +211,7 @@ my int $v = flexible();    <span class="comment"># scalar context</span></code><
 
             <h3>Capturing Variables</h3>
 
-            <p>Closures capture variables by reference:</p>
+            <p>A closure shares the variables it captures with the enclosing scope, as in Perl: changes made inside the closure are visible outside, and later changes outside are visible inside. Each <code>foreach</code> iteration's <code>my</code> variable is a fresh variable, so closures created in a loop each keep their own.</p>
 
             <pre><code><span class="keyword">func</span> <span class="func">make_counter</span>() <span class="type">scalar</span> {
     <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$count</span> = <span class="number">0</span>;
@@ -223,7 +225,12 @@ my int $v = flexible();    <span class="comment"># scalar context</span></code><
 <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$counter</span> = <span class="func">make_counter</span>();
 <span class="func">say</span>(<span class="sigil">$counter</span>->());  <span class="comment"># 1</span>
 <span class="func">say</span>(<span class="sigil">$counter</span>->());  <span class="comment"># 2</span>
-<span class="func">say</span>(<span class="sigil">$counter</span>->());  <span class="comment"># 3</span></code></pre>
+<span class="func">say</span>(<span class="sigil">$counter</span>->());  <span class="comment"># 3</span>
+
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$multiplier</span> = <span class="number">2</span>;
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$times</span> = <span class="keyword">func</span> (<span class="type">int</span> <span class="sigil">$n</span>) <span class="type">int</span> { <span class="keyword">return</span> <span class="sigil">$n</span> * <span class="sigil">$multiplier</span>; };
+<span class="sigil">$multiplier</span> = <span class="number">10</span>;
+<span class="func">say</span>(<span class="sigil">$times</span>->(<span class="number">4</span>));   <span class="comment"># 40 (sees the new value)</span></code></pre>
 
             <h3>Higher-Order Functions</h3>
 
@@ -264,20 +271,20 @@ my int $v = flexible();    <span class="comment"># scalar context</span></code><
 <span class="func">say</span>(<span class="func">greet</span>(<span class="string">"Alice"</span>));             <span class="comment"># Hello, Alice!</span>
 <span class="func">say</span>(<span class="func">greet</span>(<span class="string">"Bob"</span>, <span class="string">"Hi"</span>));        <span class="comment"># Hi, Bob!</span></code></pre>
 
-            <h2>Variable Arguments</h2>
+            <h2>Variable Arguments in Anonymous Functions</h2>
 
-            <p>Accept any number of arguments with <code>@args</code>:</p>
+            <p>An <code>array @param</code> parameter takes exactly one array argument; for a variable number of arguments use a variadic parameter (above) or the implicit <code>@_</code>. Anonymous functions support both forms: <code>func { ... }</code> / <code>fn { ... }</code> with no parameter list receive their arguments in <code>@_</code>, and <code>...@rest</code> collects the remaining ones:</p>
 
-            <pre><code><span class="keyword">func</span> <span class="func">sum</span>(<span class="type">array</span> <span class="sigil">@numbers</span>) <span class="type">int</span> {
-    <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$total</span> = <span class="number">0</span>;
-    <span class="keyword">foreach</span> <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$n</span> (<span class="sigil">@numbers</span>) {
-        <span class="sigil">$total</span> += <span class="sigil">$n</span>;
-    }
-    <span class="keyword">return</span> <span class="sigil">$total</span>;
-}
+            <pre><code><span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$count_args</span> = <span class="keyword">fn</span> {
+    <span class="keyword">my</span> <span class="sigil">$first</span> = <span class="func">shift</span>;            <span class="comment"># shift defaults to @_</span>
+    <span class="keyword">return</span> <span class="sigil">$first</span> . <span class="string">": "</span> . <span class="func">scalar</span>(<span class="sigil">@_</span>);
+};
+<span class="func">say</span>(<span class="sigil">$count_args</span>->(<span class="string">"a"</span>, <span class="string">"b"</span>, <span class="string">"c"</span>));   <span class="comment"># a: 2</span>
 
-<span class="func">say</span>(<span class="func">sum</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>));         <span class="comment"># 6</span>
-<span class="func">say</span>(<span class="func">sum</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>)); <span class="comment"># 15</span></code></pre>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$head</span> = <span class="keyword">func</span> (<span class="sigil">$first</span>, ...<span class="sigil">@rest</span>) {
+    <span class="keyword">return</span> <span class="sigil">$first</span> . <span class="string">" + "</span> . <span class="func">scalar</span>(<span class="sigil">@rest</span>) . <span class="string">" more"</span>;
+};
+<span class="func">say</span>(<span class="sigil">$head</span>->(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>));                <span class="comment"># 1 + 2 more</span></code></pre>
 
             <h2>Function References</h2>
 
@@ -323,7 +330,7 @@ my int $v = flexible();    <span class="comment"># scalar context</span></code><
             <h2>Recursion</h2>
 
             <pre><code><span class="keyword">func</span> <span class="func">factorial</span>(<span class="type">int</span> <span class="sigil">$n</span>) <span class="type">int</span> {
-    <span class="keyword">if</span> (<span class="sigil">$n</span> <= <span class="number">1</span>) {
+    <span class="keyword">if</span> (<span class="sigil">$n</span> &lt;= <span class="number">1</span>) {
         <span class="keyword">return</span> <span class="number">1</span>;
     }
     <span class="keyword">return</span> <span class="sigil">$n</span> * <span class="func">factorial</span>(<span class="sigil">$n</span> - <span class="number">1</span>);
@@ -332,7 +339,7 @@ my int $v = flexible();    <span class="comment"># scalar context</span></code><
 <span class="func">say</span>(<span class="func">factorial</span>(<span class="number">5</span>));  <span class="comment"># 120</span>
 
 <span class="keyword">func</span> <span class="func">fibonacci</span>(<span class="type">int</span> <span class="sigil">$n</span>) <span class="type">int</span> {
-    <span class="keyword">if</span> (<span class="sigil">$n</span> <= <span class="number">1</span>) {
+    <span class="keyword">if</span> (<span class="sigil">$n</span> &lt;= <span class="number">1</span>) {
         <span class="keyword">return</span> <span class="sigil">$n</span>;
     }
     <span class="keyword">return</span> <span class="func">fibonacci</span>(<span class="sigil">$n</span> - <span class="number">1</span>) + <span class="func">fibonacci</span>(<span class="sigil">$n</span> - <span class="number">2</span>);
@@ -340,13 +347,19 @@ my int $v = flexible();    <span class="comment"># scalar context</span></code><
 
             <h2>External Functions (C Interop)</h2>
 
-            <p>Declare external C functions with <code>extern</code>:</p>
+            <p>Declare external C functions with a body-less <code>extern func</code>. The declaration uses plain C types (<code>int</code> is a C <code>int</code>, <code>num</code> a <code>double</code>), so it must match the C definition, which can live in a <code>__C__</code> block or a linked library:</p>
 
-            <pre><code><span class="comment"># Declare external C function</span>
+            <pre><code><span class="keyword">__C__</span> {
+    int my_c_function(int x) { return x * 3; }
+}
+
+<span class="comment"># Declare external C function</span>
 <span class="keyword">extern</span> <span class="keyword">func</span> <span class="func">my_c_function</span>(<span class="type">int</span> <span class="sigil">$arg</span>) <span class="type">int</span>;
 
 <span class="comment"># Call it like any other function</span>
-<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$result</span> = <span class="func">my_c_function</span>(<span class="number">42</span>);</code></pre>
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$result</span> = <span class="func">my_c_function</span>(<span class="number">42</span>);   <span class="comment"># 126</span></code></pre>
+
+            <p>The opposite direction, <code>extern func name(...) type { body }</code>, defines a Strada function with a plain C signature that C code can call directly. A body-less <code>extern func Other::name(...)</code> with a package-qualified name instead forward-declares a Strada function from another module (useful when two modules <code>use</code> each other).</p>
 
             <h2>Signal Handlers</h2>
 
@@ -419,7 +432,7 @@ my int $v = flexible();    <span class="comment"># scalar context</span></code><
 <span class="keyword">func</span> <span class="func">sum_all</span> {
     <span class="keyword">my</span> <span class="sigil">$total</span> = <span class="number">0</span>;
     <span class="keyword">my</span> <span class="sigil">$i</span> = <span class="number">0</span>;
-    <span class="keyword">while</span> (<span class="sigil">$i</span> < <span class="func">size</span>(<span class="sigil">@_</span>)) {
+    <span class="keyword">while</span> (<span class="sigil">$i</span> &lt; <span class="func">size</span>(<span class="sigil">@_</span>)) {
         <span class="sigil">$total</span> = <span class="sigil">$total</span> + <span class="sigil">$_</span>[<span class="sigil">$i</span>];
         <span class="sigil">$i</span> = <span class="sigil">$i</span> + <span class="number">1</span>;
     }

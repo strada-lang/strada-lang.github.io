@@ -91,11 +91,13 @@
 
             <p>Use <code>refcount()</code> to see how many references exist to a value:</p>
 
-            <pre><code><span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@arr</span> = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>];
-<span class="func">say</span>(<span class="func">refcount</span>(\<span class="sigil">@arr</span>));  <span class="comment"># 1</span>
+            <pre><code><span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@arr</span> = (<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>);
+<span class="func">say</span>(<span class="func">refcount</span>(<span class="sigil">@arr</span>));  <span class="comment"># 1</span>
 
 <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$ref</span> = \<span class="sigil">@arr</span>;
-<span class="func">say</span>(<span class="func">refcount</span>(\<span class="sigil">@arr</span>));  <span class="comment"># 2</span></code></pre>
+<span class="func">say</span>(<span class="func">refcount</span>(<span class="sigil">@arr</span>));  <span class="comment"># 2</span></code></pre>
+
+            <p><code>refcount()</code> is a debugging aid for compiled programs. The bytecode VM (<code>strada-interp</code>) manages memory with a tracing collector instead, so there it always reports 1.</p>
 
             <h2>Scope and Lifetime</h2>
 
@@ -153,7 +155,7 @@
 
             <h2>Object Destruction (DESTROY)</h2>
 
-            <p>When an object's refcount reaches zero, Strada automatically calls its <code>DESTROY</code> method if one exists:</p>
+            <p>When an object's refcount reaches zero, Strada automatically calls its <code>DESTROY</code> method if one exists. (In the bytecode VM, which uses a tracing collector, <code>DESTROY</code> runs when the collector reclaims the object rather than at the moment the last reference goes away.)</p>
 
             <pre><code><span class="keyword">package</span> <span class="type">Connection</span>;
 
@@ -168,7 +170,7 @@
 <span class="keyword">func</span> <span class="func">DESTROY</span>(<span class="type">scalar</span> <span class="sigil">$self</span>) <span class="type">void</span> {
     <span class="comment"># Called automatically when object is freed</span>
     <span class="func">say</span>(<span class="string">"Closing connection to "</span> . <span class="sigil">$self</span>->{<span class="string">"host"</span>});
-    <span class="func">core::close_fd</span>(<span class="sigil">$self</span>->{<span class="string">"socket"</span>});
+    <span class="func">core::socket_close</span>(<span class="sigil">$self</span>->{<span class="string">"socket"</span>});
 }
 
 <span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
@@ -183,7 +185,7 @@
             <div class="info-box">
                 <strong>DESTROY Order</strong>
                 With inheritance, DESTROY methods are called from child to parent.
-                Use <code>$self->SUPER::DESTROY()</code> to call parent destructors.
+                A child <code>DESTROY</code> that wants the parent's cleanup too calls it explicitly with <code>SUPER::DESTROY($self);</code>.
             </div>
 
             <h2>Manual Memory Control</h2>
@@ -202,7 +204,7 @@
             <h3>core::release() - Free via Reference</h3>
 
             <pre><code><span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$ref</span> = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>];
-<span class="func">core::release</span>(<span class="sigil">$ref</span>);  <span class="comment"># Decrements refcount, $ref becomes undef</span></code></pre>
+<span class="func">core::release</span>(\<span class="sigil">$ref</span>);  <span class="comment"># Pass a reference to the variable: drops its value, $ref becomes undef</span></code></pre>
 
             <h2>Performance Optimization</h2>
 
@@ -263,25 +265,25 @@
 
             <h2>Memory and Closures</h2>
 
-            <p>Closures capture variables by reference. The captured variables stay alive as long as the closure exists:</p>
+            <p>Closures capture variables <strong>by sharing</strong>, as in Perl: the closure and the scope that declared a variable (and any other closure that captured it) use the same variable, held in a reference-counted cell. A change made inside the closure is visible outside and the other way round, and each <code>foreach</code> iteration's <code>my</code> variable is a fresh one. Arrays and hashes are shared the same way. A captured variable stays alive as long as any closure that uses it exists:</p>
 
             <pre><code><span class="keyword">func</span> <span class="func">make_counter</span>() <span class="type">scalar</span> {
     <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$count</span> = <span class="number">0</span>;
 
     <span class="keyword">return</span> <span class="keyword">func</span> () {
-        <span class="sigil">$count</span>++;  <span class="comment"># Captures $count by reference</span>
+        <span class="sigil">$count</span>++;  <span class="comment"># Updates the captured $count</span>
         <span class="keyword">return</span> <span class="sigil">$count</span>;
     };
 }
 
 <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$counter</span> = <span class="func">make_counter</span>();
-<span class="comment"># $count from make_counter() is kept alive by the closure</span>
+<span class="comment"># make_counter has returned, but $count lives on in the closure</span>
 
 <span class="func">say</span>(<span class="sigil">$counter</span>->());  <span class="comment"># 1</span>
 <span class="func">say</span>(<span class="sigil">$counter</span>->());  <span class="comment"># 2</span>
 
 <span class="sigil">$counter</span> = <span class="func">undef</span>;
-<span class="comment"># Now $count is finally freed</span></code></pre>
+<span class="comment"># Now the closure and its captured $count are freed</span></code></pre>
 
             <h3>Closures Without Return Statements</h3>
 
@@ -305,7 +307,7 @@
 
             <div class="info-box warning">
                 <strong>Watch for Cycles</strong>
-                If a closure captures a variable that references the closure itself, you create a cycle that won't be freed automatically. Break such cycles with <code>core::weaken()</code>, or rely on the automatic cycle collector described below.
+                If a closure captures a variable that references the closure itself (for example <code>$self-&gt;{"cb"} = func () { $self }</code>), plain reference counting cannot free it. The automatic cycle collector described below reclaims such cycles; <code>core::weaken()</code> breaks them deterministically.
             </div>
 
             <h2>Circular References</h2>
@@ -326,8 +328,10 @@
                 <strong>Notes</strong>
                 <ul>
                     <li>Enabled by default. Build with <code>./configure --without-cycle-gc</code> to compile it out (then cycles require <code>core::weaken()</code> as before).</li>
-                    <li>Covers cycles through arrays, hashes, and references (the common object-graph case). Cycles that close only through a closure capture still need <code>core::weaken()</code>.</li>
-                    <li>A cyclic <em>blessed</em> object reclaimed by the collector does not run <code>DESTROY</code> (mirrors Perl's global-destruction behaviour).</li>
+                    <li>Covers cycles through arrays, hashes, references and closure captures (the common object-graph and <code>$self</code>-capturing-callback cases). Cycles through futures/channels or tied containers still need <code>core::weaken()</code>.</li>
+                    <li>A cyclic <em>blessed</em> object reclaimed by the collector runs its <code>DESTROY</code> method.</li>
+                    <li>Works in threaded programs (it briefly stops the other threads at a safepoint; a thread that cannot reach one in time just causes that collection to be skipped).</li>
+                    <li>The automatic trigger is adaptive: a collection that frees nothing doubles the threshold, so cycle-free programs do almost no collection work.</li>
                 </ul>
             </div>
 
@@ -405,10 +409,11 @@
                 <strong>Arena rules</strong>
                 <ul>
                     <li>Enabled by default; build with <code>./configure --without-arena</code> to compile it out. The arena is dormant until <code>core::arena_begin()</code> is called, so it is safe to ship enabled.</li>
-                    <li><strong>Values created inside an arena must not escape <code>arena_end()</code></strong> &mdash; storing one into a longer-lived structure leaves a dangling reference.</li>
+                    <li><strong>Don't use arena values after <code>arena_end()</code>.</strong> A variable that still holds one (e.g. <code>my $t = build(); &hellip; arena_end();</code>) is safe to let go out of scope &mdash; the values are neutralized, not freed &mdash; but it reads as <code>undef</code> afterwards, and an arena value stored into a longer-lived structure is lost the same way.</li>
                     <li>An arena container that references a <em>persistent</em> (pre-arena) value leaks one reference on that value; keep arena data self-contained.</li>
                     <li><code>DESTROY</code> is not run for objects reclaimed by the arena.</li>
                     <li>Single-threaded scope only (perfect for a preforking worker, which is single-threaded per process).</li>
+                    <li>Compiled programs only: the bytecode VM has no arena (and no <code>core::memprof_*</code>).</li>
                 </ul>
             </div>
 

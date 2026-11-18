@@ -63,11 +63,11 @@
             </div>
 
             <h1>Strada <span>REPL &amp; Scripting</span></h1>
-            <p class="subtitle">Interactive shell and script execution via <code>strada-jit</code> — real native compilation (tcc or gcc + dlopen). Supports the full Strada language including closures, try/catch, OOP, <code>const</code>, and <code>enum</code>. tcc is auto-detected for snappy per-line latency; gcc is the fallback and the default for <code>--script</code>.</p>
+            <p class="subtitle">Interactive shell and script execution via <code>strada-jit</code> — real native compilation (tcc or gcc + dlopen). Supports the full Strada language including closures, try/catch, OOP, <code>const</code>, and <code>enum</code>. gcc is used when installed (it is also the default for <code>--script</code>); tcc is the fallback, or pass <code>--compiler=tcc</code> for lower per-line latency.</p>
 
             <h2>Quick Start</h2>
 
-            <pre><code><span class="comment"># Interactive REPL (auto-detects tcc when installed; falls back to gcc)</span>
+            <pre><code><span class="comment"># Interactive REPL (uses gcc when installed, otherwise tcc)</span>
 strada --repl
 
 <span class="comment"># Force a specific backend</span>
@@ -88,20 +88,21 @@ strada --script program.strada --chunked</code></pre>
             </div>
 
             <div class="info-box">
-                <strong>Older interpreter (opt-in):</strong> a bytecode VM / tree-walking interpreter still exists at <code>interpreter/strada-interp</code> for embedding and experiments. It's no longer built by default — run <code>make interpreter</code> to opt in. The REPL and scripting flow above does not depend on it.
+                <strong>Older interpreter (opt-in):</strong> a bytecode VM interpreter also exists at <code>interpreter/strada-interp</code> (see <a href="interpreter.html">Interpreter</a>), with its own REPL. It's no longer built by default — run <code>make interpreter</code> to opt in. The REPL and scripting flow above does not depend on it.
             </div>
 
             <h2>Interactive REPL</h2>
 
-            <p>The REPL supports readline with line editing, history, and arrow keys. Each balanced chunk you enter is compiled to a small <code>.so</code> via tcc (or gcc) and <code>dlopen</code>'d — so the REPL runs real, fully-typed Strada with closures, try/catch, OOP, the lot.</p>
+            <p>The REPL supports readline with line editing, history, and arrow keys. Each balanced chunk you enter is compiled to a small <code>.so</code> via gcc (or tcc, with <code>--compiler=tcc</code>) and <code>dlopen</code>'d — so the REPL runs real, fully-typed Strada with closures, try/catch, OOP, the lot.</p>
 
             <pre><code>$ strada --repl
-Strada JIT v0.3 (using tcc)
-Type .help for help, .quit to exit.
+Strada JIT v0.3 (using gcc)
+Tip: Install tcc for faster compilation (apt install tcc)
+Type .help for help, .quit to exit
 
 strada> <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$x</span> = <span class="number">42</span>;
 strada> <span class="sigil">$x</span> * <span class="number">2</span>
-<span class="number">84</span>
+=> <span class="number">84</span>
 strada> <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@nums</span> = (<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>);
 strada> <span class="func">push</span>(<span class="sigil">@nums</span>, <span class="number">4</span>);
 strada> <span class="func">say</span>(<span class="func">join</span>(<span class="string">", "</span>, <span class="sigil">@nums</span>))
@@ -109,13 +110,21 @@ strada> <span class="func">say</span>(<span class="func">join</span>(<span class
 
             <h3>Multi-line Input</h3>
 
-            <p>The REPL automatically detects incomplete input (unbalanced braces, parentheses, or brackets) and prompts for continuation:</p>
+            <p>The REPL automatically detects incomplete input (unbalanced braces, parentheses, or brackets, an open heredoc, or a statement ending in an operator) and prompts for continuation:</p>
 
             <pre><code>strada> <span class="keyword">func</span> <span class="func">greet</span>(<span class="type">str</span> <span class="sigil">$name</span>) <span class="type">void</span> {
 ...         <span class="func">say</span>(<span class="string">"Hello, "</span> . <span class="sigil">$name</span> . <span class="string">"!"</span>);
 ...     }
 strada> <span class="func">greet</span>(<span class="string">"World"</span>)
-Hello, World!</code></pre>
+Hello, World!
+strada> <span class="keyword">my</span> <span class="sigil">$text</span> = &lt;&lt;EOT;
+...    first line
+...    second line
+...    EOT
+strada> <span class="keyword">my</span> <span class="sigil">$t</span> = <span class="number">1</span> +
+...     <span class="number">2</span>;
+strada> <span class="func">say</span>(<span class="sigil">$t</span>);
+3</code></pre>
 
             <h3>REPL Commands</h3>
 
@@ -133,15 +142,35 @@ Hello, World!</code></pre>
                     </tr>
                     <tr>
                         <td><code>.vars</code></td>
-                        <td>List variables in scope with current values</td>
+                        <td>List declared variables with their current values</td>
                     </tr>
                     <tr>
                         <td><code>.funcs</code></td>
-                        <td>List defined functions with parameter counts</td>
+                        <td>List defined functions with their signatures</td>
                     </tr>
                     <tr>
                         <td><code>.load FILE</code></td>
-                        <td>Load and execute code from a file (registers functions, skips main)</td>
+                        <td>Load and execute code from a file</td>
+                    </tr>
+                    <tr>
+                        <td><code>.imports</code></td>
+                        <td>List imports and library paths</td>
+                    </tr>
+                    <tr>
+                        <td><code>.soinfo FILE</code></td>
+                        <td>Show exported functions from a <code>.so</code>/<code>.o</code>/<code>.a</code> file</td>
+                    </tr>
+                    <tr>
+                        <td><code>.debug</code> / <code>.cdebug</code></td>
+                        <td>Toggle showing the generated Strada / generated C</td>
+                    </tr>
+                    <tr>
+                        <td><code>.compiler</code></td>
+                        <td>Show the C compiler backend in use</td>
+                    </tr>
+                    <tr>
+                        <td><code>.memprof</code> / <code>.memstats</code></td>
+                        <td>Toggle memory profiling / show memory statistics</td>
                     </tr>
                     <tr>
                         <td><code>.clear</code></td>
@@ -174,7 +203,7 @@ Rex says woof!</code></pre>
 strada --script program.strada
 
 <span class="comment"># With library search paths</span>
-strada --script -L lib program.strada
+strada -L lib --script program.strada
 
 <span class="comment"># Pick a different C compiler</span>
 strada --script program.strada --compiler=tcc
@@ -186,8 +215,8 @@ strada --script program.strada --chunked</code></pre>
 
             <p>Make a Strada source file directly executable:</p>
 
-            <pre><code><span class="comment">#!/usr/bin/env strada</span>
-<span class="comment"># --script is implied when the file is given as the first arg</span>
+            <pre><code><span class="comment">#!/usr/bin/env -S strada --script</span>
+<span class="comment"># (a plain "#!/usr/bin/env strada" would only compile the file, not run it)</span>
 
 <span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
     <span class="func">say</span>(<span class="string">"Hello from script!"</span>);
@@ -217,8 +246,8 @@ strada --script program.strada --chunked</code></pre>
                     </tr>
                     <tr>
                         <td>Startup cost</td>
-                        <td>~1 sec gcc (or ~50 ms with <code>--compiler=tcc</code>)</td>
-                        <td>~50 ms per chunk with tcc; ~500 ms per chunk with gcc</td>
+                        <td>~1.5 s with gcc (~1.3 s with <code>--compiler=tcc</code>) for a small script</td>
+                        <td>~50 ms per chunk with tcc; ~400 ms per chunk with gcc</td>
                         <td>One-time at build; instant at runtime</td>
                     </tr>
                     <tr>
@@ -254,7 +283,7 @@ strada --script program.strada --chunked</code></pre>
                 <tbody>
                     <tr>
                         <td><code>--repl</code></td>
-                        <td>Start the interactive REPL (auto-detects tcc/gcc)</td>
+                        <td>Start the interactive REPL (gcc if installed, otherwise tcc)</td>
                     </tr>
                     <tr>
                         <td><code>--script FILE</code></td>
@@ -270,7 +299,7 @@ strada --script program.strada --chunked</code></pre>
                     </tr>
                     <tr>
                         <td><code>-L PATH</code></td>
-                        <td>Add library search path</td>
+                        <td>Add library search path (put it before <code>--script</code>, which takes the next argument as the file)</td>
                     </tr>
                     <tr>
                         <td><code>--help</code></td>
@@ -293,7 +322,7 @@ strada --script program.strada --chunked</code></pre>
     <span class="keyword">return</span> <span class="number">0</span>;
 }</code></pre>
 
-            <p>The default backend is the tree-walking interpreter, which is always available. Switch to the bytecode VM with <code>Strada::Interpreter::set_eval_backend("vm")</code> — note the VM requires the runtime to be built with <code>-DHAVE_VM</code> (only the standalone <code>strada-interp</code> binary defines it).</p>
+            <p><code>Eval</code> runs the code on the bytecode VM (no C compiler needed at runtime); variables and functions persist across calls until <code>Strada::Interpreter::reset()</code>. <code>strada</code> links the VM objects automatically when a program uses <code>Eval</code>, and the same program also runs under <code>strada-interp</code>. <code>set_eval_backend()</code> is kept only for compatibility: the backend is always the VM. See <a href="interpreter.html">Interpreter</a> for the full API.</p>
 
         </main>
     </div>

@@ -134,7 +134,7 @@
                     </tr>
                     <tr>
                         <td><code>async::timeout($f, $ms)</code></td>
-                        <td>Await with timeout (throws on timeout)</td>
+                        <td>Await with timeout (throws "Future timed out"; the future keeps running, so a later <code>await</code> still gets its result)</td>
                     </tr>
                     <tr>
                         <td><code>async::spawn($fn)</code></td>
@@ -427,10 +427,27 @@
                 </tbody>
             </table>
 
-            <div class="nav-buttons">
-                <a href="memory.html" class="btn btn-secondary">&larr; Memory Management</a>
-                <a href="debugging.html" class="btn btn-primary">Debugging &rarr;</a>
-            </div>
+            <h2>Threads and Per-Thread Values</h2>
+
+            <p>Below the pool, <code>thread::create</code> runs a closure on its own OS thread and <code>thread::join</code> returns its result. Each thread has its own <code>$_</code> and its own named thread-local values (<code>thread::tls_set/tls_get/tls_exists/tls_delete</code>, freed at thread exit); regex match state (<code>$1</code>, <code>captures()</code>) is per thread as well.</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$m</span> = thread::mutex_new();
+<span class="sigil">$_</span> = <span class="string">"main"</span>;
+thread::tls_set(<span class="string">"name"</span>, <span class="string">"main"</span>);
+
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$t</span> = thread::create(<span class="keyword">func</span> () {
+    <span class="sigil">$_</span> = <span class="string">"worker"</span>;                    <span class="comment"># this thread's own $_</span>
+    thread::tls_set(<span class="string">"name"</span>, <span class="string">"worker"</span>);
+    thread::mutex_lock(<span class="sigil">$m</span>);
+    <span class="comment"># ... critical section ...</span>
+    thread::mutex_unlock(<span class="sigil">$m</span>);
+    <span class="keyword">return</span> <span class="number">42</span>;
+});
+
+<span class="func">say</span>(thread::join(<span class="sigil">$t</span>));          <span class="comment"># 42</span>
+<span class="func">say</span>(<span class="sigil">$_</span>);                         <span class="comment"># main</span>
+<span class="func">say</span>(thread::tls_get(<span class="string">"name"</span>));    <span class="comment"># main</span>
+thread::mutex_destroy(<span class="sigil">$m</span>);</code></pre>
 
             <h2>Event Loop and Green Tasks (Async::Loop)</h2>
 
@@ -463,7 +480,8 @@
                     look blocking but suspend the task (stackful coroutines) until the fd is ready. Optional trailing
                     timeouts return <code>undef</code> on expiry. Outside a task the same calls fall back to plain blocking.</li>
                 <li><strong>try/catch works inside tasks</strong>, including across suspensions; an uncaught throw kills
-                    only its own task (reported via <code>$loop-&gt;{"on_task_error"}</code>).</li>
+                    only its own task (reported via <code>$loop-&gt;{"on_task_error"}</code>, a <code>fn (scalar $err)</code> handler; the default warns).</li>
+                <li><strong>Per-task state</strong>: each green task has its own <code>$_</code> and its own <code>local</code> values, so a task that suspends doesn't see another task's changes. Regex match state is per OS thread, so copy captures out before suspending.</li>
                 <li><strong>Callback style too</strong>: <code>$loop-&gt;watch($fd, "r", fn (int $fd, str $mask) {...})</code>,
                     <code>$loop-&gt;timer_after($ms, $cb)</code>, multiple watchers per fd.</li>
                 <li><strong>TLS over tasks</strong> via <code>Async::TaskSSL</code> — the handshake and IO park on the exact
@@ -475,6 +493,15 @@
             <p>One thread handles ~34k echo round-trips/s across 50 concurrent task connections
             (loopback, -O2). See <code>docs/EVENT_LOOP.md</code> in the repository for the full API,
             task rules, and design notes.</p>
+
+            <h2>In the Interpreter</h2>
+
+            <p>Everything on this page also works under the bytecode VM (<code>strada-interp</code>), with the same output as the compiled program: <code>async func</code> and <code>await</code>, every <code>async::</code> function (futures, channels, mutexes, atomics, <code>spawn</code>/<code>select</code>/<code>map</code>), <code>Async::Scope</code> and <code>Async::Actor</code>, <code>thread::</code> threads, mutexes, condition variables and TLS, and <code>Async::Loop</code> green tasks (each task runs its VM code on its own coroutine, with its own <code>$_</code> and <code>local</code> values).</p>
+
+            <div class="nav-buttons">
+                <a href="memory.html" class="btn btn-secondary">&larr; Memory Management</a>
+                <a href="debugging.html" class="btn btn-primary">Debugging &rarr;</a>
+            </div>
 
         </main>
     </div>

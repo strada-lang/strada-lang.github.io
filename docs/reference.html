@@ -75,7 +75,7 @@
                     <tr><td><code>say($value)</code></td><td>Print value with newline</td></tr>
                     <tr><td><code>print($value)</code></td><td>Print value without newline</td></tr>
                     <tr><td><code>warn($msg)</code></td><td>Print warning to stderr</td></tr>
-                    <tr><td><code>die($msg)</code></td><td>Print error and exit</td></tr>
+                    <tr><td><code>die($msg)</code></td><td>Throw an exception (catchable with <code>try</code>/<code>catch</code>; an uncaught one prints the message and exits)</td></tr>
                 </tbody>
             </table>
 
@@ -87,7 +87,6 @@
                 </thead>
                 <tbody>
                     <tr><td><code>length($str)</code></td><td>Length in <strong>Unicode codepoints</strong> (use <code>core::byte_length</code> for raw bytes)</td></tr>
-                    <tr><td><code>strlen($str)</code></td><td>Alias for <code>length</code></td></tr>
                     <tr><td><code>substr($str, $start, $len)</code></td><td>Extract substring (offsets are codepoint positions, UTF-8 safe)</td></tr>
                     <tr><td><code>index($str, $substr)</code></td><td>Find first occurrence (codepoint position), -1 if not found</td></tr>
                     <tr><td><code>rindex($str, $substr)</code></td><td>Find last occurrence (codepoint position)</td></tr>
@@ -98,10 +97,9 @@
                     <tr><td><code>trim($str)</code></td><td>Remove leading/trailing whitespace</td></tr>
                     <tr><td><code>split($pat, $str [, $limit])</code></td><td>Split string into array (regex; Perl rules: trailing empty fields dropped, <code>" "</code> splits on whitespace) &mdash; <a href="regex.html">details</a></td></tr>
                     <tr><td><code>join($sep, @arr)</code></td><td>Join array into string</td></tr>
-                    <tr><td><code>chr($code)</code></td><td>Character from ASCII code</td></tr>
-                    <tr><td><code>ord($char)</code></td><td>ASCII code from character</td></tr>
+                    <tr><td><code>chr($code)</code></td><td>Character for a Unicode codepoint (<code>core::byte($n)</code> for a raw byte)</td></tr>
+                    <tr><td><code>ord($char)</code></td><td>Codepoint of the first character</td></tr>
                     <tr><td><code>sprintf($fmt, ...)</code></td><td>Formatted string (like C sprintf)</td></tr>
-                    <tr><td><code>stringify($val)</code></td><td>Convert value to string</td></tr>
                 </tbody>
             </table>
 
@@ -177,7 +175,7 @@
 
             <h3>Examples</h3>
             <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$s</span> = <span class="string">"  Hello World  "</span>;
-<span class="func">say</span>(<span class="func">strlen</span>(<span class="sigil">$s</span>));           <span class="comment"># 15</span>
+<span class="func">say</span>(<span class="func">length</span>(<span class="sigil">$s</span>));           <span class="comment"># 15</span>
 <span class="func">say</span>(<span class="func">trim</span>(<span class="sigil">$s</span>));             <span class="comment"># "Hello World"</span>
 <span class="func">say</span>(<span class="func">substr</span>(<span class="sigil">$s</span>, <span class="number">2</span>, <span class="number">5</span>));    <span class="comment"># "Hello"</span>
 <span class="func">say</span>(<span class="func">uc</span>(<span class="sigil">$s</span>));               <span class="comment"># "  HELLO WORLD  "</span>
@@ -193,13 +191,13 @@
                     <tr><th>Function</th><th>Description</th></tr>
                 </thead>
                 <tbody>
-                    <tr><td><code>len(@arr)</code></td><td>Return array length</td></tr>
-                    <tr><td><code>scalar(@arr)</code></td><td>Return array length (alias for len)</td></tr>
+                    <tr><td><code>scalar(@arr)</code>, <code>size(@arr)</code></td><td>Return array length (<code>scalar(@$ref)</code> for an array reference)</td></tr>
+                    <tr><td><code>$#arr</code></td><td>Last index (length - 1); <code>$#{$ref}</code> / <code>$#$ref</code> for a reference</td></tr>
                     <tr><td><code>push(@arr, $val)</code></td><td>Add element to end</td></tr>
                     <tr><td><code>pop(@arr)</code></td><td>Remove and return last element</td></tr>
                     <tr><td><code>shift(@arr)</code></td><td>Remove and return first element</td></tr>
                     <tr><td><code>unshift(@arr, $val)</code></td><td>Add element to beginning</td></tr>
-                    <tr><td><code>reverse(@arr)</code></td><td>Reverse array elements in place</td></tr>
+                    <tr><td><code>reverse(@arr)</code></td><td>Return a reversed copy; in scalar context (<code>my str $s = reverse("abc");</code>) joins its arguments and reverses the string</td></tr>
                     <tr><td><code>sort(@arr)</code></td><td>Return sorted array</td></tr>
                     <tr><td><code>splice(@arr, $off, $len)</code></td><td>Remove elements, return removed</td></tr>
                     <tr><td><code>splice(@arr, $off, $len, @repl)</code></td><td>Remove and replace with @repl, return removed</td></tr>
@@ -242,7 +240,7 @@
                 <h4>Pre-allocating Arrays</h4>
                 <p>For performance, pre-allocate arrays when you know the approximate size:</p>
                 <pre><code><span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@data</span>[<span class="number">1000</span>];  <span class="comment"># Pre-allocate for 1000 elements</span>
-<span class="keyword">for</span> (<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$i</span> = <span class="number">0</span>; <span class="sigil">$i</span> < <span class="number">1000</span>; <span class="sigil">$i</span>++) {
+<span class="keyword">for</span> (<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$i</span> = <span class="number">0</span>; <span class="sigil">$i</span> &lt; <span class="number">1000</span>; <span class="sigil">$i</span>++) {
     <span class="func">push</span>(<span class="sigil">@data</span>, <span class="sigil">$i</span>);  <span class="comment"># No reallocation needed</span>
 }</code></pre>
             </div>
@@ -302,11 +300,11 @@
             <pre><code><span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@nums</span> = (<span class="number">5</span>, <span class="number">2</span>, <span class="number">8</span>, <span class="number">1</span>, <span class="number">9</span>);
 
 <span class="comment"># Sort ascending (numeric) - use spaceship operator</span>
-<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@asc</span> = <span class="keyword">sort</span> { <span class="sigil">$a</span> <=> <span class="sigil">$b</span> } <span class="sigil">@nums</span>;
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@asc</span> = <span class="keyword">sort</span> { <span class="sigil">$a</span> &lt;=> <span class="sigil">$b</span> } <span class="sigil">@nums</span>;
 <span class="comment"># Result: (1, 2, 5, 8, 9)</span>
 
 <span class="comment"># Sort descending</span>
-<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@desc</span> = <span class="keyword">sort</span> { <span class="sigil">$b</span> <=> <span class="sigil">$a</span> } <span class="sigil">@nums</span>;
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@desc</span> = <span class="keyword">sort</span> { <span class="sigil">$b</span> &lt;=> <span class="sigil">$a</span> } <span class="sigil">@nums</span>;
 <span class="comment"># Result: (9, 8, 5, 2, 1)</span>
 
 <span class="comment"># Default sort (alphabetical)</span>
@@ -316,7 +314,7 @@
             <pre><code><span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@data</span> = (<span class="number">5</span>, <span class="number">2</span>, <span class="number">8</span>, <span class="number">1</span>, <span class="number">9</span>, <span class="number">3</span>, <span class="number">7</span>);
 
 <span class="comment"># Filter, transform, and sort in one pipeline</span>
-<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@result</span> = <span class="keyword">sort</span> { <span class="sigil">$a</span> <=> <span class="sigil">$b</span> } <span class="keyword">map</span> { <span class="sigil">$_</span> * <span class="number">10</span> } <span class="keyword">grep</span> { <span class="sigil">$_</span> > <span class="number">3</span> } <span class="sigil">@data</span>;
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@result</span> = <span class="keyword">sort</span> { <span class="sigil">$a</span> &lt;=> <span class="sigil">$b</span> } <span class="keyword">map</span> { <span class="sigil">$_</span> * <span class="number">10</span> } <span class="keyword">grep</span> { <span class="sigil">$_</span> > <span class="number">3</span> } <span class="sigil">@data</span>;
 <span class="comment"># Result: (50, 70, 80, 90)</span></code></pre>
 
             <h2>Hash Functions</h2>
@@ -326,7 +324,7 @@
                     <tr><th>Function</th><th>Description</th></tr>
                 </thead>
                 <tbody>
-                    <tr><td><code>keys(%hash)</code></td><td>Return array of keys</td></tr>
+                    <tr><td><code>keys(%hash)</code></td><td>Return array of keys (the key count when assigned to a scalar; use <code>[keys(%hash)]</code> to keep the list in a scalar)</td></tr>
                     <tr><td><code>values(%hash)</code></td><td>Return array of values</td></tr>
                     <tr><td><code>exists(%hash, $key)</code></td><td>Check if key exists (returns 1/0)</td></tr>
                     <tr><td><code>delete(%hash, $key)</code></td><td>Remove key-value pair</td></tr>
@@ -350,10 +348,15 @@
     <span class="func">say</span>(<span class="sigil">$pair</span>[<span class="number">0</span>] . <span class="string">" = "</span> . <span class="sigil">$pair</span>[<span class="number">1</span>]);
     <span class="sigil">@pair</span> = <span class="func">each</span>(<span class="sigil">%config</span>);
 }
-<span class="comment"># Output (order may vary):</span>
+<span class="comment"># Output (hashes iterate in insertion order):</span>
 <span class="comment">#   host = localhost</span>
 <span class="comment">#   port = 8080</span>
-<span class="comment">#   debug = 1</span></code></pre>
+<span class="comment">#   debug = 1</span>
+
+<span class="comment"># Perl style: the loop runs while the list assignment is non-empty</span>
+<span class="keyword">while</span> (<span class="keyword">my</span> (<span class="sigil">$k</span>, <span class="sigil">$v</span>) = <span class="func">each</span> <span class="sigil">%config</span>) {
+    <span class="func">say</span>(<span class="sigil">$k</span> . <span class="string">" = "</span> . <span class="sigil">$v</span>);
+}</code></pre>
 
             <div class="info-box">
                 <h4>Pre-allocating Hashes</h4>
@@ -373,7 +376,6 @@
                 </thead>
                 <tbody>
                     <tr><td><code>int($val)</code></td><td>Convert to integer</td></tr>
-                    <tr><td><code>num($val)</code></td><td>Convert to number</td></tr>
                     <tr><td><code>defined($val)</code></td><td>Check if value is defined</td></tr>
                     <tr><td><code>ref($val)</code></td><td>Return reference type or empty string</td></tr>
                     <tr><td><code>typeof($val)</code></td><td>Return type as string</td></tr>
@@ -397,8 +399,8 @@
                     <tr><td><code>core::open_str($content, $mode)</code></td><td>Open in-memory handle from string</td></tr>
                     <tr><td><code>core::str_from_fh($fh)</code></td><td>Extract string from memstream</td></tr>
                     <tr><td><code>core::readline($fh)</code></td><td>Read line from filehandle</td></tr>
-                    <tr><td><code>core::read($fd, $len)</code></td><td>Read bytes from fd</td></tr>
-                    <tr><td><code>core::fwrite($fd, $data)</code></td><td>Write bytes to fd</td></tr>
+                    <tr><td><code>core::fread($fh [, $len])</code></td><td>Read up to <code>$len</code> bytes (without <code>$len</code>: the whole file)</td></tr>
+                    <tr><td><code>core::fwrite($fh, $data [, $len])</code></td><td>Write data (only the first <code>$len</code> bytes when given)</td></tr>
                     <tr><td><code>core::close($fd)</code></td><td>Close file descriptor</td></tr>
                     <tr><td><code>core::seek($fd, $pos, $whence)</code></td><td>Seek in file</td></tr>
                     <tr><td><code>core::tell($fd)</code></td><td>Get current position</td></tr>
@@ -508,7 +510,8 @@
                 <tbody>
                     <tr><td><code>core::exit($code)</code></td><td>Exit with status code</td></tr>
                     <tr><td><code>core::fork()</code></td><td>Fork process</td></tr>
-                    <tr><td><code>core::exec($cmd, @args)</code></td><td>Execute command</td></tr>
+                    <tr><td><code>core::exec($cmd)</code></td><td>Replace the process with <code>/bin/sh -c $cmd</code></td></tr>
+                    <tr><td><code>core::system_argv($prog, \@argv)</code></td><td>Run a program with an argv array (no shell); returns its exit code</td></tr>
                     <tr><td><code>core::system($cmd)</code></td><td>Run shell command</td></tr>
                     <tr><td><code>core::wait()</code></td><td>Wait for any child; returns its pid (-1 if none)</td></tr>
                     <tr><td><code>core::waitpid($pid, $flags)</code></td><td>Wait for a specific child; returns its exit status (0 under WNOHANG while it is still running)</td></tr>
@@ -603,7 +606,7 @@
                 <tbody>
                     <tr><td><code>core::socket_server($port)</code></td><td>Create TCP server</td></tr>
                     <tr><td><code>core::socket_accept($fd)</code></td><td>Accept connection</td></tr>
-                    <tr><td><code>core::socket_connect($host, $port)</code></td><td>Connect to server</td></tr>
+                    <tr><td><code>core::socket_client($host, $port)</code></td><td>Connect to a TCP server</td></tr>
                     <tr><td><code>core::gethostbyname($host)</code></td><td>Resolve hostname</td></tr>
                     <tr><td><code>core::gethostbyname_all($host)</code></td><td>Resolve hostname (all addresses)</td></tr>
                     <tr><td><code>core::gethostname()</code></td><td>Get local hostname</td></tr>
@@ -612,7 +615,7 @@
             </table>
 
             <h3>SSL/TLS (ssl::)</h3>
-            <p>Secure socket connections via OpenSSL. Build with: <code>cd lib/ssl && make</code></p>
+            <p>Secure socket connections via OpenSSL, from the <code>ssl</code> module (<code>use ssl;</code>). <code>make libs</code> precompiles it when <code>./configure</code> finds OpenSSL.</p>
             <table>
                 <thead>
                     <tr><th>Function</th><th>Description</th></tr>
@@ -721,6 +724,7 @@
             <p>The plain <code>use</code> statement auto-detects a precompiled sibling artifact (<code>.o</code> preferred over <code>.so</code>) next to the <code>.strada</code> source, with an mtime freshness check. Falls back to source inlining when the artifact is stale or missing.</p>
             <pre><code><span class="keyword">use</span> lib <span class="string">"lib"</span>;
 <span class="keyword">use</span> JSON;                       <span class="comment"># picks up lib/JSON.o (or .so) if present</span>
+<span class="keyword">use</span> MyMod qw(a b);              <span class="comment"># runs MyMod's import(str $pkg, array @list) with @list = ("a", "b")</span>
 
 <span class="comment"># Explicit forms — useful when no .strada is alongside the artifact:</span>
 <span class="func">import_lib</span> <span class="string">"JSON.so"</span>;          <span class="comment"># Runtime loading (dlopen)</span>
@@ -783,7 +787,7 @@
                     <tr><td><code>strada_new_int(i)</code></td><td>Create StradaValue* from int64_t</td></tr>
                     <tr><td><code>strada_new_num(n)</code></td><td>Create StradaValue* from double</td></tr>
                     <tr><td><code>strada_new_str(s)</code></td><td>Create StradaValue* from string</td></tr>
-                    <tr><td><code>&amp;strada_undef</code></td><td>Return undef value</td></tr>
+                    <tr><td><code>strada_new_undef()</code></td><td>Create an undef value (e.g. <code>return strada_new_undef();</code>)</td></tr>
                 </tbody>
             </table>
 
@@ -804,11 +808,12 @@
         <span class="comment">// Retrieve pointer from int</span>
         SSL *conn = (SSL*)(intptr_t)strada_to_int(handle);
         SSL_free(conn);
-        <span class="keyword">return</span> &amp;strada_undef;
+        <span class="keyword">return</span> strada_new_undef();
     }
 }</code></pre>
 
             <h2>JSON Functions</h2>
+            <p>From the <code>JSON</code> module: add <code>use JSON;</code> to the program.</p>
 
             <table>
                 <thead>
@@ -827,7 +832,7 @@
                     <tr><th>Syntax</th><th>Description</th></tr>
                 </thead>
                 <tbody>
-                    <tr><td><code>__PACKAGE__</code></td><td>Current package name (runtime)</td></tr>
+                    <tr><td><code>__PACKAGE__</code></td><td>Name of the package the code is written in (compile-time string)</td></tr>
                     <tr><td><code>::func()</code></td><td>Call func in current package (compile-time)</td></tr>
                     <tr><td><code>.::func()</code></td><td>Alternate syntax for above</td></tr>
                     <tr><td><code>__PACKAGE__::func()</code></td><td>Explicit form of above</td></tr>
@@ -862,7 +867,7 @@
                     <tr><td><code>with Role;</code></td><td>Compose a role (mixin) into the class</td></tr>
                     <tr><td><code>before "method" func($self) void { }</code></td><td>Run code before a method call</td></tr>
                     <tr><td><code>after "method" func($self) void { }</code></td><td>Run code after a method call</td></tr>
-                    <tr><td><code>around "method" func($self) void { }</code></td><td>Wrap a method call entirely</td></tr>
+                    <tr><td><code>around "method" func($orig, $self, ...@args) { }</code></td><td>Wrap a method call; <code>$orig-&gt;($self, ...@args)</code> runs the original</td></tr>
                 </tbody>
             </table>
 
@@ -874,7 +879,7 @@
 
             <h2>core:: Namespace Alias</h2>
 
-            <p>The <code>core::</code> namespace is the preferred way to call system functions. It is an alias for the older <code>sys::</code> namespace. The compiler normalizes <code>core::</code> to <code>sys::</code> at compile time, so there is zero overhead. Both namespaces work interchangeably.</p>
+            <p>The <code>core::</code> namespace is the preferred way to call system functions. The older <code>sys::</code> spelling still compiles to the same call, but the compiler prints a deprecation warning (<code>Warning: sys:: is deprecated, use core::time instead</code>).</p>
 
             <table>
                 <thead>
@@ -889,17 +894,7 @@
                 </tbody>
             </table>
 
-            <p>Use whichever namespace feels more natural. <code>core::</code> is recommended for new code as it reads more clearly as "core language functionality."</p>
-
-            <pre><code><span class="comment"># These are equivalent:</span>
-<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$pid</span> = <span class="func">core::fork</span>();
-<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$pid</span> = <span class="func">sys::fork</span>();
-
-<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$home</span> = <span class="func">core::getenv</span>(<span class="string">"HOME"</span>);
-<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$home</span> = <span class="func">sys::getenv</span>(<span class="string">"HOME"</span>);
-
-<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$now</span> = <span class="func">core::time</span>();
-<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$now</span> = <span class="func">sys::time</span>();</code></pre>
+            <p>Use <code>core::</code> in new code.</p>
 
             <h2>Miscellaneous</h2>
 
@@ -908,24 +903,24 @@
                     <tr><th>Function</th><th>Description</th></tr>
                 </thead>
                 <tbody>
-                    <tr><td><code>dump($val)</code></td><td>Debug print value structure</td></tr>
+                    <tr><td><code>dump($val)</code> / <code>dumper($val)</code></td><td>Print / return a readable dump of a value's structure</td></tr>
                     <tr><td><code>caller()</code></td><td>Get caller information</td></tr>
-                    <tr><td><code>eval($code)</code></td><td>Evaluate Strada code string</td></tr>
+                    <tr><td><code>Strada::JIT::eval($code)</code></td><td>Evaluate a Strada code string at run time (<code>use Strada::JIT;</code>, then <code>Strada::JIT::init()</code>)</td></tr>
                     <tr><td><code>$obj->isa($class)</code></td><td>Check if object is instance of class</td></tr>
                     <tr><td><code>$obj->can($method)</code></td><td>Check if object has method</td></tr>
                     <tr><td><code>$obj->$method()</code></td><td>Dynamic method dispatch (name from variable)</td></tr>
-                    <tr><td><code>local($var)</code></td><td>Dynamic scoping for <code>our</code> variables</td></tr>
+                    <tr><td><code>local $var = ...;</code></td><td>Dynamic scoping for <code>our</code> variables and <code>$_</code></td></tr>
                 </tbody>
             </table>
 
-            <h3>local() &mdash; Dynamic Scoping</h3>
+            <h3>local &mdash; Dynamic Scoping</h3>
 
-            <p>The <code>local()</code> function provides dynamic scoping for <code>our</code> (package-global) variables. It saves the current value and automatically restores it when the enclosing scope exits. This is useful for temporarily overriding globals without affecting the rest of the program.</p>
+            <p>The <code>local</code> statement provides dynamic scoping for <code>our</code> (package-global) variables and for the topic variable <code>$_</code>. It saves the current value and automatically restores it when the enclosing scope exits. This is useful for temporarily overriding globals without affecting the rest of the program.</p>
 
             <pre><code><span class="keyword">our</span> <span class="type">int</span> <span class="sigil">$verbose</span> = <span class="number">0</span>;
 
 <span class="keyword">func</span> <span class="func">debug_section</span>() <span class="type">void</span> {
-    <span class="func">local</span>(<span class="sigil">$verbose</span>) = <span class="number">1</span>;  <span class="comment"># Temporarily set to 1</span>
+    <span class="keyword">local</span> <span class="sigil">$verbose</span> = <span class="number">1</span>;   <span class="comment"># Temporarily set to 1</span>
     <span class="func">do_work</span>();               <span class="comment"># $verbose is 1 here</span>
     <span class="comment"># $verbose automatically restored to 0 on scope exit</span>
 }
@@ -944,8 +939,8 @@
 }</code></pre>
 
             <div class="info-box">
-                <strong>local() vs my</strong>
-                <p><code>local()</code> provides <em>dynamic</em> scoping &mdash; the localized value is visible in the current function and all functions called from it. <code>my</code> provides <em>lexical</em> scoping &mdash; the variable is only visible in the current block. <code>local()</code> only works with <code>our</code> variables (package globals).</p>
+                <strong>local vs my</strong>
+                <p><code>local</code> provides <em>dynamic</em> scoping &mdash; the localized value is visible in the current function and all functions called from it. <code>my</code> provides <em>lexical</em> scoping &mdash; the variable is only visible in the current block. <code>local</code> works with <code>our</code> variables (package globals) and <code>$_</code>. Inside a bare block or an <code>if</code>/<code>else</code> block the old value comes back at the end of that block; in a loop body, at the end of each iteration.</p>
             </div>
 
             <h2>tie/untie/tied &mdash; Tied Hashes</h2>
@@ -1030,12 +1025,16 @@
                 </thead>
                 <tbody>
                     <tr><td><code>-r, --run</code></td><td>Compile and run immediately</td></tr>
-                    <tr><td><code>-c, --keep-c</code></td><td>Keep generated .c file</td></tr>
-                    <tr><td><code>-g, --debug</code></td><td>Include debug symbols</td></tr>
+                    <tr><td><code>-o FILE</code></td><td>Output file name</td></tr>
+                    <tr><td><code>-O LEVEL</code></td><td>Optimization level <code>0</code>, <code>1</code>, <code>2</code>, <code>3</code>, <code>s</code>, <code>fast</code> (default 2; <code>-O2</code> and above use LTO)</td></tr>
+                    <tr><td><code>-c</code></td><td>Keep generated .c file</td></tr>
+                    <tr><td><code>-g</code></td><td>Include debug symbols</td></tr>
                     <tr><td><code>-p, --profile</code></td><td>Enable function profiling (report to stderr at exit)</td></tr>
                     <tr><td><code>--full-profile</code></td><td>Line-level profiling (writes <code>strada-prof.out</code>; implies <code>-g</code>)</td></tr>
                     <tr><td><code>-w, --warnings</code></td><td>Show compiler warnings</td></tr>
-                    <tr><td><code>-t, --timing</code></td><td>Show compilation phase timing</td></tr>
+                    <tr><td><code>--check</code></td><td>Syntax and semantic check only (no output); exit status 0 if clean</td></tr>
+                    <tr><td><code>--tcc</code></td><td>Compile the generated C with tcc (fast, unoptimized), link with the C compiler</td></tr>
+                    <tr><td><code>-t, --timing</code></td><td>Show compilation phase timing (<code>stradac</code> only)</td></tr>
                     <tr><td><code>--shared</code></td><td>Compile as shared library (.so)</td></tr>
                     <tr><td><code>-L &lt;path&gt;</code></td><td>Add library search path (high priority)</td></tr>
                     <tr><td><code>-LL &lt;path&gt;</code></td><td>Add library search path (low priority)</td></tr>

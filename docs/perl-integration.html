@@ -223,15 +223,11 @@ perl5::run(<span class="string">"%person = (name => 'Bob', age => 25);"</span>);
 
             <h3>XS Module Support</h3>
 
-            <p>XS-based Perl modules (compiled modules like POSIX, JSON::XS, DBI) require the Perl library to be preloaded:</p>
+            <p>XS-based Perl modules (compiled modules like POSIX, List::Util, JSON::XS) load directly: <code>perl5::init()</code> registers DynaLoader when the interpreter starts, so no <code>LD_PRELOAD</code> workaround is needed.</p>
 
-            <pre><code><span class="comment"># Find your libperl path</span>
-perl -MConfig -e 'print $Config{archlib}'
-
-<span class="comment"># Run with LD_PRELOAD</span>
-LD_PRELOAD=/lib/x86_64-linux-gnu/libperl.so.5.38 ./myapp</code></pre>
-
-            <p>Pure Perl modules work without this workaround.</p>
+            <pre><code><span class="keyword">if</span> (perl5::use_module(<span class="string">"POSIX"</span>) == <span class="number">1</span>) {
+    say(perl5::eval(<span class="string">"POSIX::floor(3.7)"</span>));  <span class="comment"># 3</span>
+}</code></pre>
 
             <h3>Error Handling</h3>
 
@@ -251,7 +247,9 @@ LD_PRELOAD=/lib/x86_64-linux-gnu/libperl.so.5.38 ./myapp</code></pre>
 
             <h3>Setup</h3>
 
-            <pre><code><span class="comment"># Build the Perl XS module (install libffi-dev for unlimited-argument calls)</span>
+            <pre><code><span class="comment"># Build the Perl XS module (install libffi-dev for unlimited-argument calls;</span>
+<span class="comment"># without libffi a call is limited to 4 arguments)</span>
+<span class="comment"># Outside the Strada source tree, point it at Strada: perl Makefile.PL STRADA_ROOT=/path/to/strada</span>
 cd perl/Strada
 perl Makefile.PL
 make
@@ -275,7 +273,7 @@ make install  <span class="comment"># optional</span></code></pre>
 
 <span class="keyword">func</span> <span class="function">sum_list</span>(<span class="type">scalar</span> <span class="variable">$items</span>) <span class="type">int</span> {
     <span class="keyword">my</span> <span class="type">int</span> <span class="variable">$sum</span> = <span class="number">0</span>;
-    <span class="keyword">foreach</span> <span class="keyword">my</span> <span class="type">int</span> <span class="variable">$x</span> (<span class="variable">$items</span>) {
+    <span class="keyword">foreach</span> <span class="keyword">my</span> <span class="type">int</span> <span class="variable">$x</span> (@{<span class="variable">$items</span>}) {
         <span class="variable">$sum</span> = <span class="variable">$sum</span> + <span class="variable">$x</span>;
     }
     <span class="keyword">return</span> <span class="variable">$sum</span>;
@@ -475,7 +473,9 @@ perl/
     Strada.pm            <span class="comment"># Perl module</span>
     Makefile.PL          <span class="comment"># Build configuration</span>
     t/
-      01_basic.t         <span class="comment"># Test suite</span></code></pre>
+      01_basic.t         <span class="comment"># Test suite (also 02_oop.t, 03_exceptions.t)</span>
+    example/
+      math_lib.strada    <span class="comment"># Library used by the OOP/exception tests</span></code></pre>
 
             <h2>See Also</h2>
 

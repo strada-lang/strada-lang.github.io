@@ -47,8 +47,8 @@
         <h3>Prerequisites</h3>
         <ul>
             <li><strong>gcc</strong> (or a recent clang). perla calls the C compiler to produce the final binary.</li>
-            <li><strong>MySQL client headers</strong> (<code>libmysqlclient-dev</code> on Debian/Ubuntu) if you'll use the DBI bridge.</li>
-            <li><strong>zlib</strong> and <strong>OpenSSL</strong> if you'll compile programs that do compression or TLS.</li>
+            <li><strong>OpenSSL</strong>, <strong>zlib</strong> and <strong>SQLite</strong> development libraries. perla links every program with <code>-lssl -lcrypto -lz -lsqlite3</code>.</li>
+            <li><strong>MySQL client headers</strong> (<code>libmysqlclient-dev</code> on Debian/Ubuntu) if you'll use the DBI bridge with MySQL.</li>
             <li>A real <strong>perl</strong> binary on <code>$PATH</code> helps — perla probes <code>perl -V</code> for <code>@INC</code> fallback. Set <code>PERLA_PERL=/path/to/perl</code> if it's not on PATH.</li>
         </ul>
 
@@ -83,17 +83,17 @@ fib(2) = 1
 ...
 fib(10) = 55</pre>
 
-        <p>Default <code>./perla foo.pl</code> compiles and runs, cleaning up the binary after. To keep the executable:</p>
+        <p>Default <code>./perla foo.pl</code> compiles and runs. Nothing is left in your directory: the binary lives in perla's link cache under <code>~/.cache/perla</code>, so re-running an unchanged script skips the compile, and a background job builds an <code>-O1</code> copy that later runs use. To keep the executable:</p>
 
 <pre><span class="prompt">$</span> perla -o hello hello.pl
 <span class="prompt">$</span> ./hello
 <span class="prompt">$</span> file hello
-hello: ELF 64-bit LSB pie executable, x86-64, statically linked</pre>
+hello: ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, ...</pre>
 
-        <p>One file. No <code>perl</code> required on the target. Ship it.</p>
+        <p>One file, linked only against ordinary system libraries (libc, OpenSSL, zlib, SQLite). No <code>perl</code> interpreter required on the target. Ship it.</p>
 
         <h2>Optimization levels</h2>
-        <p>Default is <code>-O0</code> — fast compile, slow binary. For release, use <code>-O2</code> or <code>-O3</code>:</p>
+        <p>Default for <code>-o</code> builds is <code>-O0</code> — fast compile, slow binary. For release, use <code>-O2</code> or <code>-O3</code>:</p>
 <pre><span class="prompt">$</span> perla -O2 -o app app.pl          <span class="comment"># -O2 + -flto</span>
 <span class="prompt">$</span> perla -O3 -o app app.pl          <span class="comment"># adds -march=native</span></pre>
 
@@ -106,19 +106,19 @@ hello: ELF 64-bit LSB pie executable, x86-64, statically linked</pre>
         </table>
 
         <h2>When you have modules</h2>
-        <p>perla handles <code>use Module::Name</code> the way you'd expect — the module's source is found on the search path and included. The search path is built from the input file's directory, <code>.</code>, <code>$PERL5LIB</code>, and any <code>use lib "..."</code> statements.</p>
+        <p>perla handles <code>use Module::Name</code> the way you'd expect — the module's source is found on the search path and included. The search path is built from the input file's directory, <code>.</code>, <code>$PERLA5LIB</code>, <code>$PERL5LIB</code>, <code>-I</code> flags, and any <code>use lib "..."</code> statements.</p>
 
 <pre><span class="prompt">$</span> <span class="kw">mkdir</span> -p lib/My
 <span class="prompt">$</span> <span class="kw">cat</span> &gt; lib/My/Greeter.pm &lt;&lt;<span class="str">'EOF'</span>
 <span class="str">package My::Greeter;
 use strict;
 sub hello { return "Hello, $_[0]!"; }
-1;
+1;</span>
 EOF
 <span class="prompt">$</span> <span class="kw">cat</span> &gt; greet.pl &lt;&lt;<span class="str">'EOF'</span>
 <span class="str">use lib 'lib';
 use My::Greeter;
-print My::Greeter::hello("perla"), "\n";
+print(My::Greeter::hello("perla"), "\n");</span>
 EOF
 <span class="prompt">$</span> perla greet.pl
 Hello, perla!</pre>
@@ -137,7 +137,7 @@ Hello, perla!</pre>
 [perla] precompiling 42 .pm files under lib/
 [perla] [1/42] ok lib/My/Greeter.pm
 ...
-[perla] precompile done: 42 built, 0 skipped, 0 failed</pre>
+[perla] precompile done: 42 built, 0 skipped, 0 failed (42 total)</pre>
 
         <p>It's idempotent — already-built modules are skipped on re-runs. Force a rebuild with <code>--force-rebuild</code>.</p>
 
@@ -152,23 +152,24 @@ precompile-force:
 	$(PERLA) --force-rebuild -M lib/
 
 precompile-clean:
-	find lib -type f \( -name <span class="str">'*.pm.o'</span> -o -name <span class="str">'*.pm.so'</span> -o -name <span class="str">'*.pm.deps'</span> \) -delete</pre>
+	find lib -type f \( -name <span class="str">'*.pm.o'</span> -o -name <span class="str">'*.pm.so'</span> -o -name <span class="str">'*.pm.deps'</span> \
+	    -o -name <span class="str">'*.pm.export'</span> -o -name <span class="str">'*.pm.cgv'</span> \) -delete</pre>
         </div>
 
         <h2>Using CPAN modules</h2>
-        <p>The most-used modules are built into perla's runtime &mdash; <code>JSON</code>, <code>DBI</code>, <code>Carp</code>, <code>Data::Dumper</code>, <code>List::Util</code>, <code>Scalar::Util</code>, <code>Storable</code>, <code>Encode</code>, <code>File::Temp</code>, <code>Digest::*</code>, <code>MIME::Base64</code>, <code>Time::HiRes</code> and more all work with no install step. For anything else, <code>perla-cpan</code> pulls it from CPAN:</p>
+        <p>The most-used modules work with no install step &mdash; <code>JSON</code>, <code>DBI</code>, <code>Carp</code>, <code>Data::Dumper</code>, <code>List::Util</code>, <code>Scalar::Util</code>, <code>Storable</code>, <code>Encode</code>, <code>File::Temp</code>, <code>Digest::*</code>, <code>MIME::Base64</code>, <code>Time::HiRes</code> and more (their XS parts are implemented natively in perla's runtime). For anything else, <code>perla-cpan</code> pulls it from CPAN. Use the <code>tools/perla-cpan</code> script in the perla checkout: the <code>perla-cpan</code> binary that <code>make install</code> currently installs is an older tool with a different syntax (<code>perla-cpan install Module::Name</code>).</p>
 
 <pre><span class="comment"># One-time: choose an install prefix</span>
 <span class="prompt">$</span> <span class="kw">export</span> PERLA_LIB=$HOME/.perla/local/lib/perla5
 <span class="prompt">$</span> <span class="kw">export</span> PERLA5LIB=$PERLA_LIB
 
 <span class="comment"># Install by name — pure-Perl and XS alike, deps resolved for you</span>
-<span class="prompt">$</span> perla-cpan Try::Tiny Path::Tiny JSON::MaybeXS
+<span class="prompt">$</span> /path/to/perla/tools/perla-cpan Try::Tiny Path::Tiny JSON::MaybeXS
 
 <span class="comment"># ...then just use them</span>
 <span class="prompt">$</span> perla myprog.pl</pre>
 
-        <p>Unlike <code>cpanm</code>, there's no <code>perl</code> in the loop: <code>perla-cpan</code> compiles XS ahead of time against perla's <code>perl.h</code> shim and links it into your binary. See the <a href="docs.html#cpan">CPAN docs</a> for flags (<code>--no-xs</code>, <code>--no-deps</code>, <code>--precompile</code>, <code>--dry-run</code>) and the honest caveats.</p>
+        <p>Unlike <code>cpanm</code>, there's no <code>perl</code> in the loop: <code>perla-cpan</code> compiles XS ahead of time against perla's <code>perl.h</code> shim into an <code>auto/…/*.so</code> that perla's <code>XSLoader</code> loads at run time (<code>--xs-static</code> builds a <code>.o</code> for static linking instead). See the <a href="docs.html#cpan">CPAN docs</a> for flags (<code>--no-xs</code>, <code>--no-deps</code>, <code>--precompile</code>, <code>--dry-run</code>) and the honest caveats.</p>
 
         <h2>Debugging what perla is doing</h2>
         <p>The <code>--debug</code> flag prints every compile-time decision (module search, cache hits, auto-builds) plus the exact <code>gcc</code> invocation:</p>
@@ -183,9 +184,9 @@ precompile-clean:
 [perla] use Carp
 [perla]   Carp: cache HIT /opt/bzperl/.../Carp.pm [.pm.o (static)]
 [perla] use File::Spec
-[perla]   File::Spec: cache MISS /opt/bzperl/.../File/Spec.pm — auto-building via perla -M
+[perla]   File::Spec: cache MISS /opt/bzperl/.../File/Spec.pm - auto-building via perla -M
 ...
-[cc] gcc -O0 -w -o app app.c /opt/bzperl/.../Carp.pm.o ... 2&gt;&amp;1
+[cc] ccache gcc -O0 -w -pipe ... -o app app.c /opt/bzperl/.../Carp.pm.o ... 2&gt;&amp;1
 [cc] done in 16.03s (ok)</pre>
 
         <p>Use this when a <code>use</code> resolves to an unexpected file, when you want to see what the compiler spawned, or when compile time is surprising.</p>
@@ -196,6 +197,8 @@ precompile-clean:
 <pre><span class="prompt">$</span> perla --keep -o app app.pl
 [perla] kept C file: app.c
 <span class="prompt">$</span> grep <span class="str">'perla_sub_main_'</span> app.c    <span class="comment"># see what each sub compiled to</span></pre>
+
+        <p>If an identical build is already in perla's link cache, no <code>.c</code> is written (even though the message says it was kept). Set <code>PERLA_NO_LINK_CACHE=1</code> to force a fresh compile.</p>
 
         <h2>Dropping into C</h2>
         <p>For FFI or performance-critical sections, perla supports <code>__C__</code> blocks:</p>
@@ -224,9 +227,10 @@ print <span class="str">"now: "</span>, ms_now(), <span class="str">"ms\n"</span
         <p>See <a href="docs.html">the full <code>__C__</code> guide</a> for the variable-name mapping, runtime helpers you can call, and memory rules.</p>
 
         <h2>Running under Cannoli (web apps)</h2>
-        <p>Compile your Perl app as a <code>.pm.so</code> and serve it via <a href="../docs/cannoli.html">Cannoli</a>'s preforking HTTP server:</p>
+        <p>Compile your Perl app as a <code>.pm.so</code> (<code>perla -M</code> builds only a <code>.pm.o</code> unless <code>PERLA_BUILD_PM_SO=1</code> is set) and serve it via <a href="../docs/cannoli.html">Cannoli</a>'s preforking HTTP server:</p>
 
-<pre><span class="prompt">$</span> perla -M MyApp.pm
+<pre><span class="prompt">$</span> PERLA_BUILD_PM_SO=1 perla -M MyApp.pm
+Compiled MyApp.pm.o (module: MyApp, init: perla_mod_init_MyApp)
 Compiled MyApp.pm.so (module: MyApp, init: perla_mod_init_MyApp)
 
 <span class="prompt">$</span> cannoli --library <span class="str">"./cannoli_perla.so:\

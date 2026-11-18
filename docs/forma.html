@@ -67,7 +67,7 @@
 
             <h2>Overview</h2>
 
-            <p>Forma is Strada's built-in template rendering library. It supports variable substitution, loops, conditionals, nested object access, and layout composition. Forma is used by the Cannoli web framework for rendering dynamic pages.</p>
+            <p>Forma is the template rendering library in Strada's standard library (<code>lib/Forma.strada</code>). It supports variable substitution, loops, conditionals, nested object access, and layout composition. It can be used from any Strada program, including <a href="cannoli.html">Cannoli</a> handlers.</p>
 
             <h3>Key Features</h3>
             <ul>
@@ -92,17 +92,20 @@
             <pre><code><span class="keyword">use</span> <span class="type">lib</span> <span class="string">"lib"</span>;
 <span class="keyword">use</span> Forma;
 
-<span class="comment"># Initialize with template directory</span>
-Forma::init(<span class="string">"./templates"</span>);
+<span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
+    <span class="comment"># Initialize with template directory</span>
+    Forma::init(<span class="string">"./templates"</span>);
 
-<span class="comment"># Create template data</span>
-<span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%vars</span> = ();
-<span class="sigil">$vars</span>{<span class="string">"title"</span>} = <span class="string">"Welcome"</span>;
-<span class="sigil">$vars</span>{<span class="string">"username"</span>} = <span class="string">"Alice"</span>;
+    <span class="comment"># Create template data</span>
+    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%vars</span> = ();
+    <span class="sigil">$vars</span>{<span class="string">"title"</span>} = <span class="string">"Welcome"</span>;
+    <span class="sigil">$vars</span>{<span class="string">"username"</span>} = <span class="string">"Alice"</span>;
 
-<span class="comment"># Render a template file</span>
-<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$html</span> = Forma::render(<span class="string">"page.html"</span>, \<span class="sigil">%vars</span>);
-<span class="func">say</span>(<span class="sigil">$html</span>);</code></pre>
+    <span class="comment"># Render a template file</span>
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$html</span> = Forma::render(<span class="string">"page.html"</span>, \<span class="sigil">%vars</span>);
+    <span class="func">say</span>(<span class="sigil">$html</span>);
+    <span class="keyword">return</span> <span class="number">0</span>;
+}</code></pre>
 
             <h2>Template Syntax</h2>
 
@@ -374,10 +377,10 @@ Price: ${{commas price}}    <span class="comment">&lt;!-- 1234567 -&gt; "1,234,5
 
             <h3>Debugging with {{dump}}</h3>
 
-            <p>Output a variable's contents for debugging:</p>
+            <p>Output a variable's contents for debugging. The output is HTML-escaped and wrapped in its own <code>&lt;pre class="forma-dump"&gt;</code> element:</p>
 
             <pre><code><span class="comment">&lt;!-- Template --&gt;</span>
-&lt;pre&gt;{{dump user}}&lt;/pre&gt;</code></pre>
+{{dump user}}</code></pre>
 
             <h2>API Reference</h2>
 
@@ -402,6 +405,10 @@ Price: ${{commas price}}    <span class="comment">&lt;!-- 1234567 -&gt; "1,234,5
             <p>Render with automatic HTML escaping for all variables. Use <code>{{{var}}}</code> for unescaped output.</p>
             <pre><code><span class="comment"># User input is automatically escaped</span>
 <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$html</span> = Forma::render_safe(<span class="string">"comment.html"</span>, \<span class="sigil">%vars</span>);</code></pre>
+
+            <h3>Forma::render_string_safe($template, $vars)</h3>
+            <p>The template-string counterpart of <code>render_safe()</code>: escapes <code>{{var}}</code>, leaves <code>{{{var}}}</code> raw.</p>
+            <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$html</span> = Forma::render_string_safe(<span class="string">"&lt;p&gt;{{comment}}&lt;/p&gt;"</span>, \<span class="sigil">%vars</span>);</code></pre>
 
             <h3>Forma::render_with_layout($template, $layout, $vars)</h3>
             <p>Render a template within a layout. The layout should contain <code>{{content}}</code>.</p>
@@ -429,7 +436,7 @@ Forma::set_cache(<span class="number">1</span>);  <span class="comment"># Enable
             <h3>Forma::escape_html($string)</h3>
             <p>Escape HTML special characters in a string.</p>
             <pre><code><span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$safe</span> = Forma::escape_html(<span class="string">"&lt;script&gt;alert('xss')&lt;/script&gt;"</span>);
-<span class="comment"># Returns: &amp;lt;script&amp;gt;alert('xss')&amp;lt;/script&amp;gt;</span></code></pre>
+<span class="comment"># Returns: &amp;lt;script&amp;gt;alert(&amp;#39;xss&amp;#39;)&amp;lt;/script&amp;gt;</span></code></pre>
 
             <h2>Custom Helpers (Functional Macros)</h2>
 
@@ -445,7 +452,7 @@ Forma::set_cache(<span class="number">1</span>);  <span class="comment"># Enable
     <span class="keyword">if</span> (<span class="func">scalar</span>(<span class="sigil">@a</span>) == <span class="number">0</span>) {
         <span class="keyword">return</span> <span class="string">"0"</span>;
     }
-    <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$n</span> = <span class="sigil">@a</span>[<span class="number">0</span>] + <span class="number">0</span>;
+    <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$n</span> = <span class="sigil">$a</span>[<span class="number">0</span>] + <span class="number">0</span>;
     <span class="keyword">return</span> <span class="string">""</span> . (<span class="sigil">$n</span> * <span class="number">2</span>);
 }
 
@@ -471,8 +478,8 @@ Forma::register_helper(<span class="string">"double"</span>, \&amp;double_helper
             <pre><code><span class="comment"># Greeting helper with optional salutation</span>
 <span class="keyword">func</span> <span class="func">greet_helper</span>(<span class="type">scalar</span> <span class="sigil">$args</span>, <span class="type">scalar</span> <span class="sigil">$vars</span>) <span class="type">str</span> {
     <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@a</span> = <span class="sigil">@{$args}</span>;
-    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$name</span> = <span class="func">scalar</span>(<span class="sigil">@a</span>) > <span class="number">0</span> ? <span class="string">""</span> . <span class="sigil">@a</span>[<span class="number">0</span>] : <span class="string">"World"</span>;
-    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$greeting</span> = <span class="func">scalar</span>(<span class="sigil">@a</span>) > <span class="number">1</span> ? <span class="string">""</span> . <span class="sigil">@a</span>[<span class="number">1</span>] : <span class="string">"Hello"</span>;
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$name</span> = <span class="func">scalar</span>(<span class="sigil">@a</span>) > <span class="number">0</span> ? <span class="string">""</span> . <span class="sigil">$a</span>[<span class="number">0</span>] : <span class="string">"World"</span>;
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$greeting</span> = <span class="func">scalar</span>(<span class="sigil">@a</span>) > <span class="number">1</span> ? <span class="string">""</span> . <span class="sigil">$a</span>[<span class="number">1</span>] : <span class="string">"Hello"</span>;
     <span class="keyword">return</span> <span class="sigil">$greeting</span> . <span class="string">", "</span> . <span class="sigil">$name</span> . <span class="string">"!"</span>;
 }
 
@@ -487,8 +494,8 @@ Forma::register_helper(<span class="string">"greet"</span>, \&amp;greet_helper);
             <pre><code><span class="comment"># Wrap text in HTML tags</span>
 <span class="keyword">func</span> <span class="func">wrap_filter</span>(<span class="type">scalar</span> <span class="sigil">$args</span>, <span class="type">scalar</span> <span class="sigil">$vars</span>) <span class="type">str</span> {
     <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@a</span> = <span class="sigil">@{$args}</span>;
-    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$val</span> = <span class="func">scalar</span>(<span class="sigil">@a</span>) > <span class="number">0</span> ? <span class="string">""</span> . <span class="sigil">@a</span>[<span class="number">0</span>] : <span class="string">""</span>;
-    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$tag</span> = <span class="func">scalar</span>(<span class="sigil">@a</span>) > <span class="number">1</span> ? <span class="string">""</span> . <span class="sigil">@a</span>[<span class="number">1</span>] : <span class="string">"span"</span>;
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$val</span> = <span class="func">scalar</span>(<span class="sigil">@a</span>) > <span class="number">0</span> ? <span class="string">""</span> . <span class="sigil">$a</span>[<span class="number">0</span>] : <span class="string">""</span>;
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$tag</span> = <span class="func">scalar</span>(<span class="sigil">@a</span>) > <span class="number">1</span> ? <span class="string">""</span> . <span class="sigil">$a</span>[<span class="number">1</span>] : <span class="string">"span"</span>;
     <span class="keyword">return</span> <span class="string">"&lt;"</span> . <span class="sigil">$tag</span> . <span class="string">"&gt;"</span> . <span class="sigil">$val</span> . <span class="string">"&lt;/"</span> . <span class="sigil">$tag</span> . <span class="string">"&gt;"</span>;
 }
 
@@ -565,31 +572,31 @@ Forma::register_helper(<span class="string">"wrap"</span>, \&amp;wrap_filter);
             <pre><code><span class="keyword">use</span> <span class="type">lib</span> <span class="string">"lib"</span>;
 <span class="keyword">use</span> Forma;
 
-Forma::init(<span class="string">"./templates"</span>);
+<span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
+    Forma::init(<span class="string">"./templates"</span>);
 
-<span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%vars</span> = ();
-<span class="sigil">$vars</span>{<span class="string">"title"</span>} = <span class="string">"Products"</span>;
-<span class="sigil">$vars</span>{<span class="string">"logged_in"</span>} = <span class="number">1</span>;
-<span class="sigil">$vars</span>{<span class="string">"username"</span>} = <span class="string">"Alice"</span>;
-<span class="sigil">$vars</span>{<span class="string">"products"</span>} = [
-    { <span class="string">"name"</span> => <span class="string">"Widget"</span>, <span class="string">"price"</span> => <span class="string">"19.99"</span>, <span class="string">"in_stock"</span> => <span class="number">1</span> },
-    { <span class="string">"name"</span> => <span class="string">"Gadget"</span>, <span class="string">"price"</span> => <span class="string">"29.99"</span>, <span class="string">"in_stock"</span> => <span class="number">0</span> },
-    { <span class="string">"name"</span> => <span class="string">"Gizmo"</span>, <span class="string">"price"</span> => <span class="string">"39.99"</span>, <span class="string">"in_stock"</span> => <span class="number">1</span> }
-];
-<span class="sigil">$vars</span>{<span class="string">"has_products"</span>} = <span class="number">1</span>;
+    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%vars</span> = ();
+    <span class="sigil">$vars</span>{<span class="string">"title"</span>} = <span class="string">"Products"</span>;
+    <span class="sigil">$vars</span>{<span class="string">"logged_in"</span>} = <span class="number">1</span>;
+    <span class="sigil">$vars</span>{<span class="string">"username"</span>} = <span class="string">"Alice"</span>;
+    <span class="sigil">$vars</span>{<span class="string">"products"</span>} = [
+        { <span class="string">"name"</span> => <span class="string">"Widget"</span>, <span class="string">"price"</span> => <span class="string">"19.99"</span>, <span class="string">"in_stock"</span> => <span class="number">1</span> },
+        { <span class="string">"name"</span> => <span class="string">"Gadget"</span>, <span class="string">"price"</span> => <span class="string">"29.99"</span>, <span class="string">"in_stock"</span> => <span class="number">0</span> },
+        { <span class="string">"name"</span> => <span class="string">"Gizmo"</span>, <span class="string">"price"</span> => <span class="string">"39.99"</span>, <span class="string">"in_stock"</span> => <span class="number">1</span> }
+    ];
+    <span class="sigil">$vars</span>{<span class="string">"has_products"</span>} = <span class="number">1</span>;
 
-<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$html</span> = Forma::render_with_layout(<span class="string">"products.html"</span>, <span class="string">"layout.html"</span>, \<span class="sigil">%vars</span>);
-<span class="func">say</span>(<span class="sigil">$html</span>);</code></pre>
+    <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$html</span> = Forma::render_with_layout(<span class="string">"products.html"</span>, <span class="string">"layout.html"</span>, \<span class="sigil">%vars</span>);
+    <span class="func">say</span>(<span class="sigil">$html</span>);
+    <span class="keyword">return</span> <span class="number">0</span>;
+}</code></pre>
 
             <h2>Using with Cannoli</h2>
 
-            <p>Forma integrates seamlessly with the Cannoli web framework:</p>
+            <p>Cannoli has its own built-in template engine (<code>$c-&gt;render(...)</code>), but a Cannoli application can use Forma as well. A Cannoli-style handler (registered with <code>Cannoli::App::get_c</code>) renders a page with Forma and writes it to the response:</p>
 
             <pre><code><span class="keyword">use</span> <span class="type">lib</span> <span class="string">"lib"</span>;
-<span class="keyword">use</span> cannoli;
 <span class="keyword">use</span> Forma;
-
-Forma::init(<span class="string">"./templates"</span>);
 
 <span class="keyword">func</span> <span class="func">handle_home</span>(<span class="type">scalar</span> <span class="sigil">$c</span>) <span class="type">hash</span> {
     <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%vars</span> = ();
@@ -598,11 +605,20 @@ Forma::init(<span class="string">"./templates"</span>);
 
     <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$html</span> = Forma::render_with_layout(<span class="string">"home.html"</span>, <span class="string">"layout.html"</span>, \<span class="sigil">%vars</span>);
 
-    <span class="sigil">$c</span>->status(<span class="number">200</span>);
-    <span class="sigil">$c</span>->content_type(<span class="string">"text/html"</span>);
-    <span class="sigil">$c</span>->write_body(<span class="sigil">$html</span>);
-    <span class="keyword">return</span> <span class="sigil">$c</span>->build_response();
+    <span class="sigil">$c</span>-&gt;status(<span class="number">200</span>);
+    <span class="sigil">$c</span>-&gt;content_type(<span class="string">"text/html"</span>);
+    <span class="sigil">$c</span>-&gt;write_body(<span class="sigil">$html</span>);
+    <span class="keyword">return</span> <span class="sigil">$c</span>-&gt;build_response();
+}
+
+<span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
+    Forma::init(<span class="string">"./templates"</span>);
+    <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$app</span> = Cannoli::App::new();
+    Cannoli::App::get_c(<span class="sigil">$app</span>, <span class="string">"/"</span>, \&amp;handle_home);
+    <span class="keyword">return</span> Cannoli::App::run(<span class="sigil">$app</span>);
 }</code></pre>
+
+            <p>See the <a href="cannoli.html">Cannoli page</a> for how to build and run an application.</p>
 
             <h2>Additional Built-in Helpers</h2>
 
@@ -628,12 +644,13 @@ Forma::init(<span class="string">"./templates"</span>);
             <pre><code><span class="comment">&lt;!-- Replace text --&gt;</span>
 {{replace text "old" "new"}}     <span class="comment">&lt;!-- Replace all occurrences --&gt;</span>
 
-<span class="comment">&lt;!-- String checks --&gt;</span>
-{{#if (contains name "admin")}}
-    &lt;span class="admin-badge"&gt;Admin&lt;/span&gt;
-{{/if}}
-{{#if (starts_with filename "temp_")}}...{{/if}}
-{{#if (ends_with filename ".txt")}}...{{/if}}
+<span class="comment">&lt;!-- String checks (output "1" or "0") --&gt;</span>
+{{contains name "admin"}}
+{{starts_with filename "temp_"}}
+{{ends_with filename ".txt"}}
+
+<span class="comment">&lt;!-- A helper call in parentheses can be an #if / #unless condition --&gt;</span>
+{{#if (contains name "admin")}}Admin{{/if}}
 
 <span class="comment">&lt;!-- Padding --&gt;</span>
 {{pad_left id 5 "0"}}      <span class="comment">&lt;!-- "42" -&gt; "00042" --&gt;</span>
@@ -641,7 +658,8 @@ Forma::init(<span class="string">"./templates"</span>);
 
 <span class="comment">&lt;!-- Repeat string --&gt;</span>
 {{repeat "=" 20}}          <span class="comment">&lt;!-- "====================" --&gt;</span>
-{{repeat "*" count}}       <span class="comment">&lt;!-- Repeat count times --&gt;</span>
+{{repeat stars 3}}         <span class="comment">&lt;!-- the value of stars, 3 times --&gt;</span>
+{{repeat "*" rating}}      <span class="comment">&lt;!-- the count can be a variable --&gt;</span>
 
 <span class="comment">&lt;!-- Strip HTML tags --&gt;</span>
 {{strip_tags html_content}}<span class="comment">&lt;!-- Remove all HTML tags --&gt;</span></code></pre>
@@ -660,27 +678,31 @@ Forma::init(<span class="string">"./templates"</span>);
 
             <p>Format dates and display relative time:</p>
 
-            <pre><code><span class="comment">&lt;!-- Format timestamps --&gt;</span>
-{{date_format timestamp "%Y-%m-%d"}}        <span class="comment">&lt;!-- 2026-01-27 --&gt;</span>
-{{date_format timestamp "%B %d, %Y"}}       <span class="comment">&lt;!-- January 27, 2026 --&gt;</span>
-{{date_format timestamp "%H:%M:%S"}}        <span class="comment">&lt;!-- 14:30:45 --&gt;</span>
-{{date_format timestamp "%A"}}              <span class="comment">&lt;!-- Tuesday --&gt;</span>
+            <pre><code><span class="comment">&lt;!-- Format timestamps (local time) --&gt;</span>
+{{date_format timestamp "YYYY-MM-DD"}}      <span class="comment">&lt;!-- 2026-01-27 --&gt;</span>
+{{date_format timestamp "MMM d, YYYY"}}     <span class="comment">&lt;!-- Jan 27, 2026 --&gt;</span>
+{{date_format timestamp "HH:mm:ss"}}        <span class="comment">&lt;!-- 14:30:45 --&gt;</span>
+{{date_format timestamp "hh:mm A"}}         <span class="comment">&lt;!-- 02:30 PM --&gt;</span>
+{{date_format now "YYYY"}}                  <span class="comment">&lt;!-- current year --&gt;</span>
 
 <span class="comment">&lt;!-- Relative time (time ago) --&gt;</span>
 {{time_ago created_at}}    <span class="comment">&lt;!-- "5 minutes ago", "2 hours ago", "3 days ago" --&gt;</span></code></pre>
 
+            <p>The timestamp is Unix seconds (a number, a variable, or <code>now</code>). Any character of the format that is not a code is copied as-is, so avoid literal <code>d</code>, <code>A</code> and <code>a</code> in the surrounding text.</p>
+
             <table>
                 <tr><th>Format Code</th><th>Description</th><th>Example</th></tr>
-                <tr><td><code>%Y</code></td><td>4-digit year</td><td>2026</td></tr>
-                <tr><td><code>%m</code></td><td>Month (01-12)</td><td>01</td></tr>
-                <tr><td><code>%d</code></td><td>Day (01-31)</td><td>27</td></tr>
-                <tr><td><code>%H</code></td><td>Hour (00-23)</td><td>14</td></tr>
-                <tr><td><code>%M</code></td><td>Minute (00-59)</td><td>30</td></tr>
-                <tr><td><code>%S</code></td><td>Second (00-59)</td><td>45</td></tr>
-                <tr><td><code>%B</code></td><td>Full month name</td><td>January</td></tr>
-                <tr><td><code>%b</code></td><td>Abbreviated month</td><td>Jan</td></tr>
-                <tr><td><code>%A</code></td><td>Full weekday name</td><td>Tuesday</td></tr>
-                <tr><td><code>%a</code></td><td>Abbreviated weekday</td><td>Tue</td></tr>
+                <tr><td><code>YYYY</code></td><td>4-digit year</td><td>2026</td></tr>
+                <tr><td><code>MM</code></td><td>Month (01-12)</td><td>01</td></tr>
+                <tr><td><code>MMM</code></td><td>Abbreviated month</td><td>Jan</td></tr>
+                <tr><td><code>DD</code></td><td>Day (01-31)</td><td>07</td></tr>
+                <tr><td><code>d</code></td><td>Day without padding</td><td>7</td></tr>
+                <tr><td><code>HH</code></td><td>Hour (00-23)</td><td>14</td></tr>
+                <tr><td><code>hh</code></td><td>Hour (01-12)</td><td>02</td></tr>
+                <tr><td><code>mm</code></td><td>Minute (00-59)</td><td>30</td></tr>
+                <tr><td><code>ss</code></td><td>Second (00-59)</td><td>45</td></tr>
+                <tr><td><code>A</code></td><td>AM/PM</td><td>PM</td></tr>
+                <tr><td><code>a</code></td><td>am/pm</td><td>pm</td></tr>
             </table>
 
             <h3>Currency and Percentage Formatting</h3>
@@ -689,7 +711,7 @@ Forma::init(<span class="string">"./templates"</span>);
 {{currency price}}         <span class="comment">&lt;!-- "$1,234.56" (default USD) --&gt;</span>
 {{currency price "EUR"}}   <span class="comment">&lt;!-- "€1,234.56" --&gt;</span>
 {{currency price "GBP"}}   <span class="comment">&lt;!-- "£1,234.56" --&gt;</span>
-{{currency price "JPY"}}   <span class="comment">&lt;!-- "¥1,235" (no decimals) --&gt;</span>
+{{currency price "JPY"}}   <span class="comment">&lt;!-- "¥1,235" (JPY and KRW have no minor unit) --&gt;</span>
 
 <span class="comment">&lt;!-- Percentage formatting --&gt;</span>
 {{percent ratio}}          <span class="comment">&lt;!-- 0.75 -&gt; "75%" --&gt;</span>
@@ -739,7 +761,7 @@ Forma::init(<span class="string">"./templates"</span>);
                     <tr><td>format_number</td><td><code>{{format_number pi 2}}</code></td></tr>
                     <tr><td>currency</td><td><code>{{currency price "USD"}}</code></td></tr>
                     <tr><td>percent</td><td><code>{{percent ratio 1}}</code></td></tr>
-                    <tr><td rowspan="3">Date/Time</td><td>date_format</td><td><code>{{date_format ts "%Y-%m-%d"}}</code></td></tr>
+                    <tr><td rowspan="3">Date/Time</td><td>date_format</td><td><code>{{date_format ts "YYYY-MM-DD"}}</code></td></tr>
                     <tr><td>time_ago</td><td><code>{{time_ago timestamp}}</code></td></tr>
                     <tr><td>plural</td><td><code>{{plural n "item" "items"}}</code></td></tr>
                     <tr><td rowspan="3">URL/HTML</td><td>url_encode</td><td><code>{{url_encode query}}</code></td></tr>
@@ -809,7 +831,7 @@ Forma::clear_cache();</code></pre>
             </ul>
 
             <div class="tip">
-                <strong>Tip:</strong> For complex web applications, consider using Pacco (the Strada package registry) as an example of Forma and Cannoli working together.
+                <strong>Tip:</strong> <code>examples/test_forma_comprehensive.strada</code> and <code>examples/test_forma_custom_helpers.strada</code> in the Strada repository exercise most of the features on this page.
             </div>
 
         </main>

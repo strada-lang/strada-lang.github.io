@@ -95,24 +95,28 @@
 <span class="keyword">use</span> <span class="type">Nesso</span>;
 <span class="keyword">use</span> <span class="type">Nesso::Record</span>;    <span class="comment"># For ActiveRecord-style methods</span>
 
-<span class="comment"># Connect to database and create Nesso instance</span>
-<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$db</span> = <span class="type">DBI</span>::<span class="func">connect</span>(<span class="string">"dbi:SQLite:app.db"</span>, <span class="string">""</span>, <span class="string">""</span>);
-<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$n</span> = <span class="type">Nesso</span>::<span class="func">new</span>(<span class="sigil">$db</span>);
+<span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
+    <span class="comment"># Connect to database and create Nesso instance</span>
+    <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$db</span> = <span class="type">DBI</span>::<span class="func">connect</span>(<span class="string">"dbi:SQLite:app.db"</span>, <span class="string">""</span>, <span class="string">""</span>);
+    <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$n</span> = <span class="type">Nesso</span>::<span class="func">new</span>(<span class="sigil">$db</span>);
+    <span class="type">DBI</span>::<span class="func">do_sql</span>(<span class="sigil">$db</span>, <span class="string">"CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, username TEXT, email TEXT)"</span>);
 
-<span class="comment"># Define a model</span>
-<span class="sigil">$n</span>-&gt;<span class="func">define</span>(<span class="string">"users"</span>, {
-    <span class="string">"table"</span>   =&gt; <span class="string">"users"</span>,
-    <span class="string">"columns"</span> =&gt; [<span class="string">"id"</span>, <span class="string">"username"</span>, <span class="string">"email"</span>],
-    <span class="string">"primary"</span> =&gt; <span class="string">"id"</span>
-});
+    <span class="comment"># Define a model</span>
+    <span class="sigil">$n</span>-&gt;<span class="func">define</span>(<span class="string">"users"</span>, {
+        <span class="string">"table"</span>   =&gt; <span class="string">"users"</span>,
+        <span class="string">"columns"</span> =&gt; [<span class="string">"id"</span>, <span class="string">"username"</span>, <span class="string">"email"</span>],
+        <span class="string">"primary"</span> =&gt; <span class="string">"id"</span>
+    });
 
-<span class="comment"># Create and save a record</span>
-<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$user</span> = <span class="sigil">$n</span>-&gt;<span class="func">create</span>(<span class="string">"users"</span>, { <span class="string">"username"</span> =&gt; <span class="string">"alice"</span> });
-<span class="sigil">$user</span>-&gt;<span class="func">save</span>();    <span class="comment"># ActiveRecord style</span>
+    <span class="comment"># Create and save a record</span>
+    <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$user</span> = <span class="sigil">$n</span>-&gt;<span class="func">create</span>(<span class="string">"users"</span>, { <span class="string">"username"</span> =&gt; <span class="string">"alice"</span> });
+    <span class="sigil">$user</span>-&gt;<span class="func">save</span>();    <span class="comment"># ActiveRecord style</span>
 
-<span class="comment"># Query records</span>
-<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$found</span> = <span class="sigil">$n</span>-&gt;<span class="func">find</span>(<span class="string">"users"</span>, <span class="number">1</span>);
-<span class="func">say</span>(<span class="sigil">$found</span>-&gt;{<span class="string">"username"</span>});</code></pre>
+    <span class="comment"># Query records</span>
+    <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$found</span> = <span class="sigil">$n</span>-&gt;<span class="func">find</span>(<span class="string">"users"</span>, <span class="number">1</span>);
+    <span class="func">say</span>(<span class="sigil">$found</span>-&gt;{<span class="string">"username"</span>});
+    <span class="keyword">return</span> <span class="number">0</span>;
+}</code></pre>
 
             <h2>Defining Models</h2>
 
@@ -202,6 +206,11 @@
     <span class="string">"_offset"</span> =&gt; <span class="number">20</span>
 });</code></pre>
 
+            <p>Every other key in a conditions hash must be a declared column (an unknown column throws). A value can be a scalar (<code>col = ?</code>), <code>undef</code> (<code>IS NULL</code>), an array ref (<code>IN (...)</code>) or a hash of operators; all values are bound as parameters:</p>
+
+            <pre><code><span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$some</span> = <span class="sigil">$n</span>-&gt;<span class="func">where</span>(<span class="string">"users"</span>, { <span class="string">"username"</span> =&gt; [<span class="string">"alice"</span>, <span class="string">"bob"</span>] });
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$adults</span> = <span class="sigil">$n</span>-&gt;<span class="func">where</span>(<span class="string">"users"</span>, { <span class="string">"age"</span> =&gt; { <span class="string">"&gt;="</span> =&gt; <span class="number">18</span>, <span class="string">"&lt;"</span> =&gt; <span class="number">65</span> } });</code></pre>
+
             <h2>Relationships</h2>
 
             <p>Nesso supports three types of relationships:</p>
@@ -281,7 +290,7 @@
 
             <h2>Custom Model Classes</h2>
 
-            <p>Create custom classes that inherit from <code>Nesso::Record</code> to add model-specific methods:</p>
+            <p>Create custom classes that inherit from <code>Nesso::Record</code> to add model-specific methods (this example also needs <code>use crypt;</code> for the password functions):</p>
 
             <pre><code><span class="keyword">package</span> <span class="type">User</span>;
 <span class="keyword">inherit</span> <span class="type">Nesso::Record</span>;
@@ -292,7 +301,7 @@
 }
 
 <span class="keyword">func</span> <span class="func">authenticate</span>(<span class="type">scalar</span> <span class="sigil">$self</span>, <span class="type">str</span> <span class="sigil">$password</span>) <span class="type">int</span> {
-    <span class="keyword">return</span> <span class="type">crypt</span>::<span class="func">check_password</span>(<span class="sigil">$password</span>, <span class="sigil">$self</span>-&gt;{<span class="string">"password_hash"</span>});
+    <span class="keyword">return</span> <span class="type">crypt</span>::<span class="func">verify</span>(<span class="sigil">$password</span>, <span class="sigil">$self</span>-&gt;{<span class="string">"password_hash"</span>});
 }
 
 <span class="keyword">func</span> <span class="func">full_name</span>(<span class="type">scalar</span> <span class="sigil">$self</span>) <span class="type">str</span> {
@@ -321,7 +330,7 @@
             <pre><code><span class="sigil">$n</span>-&gt;<span class="func">set_debug</span>(<span class="number">1</span>);
 
 <span class="comment"># Now all queries are logged:</span>
-<span class="comment"># [Nesso] SQL: SELECT * FROM users WHERE id = ?</span>
+<span class="comment"># [Nesso] SQL: SELECT * FROM "users" WHERE "id" = ?</span>
 <span class="comment"># [Nesso] PARAMS: ["1"]</span>
 <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$user</span> = <span class="sigil">$n</span>-&gt;<span class="func">find</span>(<span class="string">"users"</span>, <span class="number">1</span>);
 
@@ -419,22 +428,29 @@
                     <tr><th>Category</th><th>Method</th><th>Description</th></tr>
                 </thead>
                 <tbody>
-                    <tr><td rowspan="4">Setup</td><td><code>new($dbh)</code></td><td>Create Nesso instance</td></tr>
+                    <tr><td rowspan="6">Setup</td><td><code>new($dbh)</code></td><td>Create Nesso instance</td></tr>
                     <tr><td><code>define($name, $schema)</code></td><td>Register a model</td></tr>
                     <tr><td><code>set_db($dbh)</code></td><td>Change database handle</td></tr>
+                    <tr><td><code>get_db()</code></td><td>Current database handle</td></tr>
+                    <tr><td><code>set_debug($on)</code></td><td>Log SQL and parameters</td></tr>
                     <tr><td><code>clone($dbh)</code></td><td>Clone with different DB</td></tr>
-                    <tr><td rowspan="6">CRUD</td><td><code>create($model, $attrs)</code></td><td>Create record (unsaved)</td></tr>
+                    <tr><td rowspan="7">CRUD</td><td><code>create($model, $attrs)</code></td><td>Create record (unsaved)</td></tr>
                     <tr><td><code>save($record)</code></td><td>INSERT or UPDATE</td></tr>
                     <tr><td><code>find($model, $id)</code></td><td>Find by primary key</td></tr>
                     <tr><td><code>find_by($model, $conds)</code></td><td>Find first match</td></tr>
                     <tr><td><code>where($model, $conds)</code></td><td>Find all matches</td></tr>
+                    <tr><td><code>find_or_create($model, $conds)</code></td><td>Find first match or insert one</td></tr>
                     <tr><td><code>delete($record)</code></td><td>Delete record</td></tr>
-                    <tr><td rowspan="2">Query</td><td><code>all($model)</code></td><td>Get all records</td></tr>
+                    <tr><td rowspan="4">Query</td><td><code>all($model)</code></td><td>Get all records</td></tr>
                     <tr><td><code>count($model, $conds)</code></td><td>Count matches</td></tr>
-                    <tr><td rowspan="4">Relations</td><td><code>has_many($owner, $name, $fk)</code></td><td>Define 1:N relation</td></tr>
+                    <tr><td><code>update_all($model, $conds, $attrs)</code></td><td>Update all matches</td></tr>
+                    <tr><td><code>delete_all($model, $conds)</code></td><td>Delete all matches</td></tr>
+                    <tr><td rowspan="6">Relations</td><td><code>has_many($owner, $name, $fk)</code></td><td>Define 1:N relation</td></tr>
                     <tr><td><code>belongs_to($owner, $name, $target, $fk)</code></td><td>Define N:1 relation</td></tr>
                     <tr><td><code>has_one($owner, $name, $target, $fk)</code></td><td>Define 1:1 relation</td></tr>
                     <tr><td><code>related($record, $name)</code></td><td>Fetch related records</td></tr>
+                    <tr><td><code>preload($records, $name)</code></td><td>Eager-load a relation for a list (one query)</td></tr>
+                    <tr><td><code>with_related($model, $conds, $names)</code></td><td><code>where()</code> plus <code>preload()</code></td></tr>
                     <tr><td rowspan="2">Other</td><td><code>transaction($callback)</code></td><td>Atomic operations</td></tr>
                     <tr><td><code>query($sql, $params)</code></td><td>Raw SQL query</td></tr>
                 </tbody>

@@ -81,10 +81,10 @@
 
 <span class="comment"># Constructor</span>
 <span class="keyword">func</span> <span class="func">new</span>(<span class="type">str</span> <span class="sigil">$name</span>, <span class="type">int</span> <span class="sigil">$age</span>) <span class="type">scalar</span> {
-    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%self</span> = {
+    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%self</span> = (
         <span class="string">"name"</span> => <span class="sigil">$name</span>,
         <span class="string">"age"</span> => <span class="sigil">$age</span>
-    };
+    );
     <span class="keyword">return</span> <span class="func">bless</span>(\<span class="sigil">%self</span>, <span class="string">"Dog"</span>);
 }
 
@@ -148,7 +148,7 @@
             <p><code>bless()</code> associates a hash reference with a class name, turning it into an object:</p>
 
             <pre><code><span class="comment"># bless(reference, classname) -> object</span>
-<span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%data</span> = { <span class="string">"x"</span> => <span class="number">10</span> };
+<span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%data</span> = ( <span class="string">"x"</span> => <span class="number">10</span> );
 <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$obj</span> = <span class="func">bless</span>(\<span class="sigil">%data</span>, <span class="string">"MyClass"</span>);</code></pre>
 
             <h2>Package Auto-Prefixing</h2>
@@ -159,7 +159,7 @@
 
 <span class="comment"># This becomes Animal_new</span>
 <span class="keyword">func</span> <span class="func">new</span>(<span class="type">str</span> <span class="sigil">$name</span>) <span class="type">scalar</span> {
-    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%self</span> = { <span class="string">"name"</span> => <span class="sigil">$name</span> };
+    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%self</span> = ( <span class="string">"name"</span> => <span class="sigil">$name</span> );
     <span class="keyword">return</span> <span class="func">bless</span>(\<span class="sigil">%self</span>, <span class="string">"Animal"</span>);
 }
 
@@ -174,9 +174,9 @@
             <div class="info-box">
                 <strong>Auto-Prefix Rules</strong>
                 <ul>
-                    <li>Only applies to simple packages (no <code>::</code> in name)</li>
-                    <li>Skips <code>main</code> function and <code>package main;</code></li>
-                    <li>Skips functions that already look class-prefixed (e.g., <code>Dog_speak</code>)</li>
+                    <li>Applies to every package except <code>package main;</code> (and never to <code>main()</code> itself)</li>
+                    <li><code>::</code> in a package name becomes <code>_</code>: <code>func hello</code> in <code>package Foo::Bar;</code> is <code>Foo_Bar_hello</code> in C and is called as <code>Foo::Bar::hello()</code></li>
+                    <li>A function whose name already starts with the C prefix (e.g. <code>Dog_speak</code> in <code>package Dog;</code>) keeps its name</li>
                     <li><code>extern</code> functions are NOT auto-prefixed</li>
                 </ul>
             </div>
@@ -207,17 +207,17 @@
                     <li><code>__PACKAGE__::func()</code> — Explicit form</li>
                 </ul>
                 <p>All three resolve to <code>PackageName_func()</code> at <strong>compile time</strong>.</p>
-                <p>Note: <code>__PACKAGE__</code> alone (without <code>::</code>) returns the package name as a string at runtime.</p>
+                <p>Note: <code>__PACKAGE__</code> alone (without <code>::</code>) is the name of the package the code is written in, as a string fixed at compile time.</p>
             </div>
 
             <h2>Inheritance</h2>
 
-            <p>Implement inheritance by blessing with a derived class name and calling parent methods:</p>
+            <p>Declare the parent with <code>extends</code>, write the child's own constructor, and override methods as needed. Methods the child doesn't define are looked up in the parent:</p>
 
             <pre><code><span class="keyword">package</span> <span class="type">Animal</span>;
 
 <span class="keyword">func</span> <span class="func">new</span>(<span class="type">str</span> <span class="sigil">$name</span>) <span class="type">scalar</span> {
-    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%self</span> = { <span class="string">"name"</span> => <span class="sigil">$name</span> };
+    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%self</span> = ( <span class="string">"name"</span> => <span class="sigil">$name</span> );
     <span class="keyword">return</span> <span class="func">bless</span>(\<span class="sigil">%self</span>, <span class="string">"Animal"</span>);
 }
 
@@ -226,12 +226,13 @@
 }
 
 <span class="keyword">package</span> <span class="type">Dog</span>;
+<span class="keyword">extends</span> <span class="type">Animal</span>;
 
 <span class="keyword">func</span> <span class="func">new</span>(<span class="type">str</span> <span class="sigil">$name</span>, <span class="type">str</span> <span class="sigil">$breed</span>) <span class="type">scalar</span> {
-    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%self</span> = {
+    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%self</span> = (
         <span class="string">"name"</span> => <span class="sigil">$name</span>,
         <span class="string">"breed"</span> => <span class="sigil">$breed</span>
-    };
+    );
     <span class="keyword">return</span> <span class="func">bless</span>(\<span class="sigil">%self</span>, <span class="string">"Dog"</span>);
 }
 
@@ -247,9 +248,10 @@
 }
 
 <span class="keyword">package</span> <span class="type">Cat</span>;
+<span class="keyword">extends</span> <span class="type">Animal</span>;
 
 <span class="keyword">func</span> <span class="func">new</span>(<span class="type">str</span> <span class="sigil">$name</span>) <span class="type">scalar</span> {
-    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%self</span> = { <span class="string">"name"</span> => <span class="sigil">$name</span> };
+    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%self</span> = ( <span class="string">"name"</span> => <span class="sigil">$name</span> );
     <span class="keyword">return</span> <span class="func">bless</span>(\<span class="sigil">%self</span>, <span class="string">"Cat"</span>);
 }
 
@@ -294,7 +296,7 @@
     <span class="func">make_sound</span>(<span class="sigil">$cat</span>);  <span class="comment"># "Whiskers meows: Meow!"</span>
 
     <span class="comment"># Store in array for iteration</span>
-    <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@animals</span> = [<span class="sigil">$dog</span>, <span class="sigil">$cat</span>];
+    <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@animals</span> = (<span class="sigil">$dog</span>, <span class="sigil">$cat</span>);
 
     <span class="keyword">foreach</span> <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$animal</span> (<span class="sigil">@animals</span>) {
         <span class="sigil">$animal</span>-><span class="func">speak</span>();
@@ -309,10 +311,10 @@
             <pre><code><span class="keyword">package</span> <span class="type">Button</span>;
 
 <span class="keyword">func</span> <span class="func">new</span>(<span class="type">str</span> <span class="sigil">$label</span>, <span class="type">scalar</span> <span class="sigil">$on_click</span>) <span class="type">scalar</span> {
-    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%self</span> = {
+    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%self</span> = (
         <span class="string">"label"</span> => <span class="sigil">$label</span>,
         <span class="string">"on_click"</span> => <span class="sigil">$on_click</span>
-    };
+    );
     <span class="keyword">return</span> <span class="func">bless</span>(\<span class="sigil">%self</span>, <span class="string">"Button"</span>);
 }
 
@@ -338,17 +340,17 @@
             <pre><code><span class="keyword">package</span> <span class="type">Builder</span>;
 
 <span class="keyword">func</span> <span class="func">new</span>() <span class="type">scalar</span> {
-    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%self</span> = { <span class="string">"parts"</span> => [] };
+    <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%self</span> = ( <span class="string">"parts"</span> => [] );
     <span class="keyword">return</span> <span class="func">bless</span>(\<span class="sigil">%self</span>, <span class="string">"Builder"</span>);
 }
 
 <span class="keyword">func</span> <span class="func">add</span>(<span class="type">scalar</span> <span class="sigil">$self</span>, <span class="type">str</span> <span class="sigil">$part</span>) <span class="type">scalar</span> {
-    <span class="func">push</span>(<span class="sigil">$self</span>->{<span class="string">"parts"</span>}, <span class="sigil">$part</span>);
+    <span class="func">push</span>(@{<span class="sigil">$self</span>->{<span class="string">"parts"</span>}}, <span class="sigil">$part</span>);
     <span class="keyword">return</span> <span class="sigil">$self</span>;  <span class="comment"># Return self for chaining</span>
 }
 
 <span class="keyword">func</span> <span class="func">build</span>(<span class="type">scalar</span> <span class="sigil">$self</span>) <span class="type">str</span> {
-    <span class="keyword">return</span> <span class="func">join</span>(<span class="string">", "</span>, <span class="sigil">$self</span>->{<span class="string">"parts"</span>});
+    <span class="keyword">return</span> <span class="func">join</span>(<span class="string">", "</span>, @{<span class="sigil">$self</span>->{<span class="string">"parts"</span>}});
 }
 
 <span class="comment"># Usage with chaining</span>
@@ -452,9 +454,9 @@
             <div class="info-box">
                 <strong>Supported Operators</strong>
                 <ul>
-                    <li><strong>Arithmetic:</strong> <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>%</code>, <code>**</code></li>
+                    <li><strong>Arithmetic:</strong> <code>+</code>, <code>-</code>, <code>*</code>, <code>/</code>, <code>%</code>, <code>**</code>, <code>x</code> (repetition)</li>
                     <li><strong>String:</strong> <code>.</code> (concatenation), <code>""</code> (stringify)</li>
-                    <li><strong>Unary:</strong> <code>neg</code> (unary minus), <code>!</code>, <code>bool</code></li>
+                    <li><strong>Unary:</strong> <code>neg</code> (unary minus), <code>!</code>, <code>~</code>, <code>bool</code></li>
                     <li><strong>Comparison:</strong> <code>==</code>, <code>!=</code>, <code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code>, <code>&lt;=&gt;</code></li>
                     <li><strong>String comparison:</strong> <code>eq</code>, <code>ne</code>, <code>lt</code>, <code>gt</code>, <code>le</code>, <code>ge</code>, <code>cmp</code></li>
                 </ul>
@@ -515,10 +517,10 @@
                     <li><code>ro</code> (default) &mdash; read-only: generates a getter (<code>$obj-&gt;name()</code>)</li>
                     <li><code>rw</code> &mdash; read-write: generates both getter and setter (<code>$obj-&gt;set_name($val)</code>)</li>
                     <li><code>= default</code> &mdash; default value used when the attribute is not passed to the constructor</li>
-                    <li><code>(required)</code> &mdash; attribute must be passed to the constructor (no default)</li>
-                    <li><code>(lazy, builder =&gt; "method")</code> &mdash; lazy evaluation via a builder method</li>
+                    <li><code>(required)</code> &mdash; attribute must be passed to the constructor; omitting it throws <code>Missing required attribute 'name' for Person::new</code></li>
+                    <li><code>(lazy, builder =&gt; "method")</code> &mdash; lazy evaluation: the first read of an unset attribute calls the builder method and stores its result</li>
                 </ul>
-                <p>The auto-generated <code>new()</code> constructor takes <strong>named arguments</strong> as alternating key-value pairs: <code>Class::new("key1", val1, "key2", val2)</code>. Missing attributes fall back to their default value (via the <code>//</code> defined-or operator).</p>
+                <p>The auto-generated <code>new()</code> constructor takes <strong>named arguments</strong> as alternating key-value pairs: <code>Class::new("key1", val1, "key2", val2)</code>, which can also be written with fat commas: <code>Person::new(name =&gt; "Bob", age =&gt; 40)</code>. Missing attributes fall back to their default value (via the <code>//</code> defined-or operator).</p>
                 <p>If you define an explicit <code>func new(...)</code> in the package, the auto-generated constructor is skipped.</p>
             </div>
 
@@ -606,13 +608,13 @@
 #   [done barking]</span></code></pre>
 
             <h4>around</h4>
-            <p>Wraps the original method. The <code>around</code> modifier receives the original method as a function pointer in the first element of its args, allowing you to call, skip, or modify the original behavior.</p>
+            <p>Wraps the original method. The hook receives <code>($orig, $self, @args)</code>: <code>$orig</code> is a reference to the original method, which runs only if you call it, so you can call it, skip it, or change its arguments and return value.</p>
 
-            <pre><code><span class="keyword">around</span> <span class="string">"speak"</span> <span class="keyword">func</span>(<span class="type">scalar</span> <span class="sigil">$self</span>) <span class="type">void</span> {
+            <pre><code><span class="keyword">around</span> <span class="string">"speak"</span> <span class="keyword">func</span>(<span class="type">scalar</span> <span class="sigil">$orig</span>, <span class="type">scalar</span> <span class="sigil">$self</span>, <span class="type">scalar</span> ...<span class="sigil">@args</span>) <span class="type">scalar</span> {
     <span class="func">say</span>(<span class="string">"[around: before speak]"</span>);
-    <span class="comment"># Call the original method via the args mechanism</span>
-    <span class="comment"># or implement custom logic entirely</span>
+    <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$result</span> = <span class="sigil">$orig</span>->(<span class="sigil">$self</span>, ...<span class="sigil">@args</span>);   <span class="comment"># call the original</span>
     <span class="func">say</span>(<span class="string">"[around: after speak]"</span>);
+    <span class="keyword">return</span> <span class="sigil">$result</span>;
 }</code></pre>
 
             <div class="info-box">
@@ -620,7 +622,7 @@
                 <ul>
                     <li><code>before "method" func($self) void { ... }</code> &mdash; runs before the method</li>
                     <li><code>after "method" func($self) void { ... }</code> &mdash; runs after the method</li>
-                    <li><code>around "method" func($self) void { ... }</code> &mdash; wraps the method entirely</li>
+                    <li><code>around "method" func($orig, $self, ...@args) { ... }</code> &mdash; wraps the method; call <code>$orig-&gt;($self, ...@args)</code> to run it</li>
                     <li>The method name is specified as a <strong>string literal</strong></li>
                     <li>Multiple modifiers can be applied to the same method</li>
                     <li>Modifiers are registered at runtime and dispatched automatically</li>
@@ -702,7 +704,7 @@
                     <li>Use getters/setters for controlled access to properties</li>
                     <li>Return <code>$self</code> from setters for method chaining</li>
                     <li>Use <code>before</code>/<code>after</code> modifiers for cross-cutting concerns (logging, validation)</li>
-                    <li>Use <code>core::weaken()</code> on back-references (child&rarr;parent) to prevent circular reference leaks</li>
+                    <li>Reference cycles (child&rarr;parent back-references) are reclaimed by the built-in cycle collector; <code>core::weaken()</code> on the back-reference is still useful for deterministic teardown</li>
                 </ul>
             </div>
 

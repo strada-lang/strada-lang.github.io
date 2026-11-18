@@ -674,8 +674,11 @@
     <span class="keyword">return</span> <span class="sigil">$total</span>;
 }
 
-<span class="func">greet</span>(<span class="string">"Strada"</span>);
-<span class="func">say</span>(<span class="func">sum_all</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>));  <span class="comment"># 15</span></pre>
+<span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
+    <span class="func">greet</span>(<span class="string">"Strada"</span>);
+    <span class="func">say</span>(<span class="func">sum_all</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>));  <span class="comment"># 15</span>
+    <span class="keyword">return</span> <span class="number">0</span>;
+}</pre>
             </div>
         </div>
     </section>
@@ -758,7 +761,7 @@
                 <div class="card col-2 reveal">
                     <div class="ico">🌐</div>
                     <h3>Web Framework</h3>
-                    <p>Ships with <a href="https://github.com/strada-lang/cannoli">Cannoli</a> — routing, file uploads, chunked responses, and SSL/TLS, built in.</p>
+                    <p>Pairs with <a href="https://github.com/strada-lang/cannoli">Cannoli</a>, a preforking web server and framework written in Strada — routing, file uploads, chunked responses, and SSL/TLS.</p>
                 </div>
 
                 <div class="card col-2 reveal">
@@ -928,17 +931,17 @@
                     <pre><span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$count</span> = <span class="number">42</span>;
 <span class="keyword">my</span> <span class="type">num</span> <span class="sigil">$price</span> = <span class="number">19.99</span>;
 <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$name</span> = <span class="string">"Strada"</span>;
-<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@items</span> = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>];
-<span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%config</span> = {
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@items</span> = (<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>);
+<span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%config</span> = (
     <span class="string">"host"</span> => <span class="string">"localhost"</span>,
     <span class="string">"port"</span> => <span class="number">8080</span>
-};</pre>
+);</pre>
                 </div>
 
                 <div class="example reveal">
                     <div class="example-header">Functions</div>
                     <pre><span class="keyword">func</span> <span class="func">factorial</span>(<span class="type">int</span> <span class="sigil">$n</span>) <span class="type">int</span> {
-    <span class="keyword">if</span> (<span class="sigil">$n</span> <= <span class="number">1</span>) {
+    <span class="keyword">if</span> (<span class="sigil">$n</span> &lt;= <span class="number">1</span>) {
         <span class="keyword">return</span> <span class="number">1</span>;
     }
     <span class="keyword">return</span> <span class="sigil">$n</span> * <span class="func">factorial</span>(<span class="sigil">$n</span> - <span class="number">1</span>);
@@ -961,7 +964,7 @@
 <span class="func">sum</span>(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>);   <span class="comment"># 15</span>
 
 <span class="comment"># Spread operator unpacks arrays</span>
-<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@vals</span> = [<span class="number">10</span>, <span class="number">20</span>, <span class="number">30</span>];
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@vals</span> = (<span class="number">10</span>, <span class="number">20</span>, <span class="number">30</span>);
 <span class="func">sum</span>(...<span class="sigil">@vals</span>);            <span class="comment"># 60</span>
 <span class="func">sum</span>(<span class="number">1</span>, ...<span class="sigil">@vals</span>, <span class="number">99</span>);    <span class="comment"># 160</span></pre>
                 </div>
@@ -1025,19 +1028,21 @@
     <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$path</span> = <span class="sigil">$c</span>-><span class="func">path</span>();
 
     <span class="keyword">if</span> (<span class="sigil">$path</span> eq <span class="string">"/"</span>) {
-        <span class="keyword">return</span> <span class="sigil">$c</span>-><span class="func">json</span>({
+        <span class="sigil">$c</span>-><span class="func">render_json</span>({
             <span class="string">"message"</span> => <span class="string">"Welcome to Strada!"</span>
         });
+    } <span class="keyword">else</span> {
+        <span class="sigil">$c</span>-><span class="func">not_found</span>(<span class="string">"No such page"</span>);
     }
 
-    <span class="keyword">return</span> <span class="sigil">$c</span>-><span class="func">not_found</span>();
+    <span class="keyword">return</span> <span class="sigil">$c</span>-><span class="func">build_response</span>();
 }</pre>
                 </div>
 
                 <div class="example reveal">
                     <div class="example-header">Command-Line Arguments</div>
                     <pre><span class="keyword">func</span> <span class="func">main</span>(<span class="type">int</span> <span class="sigil">$argc</span>, <span class="type">array</span> <span class="sigil">@argv</span>) <span class="type">int</span> {
-    <span class="keyword">if</span> (<span class="sigil">$argc</span> < <span class="number">2</span>) {
+    <span class="keyword">if</span> (<span class="sigil">$argc</span> &lt; <span class="number">2</span>) {
         <span class="func">say</span>(<span class="string">"Usage: "</span> . <span class="sigil">$argv</span>[<span class="number">0</span>] . <span class="string">" &lt;name&gt;"</span>);
         <span class="keyword">return</span> <span class="number">1</span>;
     }
@@ -1059,7 +1064,7 @@
     }
 }
 
-<span class="func">say</span>(<span class="func">fast_sqrt</span>(<span class="number">16.0</span>)); <span class="comment"># 4.0</span></pre>
+<span class="func">say</span>(<span class="func">fast_sqrt</span>(<span class="number">16.0</span>)); <span class="comment"># 4</span></pre>
                 </div>
             </div>
         </div>
@@ -1095,7 +1100,7 @@
 
             <div class="pipeline-note reveal">
                 <p>The self-hosting compiler is written in Strada and compiles to portable C, which GCC turns into fast native executables with no runtime dependencies beyond libc.</p>
-                <p style="margin-top:1rem">For interactive use, <a href="docs/repl.html"><code>strada --repl</code></a> opens a JIT-backed REPL (tcc or gcc + <code>dlopen</code>) supporting the full language. A standalone <a href="docs/interpreter.html">tree-walking / bytecode VM interpreter</a> is also available as an opt-in build for embedding.</p>
+                <p style="margin-top:1rem">For interactive use, <a href="docs/repl.html"><code>strada --repl</code></a> opens a JIT-backed REPL (tcc or gcc + <code>dlopen</code>) supporting the full language. A standalone <a href="docs/interpreter.html">bytecode VM interpreter</a> (<code>strada-interp</code>, built with <code>make interpreter</code>) runs programs without generating C.</p>
             </div>
         </div>
     </section>

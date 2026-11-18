@@ -91,14 +91,14 @@ cd strada-lang</code></pre>
                     <h3>3. Build the Compiler</h3>
                     <p>Run make to build the self-hosting compiler:</p>
                     <pre><code>make</code></pre>
-                    <p>This creates the <code>./stradac</code> compiler and the <code>./strada</code> wrapper script.</p>
+                    <p>This bootstraps the self-hosting <code>./stradac</code> compiler and builds <code>strada-driver</code>, the program behind the <code>./strada</code> command.</p>
                 </div>
 
                 <div class="step">
                     <h3>4. Build Libraries (Optional)</h3>
-                    <p>Build shared libraries with detected dependencies:</p>
+                    <p>Build the optional libraries with the detected dependencies:</p>
                     <pre><code>make libs</code></pre>
-                    <p>This builds DBI (database), crypt (password hashing), SSL, and readline libraries.</p>
+                    <p>This precompiles DBI (database), crypt (password hashing), SSL, readline, and Eval into <code>lib/</code> as <code>.o</code> modules; a program that says <code>use DBI;</code> links the precompiled module automatically.</p>
                 </div>
 
                 <div class="step">
@@ -151,11 +151,11 @@ cd strada-lang</code></pre>
 
     <span class="comment"># Type annotations are optional - sigil determines the default type</span>
     <span class="keyword">my</span> <span class="sigil">$anything</span> = <span class="number">42</span>;       <span class="comment"># defaults to scalar</span>
-    <span class="keyword">my</span> <span class="sigil">@numbers</span> = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>];  <span class="comment"># defaults to array</span>
-    <span class="keyword">my</span> <span class="sigil">%config</span> = {
+    <span class="keyword">my</span> <span class="sigil">@numbers</span> = (<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>);  <span class="comment"># defaults to array</span>
+    <span class="keyword">my</span> <span class="sigil">%config</span> = (
         <span class="string">"host"</span> => <span class="string">"localhost"</span>,
         <span class="string">"port"</span> => <span class="number">8080</span>
-    };                          <span class="comment"># defaults to hash</span>
+    );                          <span class="comment"># defaults to hash</span>
 
     <span class="func">say</span>(<span class="string">"Count: "</span> . <span class="sigil">$count</span>);
     <span class="func">say</span>(<span class="string">"First number: "</span> . <span class="sigil">$numbers</span>[<span class="number">0</span>]);
@@ -220,26 +220,26 @@ cd strada-lang</code></pre>
             <h3>Loops</h3>
 
             <pre><code><span class="comment"># For loop</span>
-<span class="keyword">for</span> (<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$i</span> = <span class="number">0</span>; <span class="sigil">$i</span> < <span class="number">5</span>; <span class="sigil">$i</span>++) {
+<span class="keyword">for</span> (<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$i</span> = <span class="number">0</span>; <span class="sigil">$i</span> &lt; <span class="number">5</span>; <span class="sigil">$i</span>++) {
     <span class="func">say</span>(<span class="sigil">$i</span>);
 }
 
 <span class="comment"># While loop</span>
 <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$n</span> = <span class="number">0</span>;
-<span class="keyword">while</span> (<span class="sigil">$n</span> < <span class="number">3</span>) {
+<span class="keyword">while</span> (<span class="sigil">$n</span> &lt; <span class="number">3</span>) {
     <span class="func">say</span>(<span class="string">"n = "</span> . <span class="sigil">$n</span>);
     <span class="sigil">$n</span>++;
 }
 
 <span class="comment"># Foreach loop</span>
-<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@fruits</span> = [<span class="string">"apple"</span>, <span class="string">"banana"</span>, <span class="string">"cherry"</span>];
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@fruits</span> = (<span class="string">"apple"</span>, <span class="string">"banana"</span>, <span class="string">"cherry"</span>);
 <span class="keyword">foreach</span> <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$fruit</span> (<span class="sigil">@fruits</span>) {
     <span class="func">say</span>(<span class="sigil">$fruit</span>);
 }</code></pre>
 
             <h2>Working with Arrays</h2>
 
-            <pre><code><span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@nums</span> = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>];
+            <pre><code><span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@nums</span> = (<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>);
 
 <span class="comment"># Add elements</span>
 <span class="func">push</span>(<span class="sigil">@nums</span>, <span class="number">4</span>);
@@ -264,11 +264,11 @@ cd strada-lang</code></pre>
 
             <h2>Working with Hashes</h2>
 
-            <pre><code><span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%person</span> = {
+            <pre><code><span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%person</span> = (
     <span class="string">"name"</span> => <span class="string">"Alice"</span>,
     <span class="string">"age"</span> => <span class="number">30</span>,
     <span class="string">"city"</span> => <span class="string">"New York"</span>
-};
+);
 
 <span class="comment"># Access values</span>
 <span class="func">say</span>(<span class="sigil">$person</span>{<span class="string">"name"</span>});  <span class="comment"># Alice</span>
@@ -316,7 +316,7 @@ cd strada-lang</code></pre>
     <span class="func">say</span>(<span class="string">"Argument count: "</span> . <span class="sigil">$argc</span>);
     <span class="func">say</span>(<span class="string">"Program name: "</span> . <span class="sigil">$argv</span>[<span class="number">0</span>]);
 
-    <span class="keyword">if</span> (<span class="sigil">$argc</span> < <span class="number">2</span>) {
+    <span class="keyword">if</span> (<span class="sigil">$argc</span> &lt; <span class="number">2</span>) {
         <span class="func">say</span>(<span class="string">"Usage: "</span> . <span class="sigil">$argv</span>[<span class="number">0</span>] . <span class="string">" &lt;name&gt;"</span>);
         <span class="keyword">return</span> <span class="number">1</span>;
     }
@@ -329,9 +329,10 @@ cd strada-lang</code></pre>
             <p>Run it with arguments:</p>
 
             <pre><code>./strada -r greet.strada Alice
-<span class="comment"># Output:</span>
+<span class="comment"># Output (-r prints a blank line and "---" before running the program):</span>
+<span class="comment"># ---</span>
 <span class="comment"># Argument count: 2</span>
-<span class="comment"># Program name: greet</span>
+<span class="comment"># Program name: ./greet</span>
 <span class="comment"># Hello, Alice!</span></code></pre>
 
             <h2>Next Steps</h2>
@@ -354,7 +355,7 @@ cd strada-lang</code></pre>
                 </div>
                 <div class="card">
                     <h4>Cannoli Framework</h4>
-                    <p>Build web applications with the built-in web framework.</p>
+                    <p>Build web applications with Cannoli, the Strada web server and framework.</p>
                     <p><a href="cannoli.html">Read more &rarr;</a></p>
                 </div>
             </div>

@@ -81,8 +81,8 @@
                     <tr><td><code>int</code></td><td>64-bit signed integer (tagged pointer, zero heap allocation)</td><td><code>42</code>, <code>-17</code></td></tr>
                     <tr><td><code>num</code></td><td>64-bit floating point</td><td><code>3.14</code>, <code>-0.5</code></td></tr>
                     <tr><td><code>str</code></td><td>UTF-8 string</td><td><code>"hello"</code></td></tr>
-                    <tr><td><code>array</code></td><td>Dynamic array</td><td><code>[1, 2, 3]</code></td></tr>
-                    <tr><td><code>hash</code></td><td>Key-value map</td><td><code>{"a" => 1}</code></td></tr>
+                    <tr><td><code>array</code></td><td>Dynamic array</td><td><code>(1, 2, 3)</code></td></tr>
+                    <tr><td><code>hash</code></td><td>Key-value map</td><td><code>("a" => 1)</code></td></tr>
                     <tr><td><code>scalar</code></td><td>Generic type (any value)</td><td>Any value</td></tr>
                     <tr><td><code>void</code></td><td>No value (function returns)</td><td>-</td></tr>
                     <tr><td><code>undef</code></td><td>Undefined value</td><td><code>undef</code></td></tr>
@@ -102,7 +102,12 @@
 
 my array @arr = flexible();  # (1, 2, 3)
 my int $val = flexible();    # 42</code></pre>
-            <p>Context functions: <code>core::wantarray()</code>, <code>core::wantscalar()</code>, <code>core::wanthash()</code></p>
+            <p>Context functions: <code>core::wantarray()</code>, <code>core::wantscalar()</code>, <code>core::wanthash()</code>. <code>core::wantarray()</code> also works in a function without a <code>dynamic</code> return type:</p>
+<pre><code><span class="keyword">func</span> <span class="func">ctx</span>() {
+    <span class="keyword">return</span> <span class="func">core::wantarray</span>() ? <span class="string">"list"</span> : <span class="string">"scalar"</span>;
+}
+<span class="keyword">my</span> <span class="sigil">@l</span> = (<span class="func">ctx</span>());   <span class="comment"># $l[0] is "list"</span>
+<span class="keyword">my</span> <span class="sigil">$s</span> = <span class="func">ctx</span>();     <span class="comment"># "scalar"</span></code></pre>
 
             <h2>Sigils</h2>
 
@@ -134,31 +139,42 @@ my int $val = flexible();    # 42</code></pre>
 <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$anything</span> = <span class="number">42</span>;
 
 <span class="comment"># Array variables (@ sigil)</span>
-<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@numbers</span> = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>];
-<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@empty</span> = [];
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@numbers</span> = (<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>);
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@empty</span> = ();
 
 <span class="comment"># Hash variables (% sigil)</span>
-<span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%config</span> = {
+<span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%config</span> = (
     <span class="string">"host"</span> => <span class="string">"localhost"</span>,
     <span class="string">"port"</span> => <span class="number">8080</span>
-};</code></pre>
+);</code></pre>
 
             <div class="info-box">
                 <strong>Optional type annotations</strong>
                 Type annotations are optional. When omitted, the sigil determines the default type: <code>$</code> defaults to <code>scalar</code>, <code>@</code> to <code>array</code>, and <code>%</code> to <code>hash</code>.
                 <pre><code><span class="comment"># These pairs are equivalent:</span>
 <span class="keyword">my</span> <span class="sigil">$foo</span> = <span class="number">42</span>;           <span class="comment"># same as: my scalar $foo = 42;</span>
-<span class="keyword">my</span> <span class="sigil">@items</span> = [<span class="number">1</span>, <span class="number">2</span>];    <span class="comment"># same as: my array @items = [1, 2];</span>
-<span class="keyword">my</span> <span class="sigil">%lookup</span> = {};        <span class="comment"># same as: my hash %lookup = {};</span>
+<span class="keyword">my</span> <span class="sigil">@items</span> = (<span class="number">1</span>, <span class="number">2</span>);    <span class="comment"># same as: my array @items = (1, 2);</span>
+<span class="keyword">my</span> <span class="sigil">%lookup</span> = ();        <span class="comment"># same as: my hash %lookup = ();</span>
 <span class="keyword">our</span> <span class="sigil">$bar</span> = <span class="string">"hello"</span>;    <span class="comment"># same as: our scalar $bar = "hello";</span></code></pre>
                 Use explicit types like <code>int</code>, <code>str</code>, or <code>num</code> when you want tighter compile-time checking.
             </div>
 
             <div class="info-box">
                 <strong>Declaration without initialization</strong>
-                Variables can be declared without an initial value. They will be <code>undef</code> until assigned.
-                <pre><code><span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$x</span>;  <span class="comment"># $x is undef</span>
-<span class="sigil">$x</span> = <span class="number">10</span>;     <span class="comment"># Now $x is 10</span></code></pre>
+                Variables can be declared without an initial value. A typed scalar starts as its type's empty value; an untyped scalar starts as <code>undef</code>.
+                <pre><code><span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$x</span>;     <span class="comment"># 0</span>
+<span class="keyword">my</span> <span class="type">num</span> <span class="sigil">$f</span>;     <span class="comment"># 0</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$s</span>;     <span class="comment"># ""</span>
+<span class="keyword">my</span> <span class="sigil">$u</span>;         <span class="comment"># undef (same for "my scalar $u;")</span>
+<span class="keyword">my</span> <span class="sigil">@list</span>;      <span class="comment"># empty array</span>
+<span class="keyword">my</span> <span class="sigil">%map</span>;       <span class="comment"># empty hash</span>
+<span class="sigil">$x</span> = <span class="number">10</span>;        <span class="comment"># Now $x is 10</span></code></pre>
+                An <code>int</code> variable always holds an integer: assigning a value that is not statically an integer converts it, so <code>my int $n = "12abc";</code> stores 12.
+            </div>
+
+            <div class="info-box">
+                <strong>Same name, different sigils</strong>
+                <code>$t</code>, <code>@t</code> and <code>%t</code> are three separate variables, as in Perl: <code>my %t; my @t; my $t;</code> in one scope declares all three.
             </div>
 
             <h2>Constants</h2>
@@ -171,8 +187,8 @@ my int $val = flexible();    # 42</code></pre>
 <span class="keyword">const</span> <span class="type">num</span> PI = <span class="number">3.14159</span>;
 
 <span class="comment"># Sigil is optional for const</span>
-<span class="keyword">const</span> <span class="type">int</span> LIMIT = <span class="number">50</span>;      <span class="comment"># Without sigil</span>
-<span class="keyword">const</span> <span class="type">int</span> <span class="sigil">$LIMIT</span> = <span class="number">50</span>;   <span class="comment"># With sigil - same effect</span>
+<span class="keyword">const</span> <span class="type">int</span> LIMIT = <span class="number">50</span>;        <span class="comment"># Without sigil</span>
+<span class="keyword">const</span> <span class="type">int</span> <span class="sigil">$RETRIES</span> = <span class="number">3</span>;    <span class="comment"># With sigil: read it as RETRIES or $RETRIES</span>
 
 <span class="comment"># Local constants</span>
 <span class="keyword">func</span> <span class="func">example</span>() <span class="type">void</span> {
@@ -192,7 +208,7 @@ my int $val = flexible();    # 42</code></pre>
             <pre><code><span class="comment"># Declare our variables at file level</span>
 <span class="keyword">our</span> <span class="type">int</span> <span class="sigil">$count</span> = <span class="number">0</span>;
 <span class="keyword">our</span> <span class="type">str</span> <span class="sigil">$name</span> = <span class="string">"hello"</span>;
-<span class="keyword">our</span> <span class="type">int</span> <span class="sigil">$no_init</span>;          <span class="comment"># Defaults to undef</span>
+<span class="keyword">our</span> <span class="type">int</span> <span class="sigil">$no_init</span>;          <span class="comment"># undef (unlike "my int $x;", which is 0)</span>
 
 <span class="comment"># In another package</span>
 <span class="keyword">package</span> Config;
@@ -242,7 +258,7 @@ my int $val = flexible();    # 42</code></pre>
 <span class="keyword">my</span> <span class="type">num</span> <span class="sigil">$neg</span> = -<span class="number">0.001</span>;
 
 <span class="comment"># Math operations</span>
-<span class="keyword">my</span> <span class="type">num</span> <span class="sigil">$sqrt</span> = <span class="func">math::sqrt</span>(<span class="number">16</span>);     <span class="comment"># 4.0</span>
+<span class="keyword">my</span> <span class="type">num</span> <span class="sigil">$sqrt</span> = <span class="func">math::sqrt</span>(<span class="number">16</span>);     <span class="comment"># 4</span>
 <span class="keyword">my</span> <span class="type">num</span> <span class="sigil">$sin</span> = <span class="func">math::sin</span>(<span class="sigil">$pi</span>);     <span class="comment"># ~0</span>
 <span class="keyword">my</span> <span class="type">num</span> <span class="sigil">$floor</span> = <span class="func">math::floor</span>(<span class="number">3.7</span>); <span class="comment"># 3</span></code></pre>
 
@@ -272,9 +288,9 @@ my int $val = flexible();    # 42</code></pre>
             <h2>Arrays (array)</h2>
 
             <pre><code><span class="comment"># Declaration</span>
-<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@nums</span> = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>];
-<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@mixed</span> = [<span class="number">1</span>, <span class="string">"two"</span>, <span class="number">3.0</span>];
-<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@nested</span> = [[<span class="number">1</span>, <span class="number">2</span>], [<span class="number">3</span>, <span class="number">4</span>]];
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@nums</span> = (<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>);
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@mixed</span> = (<span class="number">1</span>, <span class="string">"two"</span>, <span class="number">3.0</span>);
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@nested</span> = ([<span class="number">1</span>, <span class="number">2</span>], [<span class="number">3</span>, <span class="number">4</span>]);
 
 <span class="comment"># Pre-allocate capacity for performance</span>
 <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@big</span>[<span class="number">1000</span>];  <span class="comment"># Empty array with capacity for 1000 elements</span>
@@ -282,6 +298,7 @@ my int $val = flexible();    # 42</code></pre>
 <span class="comment"># Access elements (use $ sigil for single element)</span>
 <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$first</span> = <span class="sigil">$nums</span>[<span class="number">0</span>];      <span class="comment"># 1</span>
 <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$last</span> = <span class="sigil">$nums</span>[-<span class="number">1</span>];     <span class="comment"># 5 (negative index)</span>
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$top</span> = <span class="sigil">$#nums</span>;           <span class="comment"># 4 (last index; $#{$ref} or $#$ref for a reference)</span>
 
 <span class="comment"># Modify elements</span>
 <span class="sigil">$nums</span>[<span class="number">0</span>] = <span class="number">10</span>;
@@ -297,11 +314,12 @@ my int $val = flexible();    # 42</code></pre>
 <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$joined</span> = <span class="func">join</span>(<span class="string">","</span>, <span class="sigil">@nums</span>); <span class="comment"># Join to string</span>
 <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@sorted</span> = <span class="func">sort</span>(<span class="sigil">@nums</span>);  <span class="comment"># Sort array</span>
 <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@rev</span> = <span class="func">reverse</span>(<span class="sigil">@nums</span>);  <span class="comment"># reversed copy (original unchanged)</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$back</span> = <span class="func">reverse</span>(<span class="string">"abc"</span>);  <span class="comment"># "cba": in scalar context reverse joins and reverses the string</span>
 
 <span class="comment"># Destructuring - unpack array into variables</span>
 <span class="keyword">my</span> (<span class="sigil">$a</span>, <span class="sigil">$b</span>, <span class="sigil">$c</span>) = <span class="sigil">@nums</span>;           <span class="comment"># Basic destructuring</span>
 <span class="keyword">my</span> (<span class="type">int</span> <span class="sigil">$x</span>, <span class="type">str</span> <span class="sigil">$y</span>) = <span class="sigil">@mixed</span>;    <span class="comment"># With explicit types</span>
-<span class="keyword">my</span> (<span class="sigil">$first</span>, <span class="sigil">$second</span>) = <span class="func">get_pair</span>();  <span class="comment"># From function return</span>
+<span class="keyword">my</span> (<span class="sigil">$p1</span>, <span class="sigil">$p2</span>) = <span class="func">get_pair</span>();      <span class="comment"># From function return</span>
 
 <span class="comment"># List flattening (Perl-style) - array VALUES expand in list context</span>
 <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@middle</span> = (<span class="number">3</span>, <span class="number">4</span>);
@@ -310,7 +328,7 @@ my int $val = flexible();    # 42</code></pre>
 <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@sp</span>  = (<span class="string">"a"</span>, <span class="func">split</span>(<span class="string">","</span>, <span class="string">"b,c"</span>)); <span class="comment"># ("a","b","c")    array-returns / builtins</span>
 
 <span class="comment"># References are scalars - they do NOT flatten (nest one array via a ref)</span>
-<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@nested</span> = (<span class="number">1</span>, [<span class="number">2</span>, <span class="number">3</span>], <span class="number">4</span>);     <span class="comment"># 3 elements: 1, an arrayref, 4</span>
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@withref</span> = (<span class="number">1</span>, [<span class="number">2</span>, <span class="number">3</span>], <span class="number">4</span>);    <span class="comment"># 3 elements: 1, an arrayref, 4</span>
 
 <span class="comment"># Scalar context - assign array to scalar to get count</span>
 <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$n</span> = <span class="sigil">@all</span>;  <span class="comment"># 5</span></code></pre>
@@ -336,11 +354,11 @@ my int $val = flexible();    # 42</code></pre>
             <h2>Hashes (hash)</h2>
 
             <pre><code><span class="comment"># Declaration</span>
-<span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%person</span> = {
+<span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%person</span> = (
     <span class="string">"name"</span> => <span class="string">"Alice"</span>,
     <span class="string">"age"</span> => <span class="number">30</span>,
     <span class="string">"city"</span> => <span class="string">"NYC"</span>
-};
+);
 
 <span class="comment"># Pre-allocate capacity for performance</span>
 <span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%cache</span>[<span class="number">500</span>];  <span class="comment"># Empty hash with capacity for ~500 entries</span>
@@ -362,7 +380,20 @@ my int $val = flexible();    # 42</code></pre>
 }
 
 <span class="comment"># Delete a key</span>
-<span class="func">delete</span>(<span class="sigil">%person</span>, <span class="string">"city"</span>);</code></pre>
+<span class="func">delete</span>(<span class="sigil">%person</span>, <span class="string">"city"</span>);
+<span class="func">delete</span> <span class="sigil">$person</span>{<span class="string">"email"</span>};           <span class="comment"># Perl form, no parentheses</span>
+
+<span class="comment"># keys/values/split in scalar context give a count</span>
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$nkeys</span> = <span class="func">keys</span>(<span class="sigil">%person</span>);      <span class="comment"># 2</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$klist</span> = [<span class="func">keys</span>(<span class="sigil">%person</span>)]; <span class="comment"># keep the list: an array reference</span>
+
+<span class="comment"># Iterate over pairs</span>
+<span class="keyword">while</span> (<span class="keyword">my</span> (<span class="sigil">$k</span>, <span class="sigil">$v</span>) = <span class="func">each</span> <span class="sigil">%person</span>) {
+    <span class="func">say</span>(<span class="sigil">$k</span> . <span class="string">" = "</span> . <span class="sigil">$v</span>);
+}
+
+<span class="comment"># Parenthesized groups of pairs join the hash</span>
+<span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%opts</span> = ((<span class="string">"a"</span>, <span class="number">1</span>), (<span class="string">"b"</span>, <span class="number">2</span>));  <span class="comment"># a => 1, b => 2</span></code></pre>
 
             <div class="info-box danger">
                 <strong>Hash Access Syntax</strong>
@@ -378,10 +409,10 @@ my int $val = flexible();    # 42</code></pre>
 <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$x</span> = <span class="number">42</span>;
 <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$ref</span> = \<span class="sigil">$x</span>;     <span class="comment"># Reference to scalar</span>
 
-<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@arr</span> = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>];
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@arr</span> = (<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>);
 <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$aref</span> = \<span class="sigil">@arr</span>;   <span class="comment"># Reference to array</span>
 
-<span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%h</span> = {<span class="string">"a"</span> => <span class="number">1</span>};
+<span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%h</span> = (<span class="string">"a"</span> => <span class="number">1</span>);
 <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$href</span> = \<span class="sigil">%h</span>;    <span class="comment"># Reference to hash</span>
 
 <span class="comment"># Dereference with arrow</span>
@@ -390,7 +421,14 @@ my int $val = flexible();    # 42</code></pre>
 
 <span class="comment"># Anonymous references</span>
 <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$anon_arr</span> = [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>];    <span class="comment"># Array reference</span>
-<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$anon_hash</span> = {<span class="string">"x"</span> => <span class="number">1</span>};  <span class="comment"># Hash reference</span></code></pre>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$anon_hash</span> = {<span class="string">"x"</span> => <span class="number">1</span>};  <span class="comment"># Hash reference</span>
+
+<span class="comment"># Assigning through an undef scalar creates the container (autovivification)</span>
+<span class="keyword">my</span> <span class="sigil">$u</span>;
+<span class="sigil">$u</span>->{<span class="string">"k"</span>} = <span class="number">1</span>;       <span class="comment"># $u is now a hash reference</span>
+<span class="keyword">my</span> <span class="sigil">$list</span>;
+<span class="sigil">$list</span>->[<span class="number">2</span>] = <span class="string">"z"</span>;    <span class="comment"># $list is now an array reference with 3 elements</span>
+<span class="sigil">$u</span>->{<span class="string">"a"</span>}{<span class="string">"b"</span>} = <span class="number">2</span>;  <span class="comment"># intermediate levels are created too</span></code></pre>
 
             <h2>Type Conversion</h2>
 
@@ -400,8 +438,9 @@ my int $val = flexible();    # 42</code></pre>
 <span class="comment"># Int to string (automatic via concatenation)</span>
 <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$s</span> = <span class="string">""</span> . <span class="number">42</span>;
 
-<span class="comment"># Explicit string conversion</span>
-<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$str</span> = <span class="string">""</span> . <span class="number">42</span>;</code></pre>
+<span class="comment"># Assigning to a typed variable converts</span>
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$str</span> = <span class="number">42</span>;       <span class="comment"># "42"</span>
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$i</span> = <span class="string">"12abc"</span>;    <span class="comment"># 12</span></code></pre>
 
             <h2>The scalar Type</h2>
 

@@ -91,10 +91,18 @@
 <span class="keyword">my</span> <span class="sigil">@colors</span> = (<span class="string">"red"</span>, <span class="string">"green"</span>, <span class="string">"blue"</span>);  <span class="comment"># array</span>
 <span class="keyword">my</span> <span class="sigil">%config</span> = (<span class="string">"debug"</span> => <span class="number">1</span>, <span class="string">"port"</span> => <span class="number">8080</span>);  <span class="comment"># hash</span>
 
-<span class="comment"># You can add explicit types for documentation:</span>
-<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$count</span> = <span class="number">42</span>;
-<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$name</span> = <span class="string">"Strada"</span>;
-<span class="keyword">my</span> <span class="type">num</span> <span class="sigil">$pi</span> = <span class="number">3.14159</span>;</code></pre>
+<span class="comment"># You can add explicit types for documentation and checking:</span>
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$total</span> = <span class="number">42</span>;
+<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$title</span> = <span class="string">"Strada"</span>;
+<span class="keyword">my</span> <span class="type">num</span> <span class="sigil">$ratio</span> = <span class="number">3.14159</span>;
+
+<span class="comment"># $t, @t and %t are three different variables (as in Perl)</span>
+<span class="keyword">my</span> <span class="sigil">%t</span>; <span class="keyword">my</span> <span class="sigil">@t</span>; <span class="keyword">my</span> <span class="sigil">$t</span>;
+<span class="sigil">$t</span>{<span class="string">"k"</span>} = <span class="number">1</span>;   <span class="comment"># element of %t</span>
+<span class="sigil">$t</span>[<span class="number">0</span>] = <span class="number">2</span>;     <span class="comment"># element of @t</span>
+<span class="sigil">$t</span> = <span class="number">3</span>;</code></pre>
+
+            <p>Declaring the same variable twice in one scope (<code>my $x = 1; my $x = 2;</code>) is a compile error.</p>
 
             <h2>Functions</h2>
 
@@ -203,18 +211,19 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr><td><code>&&</code></td><td>Logical AND (returns boolean)</td><td><code>$a && $b</code></td></tr>
+                    <tr><td><code>&amp;&amp;</code></td><td>Logical AND (returns the deciding operand)</td><td><code>$a &amp;&amp; $b</code></td></tr>
                     <tr><td><code>||</code></td><td>Logical OR (returns value)</td><td><code>$h{"key"} || "default"</code></td></tr>
                     <tr><td><code>//</code></td><td>Defined-or</td><td><code>$h{"key"} // "default"</code></td></tr>
                     <tr><td><code>!</code></td><td>Logical NOT</td><td><code>!$a</code></td></tr>
-                    <tr><td><code>and</code></td><td>Low-precedence AND</td><td><code>$a and $b</code></td></tr>
-                    <tr><td><code>or</code></td><td>Low-precedence OR</td><td><code>$a or $b</code></td></tr>
                     <tr><td><code>not</code></td><td>Low-precedence NOT</td><td><code>not $a</code></td></tr>
+                    <tr><td><code>and</code></td><td>Low-precedence AND (returns the deciding operand)</td><td><code>$a and $b</code></td></tr>
+                    <tr><td><code>or</code></td><td>Low-precedence OR (returns value)</td><td><code>my $fh = core::open($p, "r") or die("no $p");</code></td></tr>
+                    <tr><td><code>xor</code></td><td>Logical exclusive or (1 or "")</td><td><code>$a xor $b</code></td></tr>
                 </tbody>
             </table>
 
             <div class="note">
-                <strong>|| vs //</strong>: The <code>||</code> operator returns its left operand if truthy, otherwise its right operand (like Perl/JavaScript). The <code>//</code> operator returns its left operand if <em>defined</em> (not undef), otherwise its right operand. Use <code>//</code> when you want empty strings or zero to be considered valid values.
+                <strong>|| vs //</strong>: The <code>||</code> operator returns its left operand if truthy, otherwise its right operand (like Perl/JavaScript). The <code>//</code> operator returns its left operand if <em>defined</em> (not undef), otherwise its right operand. Use <code>//</code> when you want empty strings or zero to be considered valid values. <code>&amp;&amp;</code> works the same way as in Perl: <code>1 &amp;&amp; "v"</code> is <code>"v"</code> and <code>0 &amp;&amp; $x</code> is <code>0</code>. The words <code>not</code>, <code>and</code> and <code>or</code>/<code>xor</code> work like <code>!</code>, <code>&amp;&amp;</code> and <code>||</code> but bind more loosely than assignment, as in Perl: in <code>my $fh = core::open($p, "r") or die("...")</code> the assignment happens first.
             </div>
 
             <h3>String Operators</h3>
@@ -284,7 +293,19 @@
 <span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$ref</span> = \<span class="sigil">$x</span>;      <span class="comment"># Reference to $x</span>
 
 <span class="comment"># Function reference</span>
-<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$fn</span> = &amp;<span class="func">my_function</span>;</code></pre>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$fn</span> = \&amp;<span class="func">my_function</span>;   <span class="comment"># call it with $fn-&gt;()</span></code></pre>
+
+            <h3>Named Unary Operators (No Parentheses)</h3>
+            <p>As in Perl, many built-ins can be written without parentheses when the argument is a variable, a <code>\</code> reference or a literal. They bind like Perl's named unary operators, so <code>keys %h &gt; 1</code> means <code>keys(%h) &gt; 1</code>:</p>
+            <pre><code><span class="keyword">my</span> <span class="sigil">%h</span> = (<span class="string">"a"</span> => <span class="number">1</span>, <span class="string">"b"</span> => <span class="number">2</span>, <span class="string">"c"</span> => <span class="number">3</span>);
+<span class="keyword">my</span> <span class="sigil">@a</span> = (<span class="number">1</span>, <span class="number">2</span>);
+<span class="func">say</span>(<span class="keyword">scalar</span> <span class="sigil">@a</span>);                  <span class="comment"># 2</span>
+<span class="func">say</span>(<span class="func">uc</span> <span class="string">"x"</span>);                    <span class="comment"># X</span>
+<span class="func">delete</span> <span class="sigil">$h</span>{<span class="string">"a"</span>};
+<span class="keyword">if</span> (<span class="func">keys</span> <span class="sigil">%h</span> &gt; <span class="number">1</span>) { <span class="func">say</span>(<span class="string">"more than one"</span>); }
+<span class="keyword">my</span> <span class="sigil">$first</span> = <span class="func">shift</span> <span class="sigil">@a</span>;          <span class="comment"># 1</span>
+<span class="func">say</span>(<span class="func">exists</span> <span class="sigil">$h</span>{<span class="string">"b"</span>} ? <span class="string">"yes"</span> : <span class="string">"no"</span>);   <span class="comment"># yes</span></code></pre>
+            <p>The same applies to <code>values</code>, <code>each</code>, <code>defined</code>, <code>ref</code>, <code>lc</code>, <code>length</code> and similar functions. Nest calls with parentheses: write <code>scalar(keys %h)</code>, not <code>scalar keys %h</code>.</p>
 
             <h2>Blocks</h2>
 
@@ -302,11 +323,12 @@
 
             <ul>
                 <li>The number <code>0</code></li>
-                <li>The empty string <code>""</code></li>
+                <li>The empty string <code>""</code> and the string <code>"0"</code></li>
                 <li><code>undef</code></li>
+                <li>An empty array or hash (<code>if (@items)</code>, <code>if (%seen)</code>)</li>
             </ul>
 
-            <p>Everything else is "true".</p>
+            <p>Everything else is "true", including <code>"0.0"</code>, <code>"00"</code>, <code>" "</code> and every reference (even a reference to an empty array or hash).</p>
 
             <pre><code><span class="keyword">if</span> (<span class="sigil">$value</span>) {
     <span class="func">say</span>(<span class="string">"Value is true"</span>);
@@ -334,13 +356,13 @@
 <span class="func">math::ceil</span>(<span class="number">3.2</span>)</code></pre>
 
             <h3>core:: Namespace</h3>
-            <p><code>core::</code> is the preferred namespace for system functions. (<code>sys::</code> also works for backwards compatibility.)</p>
+            <p><code>core::</code> is the preferred namespace for system functions. (The legacy <code>sys::</code> spelling still compiles, but the compiler prints a deprecation warning.)</p>
             <pre><code><span class="func">core::open</span>(<span class="string">"file.txt"</span>, <span class="string">"r"</span>)
-<span class="func">core::read</span>(<span class="sigil">$fd</span>, <span class="number">1024</span>)
-<span class="func">core::fwrite</span>(<span class="sigil">$fd</span>, <span class="sigil">$data</span>)
-<span class="func">core::close</span>(<span class="sigil">$fd</span>)
+<span class="func">core::fread</span>(<span class="sigil">$fh</span>, <span class="number">1024</span>)
+<span class="func">core::fwrite</span>(<span class="sigil">$fh</span>, <span class="sigil">$data</span>)
+<span class="func">core::close</span>(<span class="sigil">$fh</span>)
 <span class="func">core::fork</span>()
-<span class="func">core::exec</span>(<span class="string">"ls"</span>, [<span class="string">"-la"</span>])
+<span class="func">core::exec</span>(<span class="string">"ls -la"</span>)      <span class="comment"># replaces the process (runs via /bin/sh -c)</span>
 <span class="func">core::getenv</span>(<span class="string">"PATH"</span>)
 <span class="func">core::time</span>()</code></pre>
 
@@ -419,9 +441,9 @@ EOT</code></pre>
 <span class="func">core::close</span>(<span class="sigil">$fh</span>);
 
 <span class="comment"># Perl-style open modes</span>
-<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$fh</span> = <span class="func">core::open</span>(<span class="string">"file.txt"</span>, <span class="string">"&lt;"</span>);   <span class="comment"># read</span>
-<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$fh</span> = <span class="func">core::open</span>(<span class="string">"file.txt"</span>, <span class="string">"&gt;"</span>);   <span class="comment"># write</span>
-<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$fh</span> = <span class="func">core::open</span>(<span class="string">"file.txt"</span>, <span class="string">"&gt;&gt;"</span>);  <span class="comment"># append</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$in</span>  = <span class="func">core::open</span>(<span class="string">"file.txt"</span>, <span class="string">"&lt;"</span>);   <span class="comment"># read</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$out</span> = <span class="func">core::open</span>(<span class="string">"out.txt"</span>, <span class="string">"&gt;"</span>);    <span class="comment"># write</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$log</span> = <span class="func">core::open</span>(<span class="string">"log.txt"</span>, <span class="string">"&gt;&gt;"</span>);   <span class="comment"># append</span>
 
 <span class="comment"># STDIN, STDOUT, STDERR barewords</span>
 <span class="func">say</span>(STDOUT, <span class="string">"to stdout"</span>);

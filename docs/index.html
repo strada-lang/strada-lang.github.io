@@ -76,7 +76,7 @@
                 </div>
                 <div class="card">
                     <h4>REPL & Scripting</h4>
-                    <p>Interactive shell for experimentation and quick scripts without compilation.</p>
+                    <p>Interactive shell and quick scripts with no separate build step (natively compiled behind the scenes by <code>strada-jit</code>).</p>
                     <p><a href="repl.html">Try the REPL &rarr;</a></p>
                 </div>
                 <div class="card">
@@ -86,7 +86,7 @@
                 </div>
                 <div class="card">
                     <h4>Interpreter</h4>
-                    <p>Tree-walking interpreter for scripts and embedded eval &mdash; no C compiler needed.</p>
+                    <p>Bytecode VM (<code>strada-interp</code>) that runs Strada programs without generating C &mdash; no C compiler needed.</p>
                     <p><a href="interpreter.html">Learn more &rarr;</a></p>
                 </div>
             </div>
@@ -126,7 +126,7 @@
             <div class="card-grid">
                 <div class="card">
                     <h4>Memory Management</h4>
-                    <p>Automatic reference counting, object destruction, and performance optimization.</p>
+                    <p>Reference counting, the cycle collector, weak references, object destruction, and the request arena.</p>
                     <p><a href="memory.html">Learn more &rarr;</a></p>
                 </div>
                 <div class="card">
@@ -146,7 +146,7 @@
                 </div>
                 <div class="card">
                     <h4>Libraries Guide</h4>
-                    <p>Create and use reusable libraries with import_lib (dynamic) and import_object (static).</p>
+                    <p>Precompile modules to <code>.o</code>, <code>.so</code> or <code>.a</code> and use them with <code>use</code>, <code>import_lib</code>, <code>import_object</code> or <code>import_archive</code>.</p>
                     <p><a href="libraries.html">Learn more &rarr;</a></p>
                 </div>
                 <div class="card">
@@ -166,17 +166,37 @@
                 </div>
                 <div class="card">
                     <h4>Built-in Functions (complete)</h4>
-                    <p>Alphabetical list of every <code>math::</code>, <code>async::</code>, <code>c::</code>, and <code>sys::/core::</code> function &mdash; over 350.</p>
+                    <p>Every built-in function, organized by namespace (<code>core::</code>, <code>math::</code>, <code>async::</code>, <code>c::</code>, and more).</p>
                     <p><a href="builtin-functions.html">Full listing &rarr;</a></p>
                 </div>
                 <div class="card">
+                    <h4>Benchmarks</h4>
+                    <p>How Strada's compiled code compares with Perl, Python, Ruby, Node.js, and PHP.</p>
+                    <p><a href="benchmarks.html">See results &rarr;</a></p>
+                </div>
+                <div class="card">
                     <h4>Cannoli Web Framework</h4>
-                    <p>Build web applications with routing, file uploads, SSL, and more.</p>
+                    <p>Preforking web server and framework: routing, request/response helpers, file uploads, SSL, and more.</p>
                     <p><a href="cannoli.html">Read docs &rarr;</a></p>
                 </div>
                 <div class="card">
+                    <h4>Forma Template Engine</h4>
+                    <p>Handlebars-inspired templates with loops, conditionals, helpers, layouts, and compiled-template caching.</p>
+                    <p><a href="forma.html">Read docs &rarr;</a></p>
+                </div>
+                <div class="card">
+                    <h4>DBI Database Interface</h4>
+                    <p>Perl DBI-style access to SQLite, MySQL/MariaDB, and PostgreSQL with placeholders and transactions.</p>
+                    <p><a href="dbi.html">Read docs &rarr;</a></p>
+                </div>
+                <div class="card">
+                    <h4>Nesso ORM</h4>
+                    <p>Lightweight models, CRUD, and relationships on top of DBI, in Data Mapper or ActiveRecord style.</p>
+                    <p><a href="nesso.html">Read docs &rarr;</a></p>
+                </div>
+                <div class="card">
                     <h4>Documentation Tools</h4>
-                    <p>Document your code with POD and generate HTML with stradadoc.</p>
+                    <p>Document your code with POD and read it in the terminal with stradadoc.</p>
                     <p><a href="stradadoc.html">Read docs &rarr;</a></p>
                 </div>
             </div>
@@ -221,23 +241,23 @@ gcc -o output output.c runtime/strada_runtime.c -Iruntime -ldl -lm
                     </tr>
                     <tr>
                         <td><code>interpreter/</code></td>
-                        <td>Tree-walking interpreter driver (REPL and file execution)</td>
+                        <td>Bytecode VM interpreter (<code>strada-interp</code>: REPL and file execution)</td>
                     </tr>
                     <tr>
                         <td><code>examples/</code></td>
                         <td>Example programs demonstrating language features</td>
                     </tr>
                     <tr>
-                        <td><code>cannoli/</code></td>
-                        <td>Web framework source and examples</td>
+                        <td><code>tools/</code></td>
+                        <td>Driver source (<code>strada-driver.strada</code>) and tools (stradadoc, strada-soinfo, profilers, ...)</td>
                     </tr>
                     <tr>
                         <td><code>lib/</code></td>
-                        <td>Standard library modules (ssl, etc.)</td>
+                        <td>Standard library modules (DBI, JSON, Forma, Nesso, ssl, Test, ...)</td>
                     </tr>
                     <tr>
                         <td><code>t/</code></td>
-                        <td>Test suite (154 tests)</td>
+                        <td>Test suite (<code>make test-suite</code>)</td>
                     </tr>
                 </tbody>
             </table>

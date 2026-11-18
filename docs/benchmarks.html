@@ -251,7 +251,7 @@
 
             <h2>Results</h2>
 
-            <p>All times are wall-clock seconds, best of 3 runs. Lower is better.</p>
+            <p>All times are wall-clock seconds, best of 3 runs, from the 2026-06-19 sweep (<code>benchmarks/RESULTS_2026-06-19.md</code>). Lower is better.</p>
 
             <table class="bench-table">
                 <thead>
@@ -513,7 +513,7 @@
 
             <div class="why-section">
                 <h3>Tagged integers: zero-allocation arithmetic</h3>
-                <p>Strada encodes integers directly inside pointers &mdash; no heap allocation, no reference counting, no free. Integer arithmetic like <code>$a + $b</code> compiles to a single CPU add instruction plus a bit shift. Reference counting and type conversion functions are inlined at every call site, short-circuiting to a single pointer-bit check for the common integer case. This makes compute-heavy code <strong>101x faster than Perl</strong>, <strong>30x faster than Python</strong>, <strong>22x faster than Ruby</strong>, <strong>13x faster than PHP</strong>, and <strong>2.8x faster than Node.js</strong>.</p>
+                <p>Strada encodes integers directly inside pointers &mdash; no heap allocation, no reference counting, no free. When both operands are <code>int</code>-typed, <code>$a + $b</code> compiles to plain 64-bit C arithmetic; on untyped values it takes an inline tagged-integer fast path (with an overflow check that promotes to an unsigned or floating-point result instead of wrapping). Reference counting and type conversion functions are inlined at every call site, short-circuiting to a single pointer-bit check for the common integer case. This makes compute-heavy code <strong>101x faster than Perl</strong>, <strong>30x faster than Python</strong>, <strong>22x faster than Ruby</strong>, <strong>13x faster than PHP</strong>, and <strong>2.8x faster than Node.js</strong>.</p>
             </div>
 
             <div class="why-section">
@@ -528,7 +528,7 @@
 
             <div class="why-section">
                 <h3>Compiled PCRE2 regex</h3>
-                <p>Strada links against PCRE2 (Perl Compatible Regular Expressions), the same engine used by PHP, Nginx, and Haproxy. Regex patterns are compiled to optimized automata at program startup. Single-character delimiters in <code>split()</code> use SIMD-optimized <code>memchr</code> instead of the regex engine.</p>
+                <p>Strada links against PCRE2 (Perl Compatible Regular Expressions), the same engine used by PHP, Nginx, and Haproxy. Each pattern is compiled once and cached (per thread), so a regex inside a loop is not recompiled on every iteration. Single-character delimiters in <code>split()</code> use SIMD-optimized <code>memchr</code> instead of the regex engine.</p>
             </div>
 
             <div class="why-section">
@@ -566,13 +566,15 @@
 
             <h2>Running the Benchmarks</h2>
 
-            <p>All benchmark source files are in the <code>benchmarks/</code> directory with implementations in Strada, Perl, Python, Ruby, Node.js, and PHP:</p>
+            <p>All benchmark source files are in the <code>benchmarks/</code> directory. The five benchmarks above have implementations in Strada, Perl, Python, Ruby, Node.js, PHP and Go; the directory also holds further benchmarks (sorting, regex, JSON, closures, exceptions, and more) &mdash; <code>run_benchmarks.sh --list</code> shows them all. By default the script compares Strada, Go, Node.js and PHP; add <code>-a</code> (or <code>--langs</code>) to include the slower Perl, Python and Ruby runs:</p>
 
-            <pre><code><span class="comment"># Run all benchmarks with the automated script</span>
+            <pre><code><span class="comment"># Reproduce the table above</span>
 cd benchmarks
-bash run_benchmarks.sh
+./run_benchmarks.sh -r 3 --langs strada,perl,python,ruby,php,node \
+    bench_compute bench_functions bench_oop bench_strings bench_array_hash
+cd ..
 
-<span class="comment"># Or run individual benchmarks</span>
+<span class="comment"># Or run individual benchmarks (from the repository root)</span>
 ./strada benchmarks/bench_compute.strada
 time ./bench_compute
 time perl benchmarks/bench_compute.pl
@@ -583,7 +585,7 @@ time php benchmarks/bench_compute.php</code></pre>
 
             <div class="info-box">
                 <strong>Environment</strong>
-                Benchmarks measured on Linux x86_64 with GCC -O2 -flto for Strada, Perl 5.38, Python 3.12, Ruby 3.2, Node.js 24 (V8), and PHP 8.3. Times are best of 3 runs (wall-clock time). Each benchmark runs the same algorithm with the same input across all languages.
+                Benchmarks measured on 2026-06-19 on a 2-core Linux x86_64 host with GCC -O2 -flto for Strada (the <code>strada</code> default), Perl 5.38, Python 3.12, Ruby 3.2, Node.js 24 (V8), and PHP 8.3. Times are best of 3 runs (wall-clock time). Each benchmark runs the same algorithm with the same input across all languages.
             </div>
 
             <div class="page-nav">

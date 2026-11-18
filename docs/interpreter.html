@@ -66,17 +66,17 @@
             <p class="subtitle">A bytecode VM that compiles Strada's AST to bytecode and executes it via a computed goto dispatch loop. 4-5x faster than Perl 5.38.</p>
 
             <div class="info-box">
-                <strong>Opt-in build:</strong> <code>strada-interp</code> is no longer built by default — run <code>make interpreter</code> in the repo to build it. The everyday <code>strada --repl</code> and <code>strada --script</code> flows now route through <a href="repl.html">strada-jit</a> (real native compilation via tcc/gcc + <code>dlopen</code>) so they support the full Strada language with no semantic gaps. The interpreter described on this page is still useful for embedding, experimentation, and anywhere you genuinely want bytecode execution without invoking gcc.
+                <strong>Opt-in build:</strong> <code>strada-interp</code> is no longer built by default — run <code>make interpreter</code> in the repo to build it. The everyday <code>strada --repl</code> and <code>strada --script</code> flows now route through <a href="repl.html">strada-jit</a> (real native compilation via tcc/gcc + <code>dlopen</code>) so they support the full Strada language with no semantic gaps. The interpreter described on this page is useful for embedding, experimentation, and anywhere you want bytecode execution without invoking gcc. The binary is <code>interpreter/strada-interp</code>.
             </div>
 
             <div class="info-box">
                 <strong>No C compiler needed at runtime</strong>
-                The interpreter compiles Strada code to bytecode and runs it on the VM. No gcc or tcc required (except for <code>__C__</code> blocks, which are JIT-compiled and cached). A tree-walking backend is available as a fallback via <code>--tree-walk</code>.
+                The interpreter compiles Strada code to bytecode and runs it on the VM. No gcc or tcc required (except for <code>__C__</code> blocks, which are JIT-compiled and cached).
             </div>
 
             <h2>Overview</h2>
 
-            <p>Strada offers three execution paths for your code:</p>
+            <p>Strada offers two execution paths for your code:</p>
 
             <table>
                 <thead>
@@ -84,7 +84,6 @@
                         <th></th>
                         <th>Compiled (stradac)</th>
                         <th>VM (strada-interp)</th>
-                        <th>Tree-Walk (--tree-walk)</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -92,80 +91,72 @@
                         <td><strong>How it works</strong></td>
                         <td>Generates C code, compiles to native binary</td>
                         <td>AST &rarr; bytecode &rarr; VM dispatch</td>
-                        <td>Walks the AST directly at runtime</td>
                     </tr>
                     <tr>
                         <td><strong>Requires C compiler</strong></td>
                         <td>Yes (gcc)</td>
                         <td>No (except <code>__C__</code> blocks)</td>
-                        <td>No</td>
                     </tr>
                     <tr>
                         <td><strong>Startup time</strong></td>
                         <td>Slow (compilation step)</td>
                         <td>Fast (parse + bytecode compile)</td>
-                        <td>Fast (parse and run)</td>
                     </tr>
                     <tr>
                         <td><strong>Runtime speed</strong></td>
                         <td>Fastest (native code)</td>
                         <td>Fast (4-5x faster than Perl 5.38)</td>
-                        <td>Slower (interpreted)</td>
                     </tr>
                     <tr>
                         <td><strong>Best for</strong></td>
                         <td>Production, performance</td>
-                        <td>Scripts, file execution</td>
-                        <td>REPL, legacy fallback</td>
+                        <td>Scripts, file execution, REPL, embedded eval</td>
                     </tr>
                 </tbody>
             </table>
 
-            <p>All paths share the same Lexer and Parser front-end, so valid Strada code works with any of them.</p>
+            <p>Both paths share the same Lexer and Parser front-end, so valid Strada code works with either of them.</p>
 
             <h2>Running Programs</h2>
 
             <pre><code><span class="comment"># Build the interpreter</span>
 make interpreter
 
-<span class="comment"># Run a Strada program (uses bytecode VM by default)</span>
-./strada-interp program.strada
-
-<span class="comment"># Use tree-walking backend instead</span>
-./strada-interp --tree-walk program.strada
+<span class="comment"># Run a Strada program on the bytecode VM</span>
+./interpreter/strada-interp program.strada
 
 <span class="comment"># With library search paths</span>
-./strada-interp -L lib program.strada
+./interpreter/strada-interp -L lib program.strada
 
-<span class="comment"># Start the interactive REPL (uses tree-walk)</span>
-./strada-interp</code></pre>
+<span class="comment"># Start the interactive REPL</span>
+./interpreter/strada-interp</code></pre>
 
             <h2>Interactive REPL</h2>
 
-            <p>When run without arguments, the interpreter starts an interactive REPL with readline support (line editing, history):</p>
+            <p>When run without arguments, the interpreter starts an interactive REPL with readline support (line editing, history), backed by a persistent bytecode VM session:</p>
 
             <pre><code>strada> <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$x</span> = <span class="number">42</span>;
+<span class="number">42</span>
 strada> <span class="sigil">$x</span> * <span class="number">2</span>
-=> <span class="number">84</span>
-
+<span class="number">84</span>
 strada> <span class="keyword">func</span> <span class="func">square</span>(<span class="type">int</span> <span class="sigil">$n</span>) <span class="type">int</span> {
-...        <span class="keyword">return</span> <span class="sigil">$n</span> * <span class="sigil">$n</span>;
-...    }
+...         <span class="keyword">return</span> <span class="sigil">$n</span> * <span class="sigil">$n</span>;
+...     }
 strada> <span class="func">square</span>(<span class="number">7</span>)
-=> <span class="number">49</span></code></pre>
+<span class="number">49</span></code></pre>
 
-            <p>Variables and function definitions persist across evaluations. Multi-line input is detected automatically when braces, parentheses, or brackets are unbalanced.</p>
+            <p>Variables and function definitions persist across evaluations until <code>.clear</code>. Multi-line input is detected automatically when braces, parentheses, or brackets are unbalanced, inside a heredoc body, and when a line ends in a binary operator (<code>my $t = 1 +</code> continues on the next line). REPL commands: <code>.help</code>, <code>.vars</code>, <code>.funcs</code>, <code>.load FILE</code>, <code>.clear</code>, <code>.quit</code>.</p>
 
             <p>See <a href="repl.html">REPL & Scripting</a> for REPL commands, scripting, and profiling features.</p>
 
             <h2>Embedded Eval</h2>
 
-            <p>The interpreter can be embedded inside compiled Strada programs using the <code>Strada::Interpreter</code> library. This enables runtime code evaluation without needing a C compiler at runtime:</p>
+            <p>The interpreter can be embedded inside compiled Strada programs through the <code>Eval</code> module (<code>lib/Eval.strada</code>, built by <code>make libs</code>), which bundles the lexer, parser and <code>Strada::Interpreter</code>. This enables runtime code evaluation without needing a C compiler at runtime. (<code>use Strada::Interpreter;</code> on its own does not compile: it lacks the front-end.) The same program also runs unchanged under <code>strada-interp</code>.</p>
 
             <pre><code><span class="keyword">use lib</span> <span class="string">"lib"</span>;
-<span class="keyword">use</span> Strada::Interpreter;
+<span class="keyword">use</span> Eval;
 
-<span class="comment"># Initialize the interpreter engine</span>
+<span class="comment"># Optional: kept for compatibility (eval initializes on demand)</span>
 Strada::Interpreter::<span class="func">init</span>();
 
 <span class="comment"># Evaluate expressions</span>
@@ -178,8 +169,8 @@ Strada::Interpreter::<span class="func">eval_string</span>(<span class="string">
 <span class="func">say</span>(<span class="sigil">$val</span>);  <span class="comment"># 50</span>
 
 <span class="comment"># Function definitions persist</span>
-Strada::Interpreter::<span class="func">eval_string</span>(<span class="string">"func double(int \$n) int { return \$n * 2; }"</span>);
-<span class="func">say</span>(Strada::Interpreter::<span class="func">eval_string</span>(<span class="string">"double(21)"</span>));  <span class="comment"># 42</span>
+Strada::Interpreter::<span class="func">eval_string</span>(<span class="string">"func twice(int \$n) int { return \$n * 2; }"</span>);
+<span class="func">say</span>(Strada::Interpreter::<span class="func">eval_string</span>(<span class="string">"twice(21)"</span>));  <span class="comment"># 42</span>
 
 <span class="comment"># Reset all state</span>
 Strada::Interpreter::<span class="func">reset</span>();</code></pre>
@@ -196,15 +187,23 @@ Strada::Interpreter::<span class="func">reset</span>();</code></pre>
                 <tbody>
                     <tr>
                         <td><code>Strada::Interpreter::init()</code></td>
-                        <td>Initialize the shared interpreter instance (auto-called by eval_string if needed)</td>
+                        <td>No-op kept for compatibility; the eval session initializes on demand</td>
                     </tr>
                     <tr>
                         <td><code>Strada::Interpreter::eval_string($code)</code></td>
-                        <td>Evaluate Strada code, return the result (undef for void statements)</td>
+                        <td>Evaluate Strada code on the bytecode VM and return the result; throws on parse, compile or runtime errors</td>
+                    </tr>
+                    <tr>
+                        <td><code>Strada::Interpreter::eval($code)</code></td>
+                        <td>Same as <code>eval_string</code> (also available as <code>eval_string_vm</code>)</td>
                     </tr>
                     <tr>
                         <td><code>Strada::Interpreter::reset()</code></td>
                         <td>Clear all persisted state (variables, functions, enums, constants)</td>
+                    </tr>
+                    <tr>
+                        <td><code>Strada::Interpreter::set_eval_backend($b)</code></td>
+                        <td>Legacy compatibility wrapper; the backend is always the bytecode VM</td>
                     </tr>
                 </tbody>
             </table>
@@ -224,7 +223,7 @@ Strada::Interpreter::<span class="func">reset</span>();</code></pre>
                 <tbody>
                     <tr>
                         <td><strong>Execution</strong></td>
-                        <td>Bytecode VM (default) or tree-walk</td>
+                        <td>Bytecode VM</td>
                         <td>Compile to .so, dlopen, execute</td>
                     </tr>
                     <tr>
@@ -239,7 +238,7 @@ Strada::Interpreter::<span class="func">reset</span>();</code></pre>
                     </tr>
                     <tr>
                         <td><strong>Async/await</strong></td>
-                        <td>No</td>
+                        <td>Yes</td>
                         <td>Yes</td>
                     </tr>
                     <tr>
@@ -262,7 +261,7 @@ Strada::Interpreter::<span class="func">reset</span>();</code></pre>
 
             <h2>Architecture</h2>
 
-            <p>The interpreter reuses the compiler's Lexer and Parser front-end. By default, the AST is compiled to bytecode and executed on a register-based VM. A tree-walking backend is available as a fallback via <code>--tree-walk</code>.</p>
+            <p>The interpreter reuses the compiler's Lexer and Parser front-end. The AST is compiled to bytecode and executed by a computed-goto dispatch loop. Values use a tagged-pointer representation, so integers need no heap allocation (like the compiled runtime's tagged integers).</p>
 
             <table>
                 <thead>
@@ -291,28 +290,28 @@ Strada::Interpreter::<span class="func">reset</span>();</code></pre>
                     <tr>
                         <td>Bytecode VM</td>
                         <td><code>interpreter/vm.c</code></td>
-                        <td>Register-based VM with JIT for <code>__C__</code> blocks</td>
+                        <td>Bytecode dispatch loop, with JIT compilation for <code>__C__</code> blocks</td>
                     </tr>
                     <tr>
-                        <td>Tree-walker</td>
+                        <td>Session manager</td>
                         <td><code>lib/Strada/Interpreter.strada</code></td>
-                        <td>Fallback AST evaluator (<code>--tree-walk</code>)</td>
+                        <td>VM session wrapper and the <code>eval_string</code> / <code>Eval</code> API</td>
                     </tr>
                     <tr>
                         <td>Driver</td>
                         <td><code>interpreter/Main.strada</code></td>
-                        <td>File execution and REPL</td>
+                        <td>File execution, <code>-e</code>, and REPL</td>
                     </tr>
                 </tbody>
             </table>
 
-            <h3>Scoping</h3>
+            <h3>Scope and Semantics</h3>
 
-            <p>The interpreter maintains a chain of environment hashes for lexical scoping. Each scope has a <code>vars</code> hash and a <code>parent</code> pointer. Variable lookup walks from innermost to outermost scope. <code>my</code> creates in the current scope; assignments update the nearest scope containing the variable.</p>
+            <p>Lexical variables (<code>my</code>) and closures compile to VM slots; <code>our</code> globals and <code>local</code> overrides live in hash-backed global tables. Control flow (<code>next</code>, <code>last</code>, <code>redo</code>, <code>return</code>) and <code>try</code>/<code>catch</code>/<code>finally</code> unwind frames and <code>local</code> stacks deterministically. The VM requires every variable to be declared with <code>my</code> or <code>our</code>.</p>
 
-            <h3>Control Flow</h3>
+            <h3><code>__C__</code> Blocks</h3>
 
-            <p>Loop control (<code>next</code>, <code>last</code>, <code>redo</code>) and <code>return</code> are implemented as exception-based signals caught by the enclosing loop or function call handler. Labeled loops match signals by label name.</p>
+            <p><code>__C__</code> blocks are JIT-compiled with gcc into a shared object and loaded with <code>dlopen</code>. All blocks of a program go into one shared object, so file-scope <code>static</code> state is shared between them. Compiled objects are cached in <code>~/.cache/strada/cblocks/</code> (7-day LRU eviction), so later runs do not recompile; <code>link_lib</code> libraries are linked into the JIT object.</p>
 
             <h2>Supported Features</h2>
 
@@ -324,14 +323,19 @@ Strada::Interpreter::<span class="func">reset</span>();</code></pre>
                 <li><strong>Operators</strong>: arithmetic, string (<code>.</code>, <code>x</code>), comparison, logical, assignment, ternary</li>
                 <li><strong>Control flow</strong>: if/elsif/else, unless, while, until, for, foreach, do-while, loop labels, statement modifiers</li>
                 <li><strong>Functions</strong>: <code>func</code>/<code>fn</code>, closures, variadic (<code>...@args</code>), spread operator</li>
-                <li><strong>OOP</strong>: packages, <code>extends</code>, <code>has ro|rw</code>, <code>before</code>/<code>after</code>/<code>around</code>, <code>isa</code>, <code>can</code>, <code>AUTOLOAD</code>, <code>bless</code>, <code>use overload</code></li>
-                <li><strong>Exceptions</strong>: try/catch (typed and catch-all), throw, die</li>
+                <li><strong>OOP</strong>: packages, <code>extends</code>, <code>has ro|rw</code>, <code>before</code>/<code>after</code>/<code>around</code>, <code>isa</code>, <code>can</code>, <code>AUTOLOAD</code>, <code>bless</code>, <code>use overload</code> (operator overloading)</li>
+                <li><strong>Exceptions</strong>: try/catch (typed and catch-all), finally, throw, die</li>
                 <li><strong>Regex</strong>: <code>=~</code>, <code>!~</code>, <code>s///</code>, <code>tr///</code>/<code>y///</code>, captures, named captures, <code>/e</code> modifier</li>
                 <li><strong>I/O</strong>: say, print, printf, sprintf, core::open, core::close, diamond operator, core::slurp, core::spew</li>
                 <li><strong>Modules</strong>: <code>use</code> (source inclusion), <code>import_lib</code> (native .so via dlopen)</li>
                 <li><strong>BEGIN/END blocks</strong>, <strong>tie/untie/tied</strong>, <strong>BigInt/BigFloat</strong>, <strong>DateTime</strong></li>
+                <li><strong>Concurrency</strong>: <code>async func</code>/<code>await</code> and futures (<code>async::spawn</code>, <code>all</code>, <code>race</code>, <code>timeout</code>, <code>cancel</code>, ...), green tasks (<code>Async::Loop</code> / <code>Async::Task</code>), <code>thread::</code> threads, mutexes and condition variables, channels; <code>$_</code> is per thread and per green task</li>
+                <li><strong>Numbers</strong>: integer overflow promotes exactly like the compiled backend (64-bit signed &rarr; 64-bit unsigned &rarr; floating point), e.g. <code>18446744073709551615</code> prints exactly</li>
+                <li><strong>C interop</strong>: <code>__C__</code> blocks (JIT-compiled), <code>c::callback</code> (libffi trampolines), <code>import_lib</code></li>
+                <li><strong>Introspection</strong>: <code>core::exception_trace()</code>, <code>stacktrace_str()</code> (returns the Strada frames), <code>core::caller()</code></li>
                 <li><strong>Namespaces</strong>: <code>core::</code>, <code>math::</code>, <code>utf8::</code> &mdash; the VM exposes the full <code>core::</code>/<code>math::</code> libc surface (~235 functions: process, users/groups, file I/O, sockets, extended math) through a generic runtime bridge</li>
-                <li><strong>Regex</strong>: <code>s///e</code> evaluated replacements, <code>tr///</code> with d/c/s/r flags, named captures, inline <code>i/s/m/x</code> flags</li>
+                <li><strong>Regex</strong>: <code>s///e</code> evaluated replacements, <code>tr///</code> with d/c/s/r flags, named captures, inline <code>i/s/m/x</code> flags, <code>while ($s =~ /.../g)</code> iteration, pattern interpolation; captures beyond <code>$9</code> work and unmatched groups are undef</li>
+                <li><strong>Context</strong>: <code>reverse</code> follows scalar/list context (<code>my $r = reverse("ab", "cd")</code> is <code>"dcba"</code>)</li>
                 <li><strong>Recursion limits</strong>: <code>core::set_recursion_limit</code> / <code>core::get_recursion_limit</code></li>
             </ul>
 
@@ -340,9 +344,12 @@ Strada::Interpreter::<span class="func">reset</span>();</code></pre>
             <h2>Limitations</h2>
 
             <div class="info-box warning">
-                <strong>Not supported in the interpreter</strong>
+                <strong>Remaining differences from the compiled backend</strong>
                 <ul style="margin: 0.5rem 0 0 1rem;">
-                    <li>Async/await (requires compiled thread pool runtime)</li>
+                    <li><code>DESTROY</code> runs when the VM's garbage collector reclaims the object, not at the moment the last reference goes away</li>
+                    <li>Raw pointers into variables (<code>core::int_ptr</code> and friends) are compiled-only</li>
+                    <li>Functions declared in an <code>extern "C" { ... }</code> block cannot be called in the VM; a call raises a catchable error (<code>extern "C" function NAME() is not available in the bytecode VM (compiled backend only)</code>)</li>
+                    <li>Execution is slower than compiled native code</li>
                 </ul>
             </div>
 
@@ -354,10 +361,10 @@ Strada::Interpreter::<span class="func">reset</span>();</code></pre>
 make interpreter
 
 <span class="comment"># The interpreter binary</span>
-./strada-interp --help
+./interpreter/strada-interp --help
 
 <span class="comment"># Usage</span>
-Strada Interpreter v0.3
+Strada Interpreter v0.3 (Bytecode VM)
 Usage:
   strada-interp                          Interactive REPL
   strada-interp [OPTIONS] &lt;file.strada&gt;  Execute file
@@ -365,6 +372,7 @@ Usage:
 
 Options:
   -e CODE       Execute code (wraps in main() if needed)
+  --vm          Use bytecode VM backend (default)
   -L PATH       Add library search path
   -h, --help    Show this help message</code></pre>
 

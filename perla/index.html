@@ -447,7 +447,7 @@
         <div class="hero-badge">Perl 5 → native executable</div>
         <h1>perla</h1>
         <p class="tagline">Compile Perl 5 scripts and modules into standalone native binaries. No <code>perl</code> interpreter required at runtime.</p>
-        <p class="sub">perla parses real Perl, lowers it to <a href="../index.html" style="color: var(--primary); font-weight: 600;">Strada</a>, and Strada compiles it to C. You get a single binary you can ship — no CPAN install, no DynaLoader, no libperl dependency.</p>
+        <p class="sub">perla parses real Perl and compiles it to C on top of the <a href="../index.html" style="color: var(--primary); font-weight: 600;">Strada</a> runtime. You get a native binary you can ship — no perl interpreter and no libperl dependency.</p>
         <div class="btn-row">
             <a href="getting-started.html" class="btn btn-primary">Get Started</a>
             <a href="docs.html" class="btn btn-secondary">Documentation</a>
@@ -462,12 +462,12 @@
             <div class="why-card">
                 <div class="icon">📦</div>
                 <h3>Single-binary deploys</h3>
-                <p>One statically-linked executable. No <code>perl</code> to install on the target, no version skew, no CPAN bootstrap, no <code>cpanm</code> on boot. Drop it on a server or into a container and run.</p>
+                <p>One native executable that links only ordinary system libraries (libc, OpenSSL, zlib, SQLite). No <code>perl</code> interpreter to install on the target, no version skew, no <code>cpanm</code> on boot. Drop it on a server or into a container and run.</p>
             </div>
             <div class="why-card">
                 <div class="icon">⚡</div>
                 <h3>Faster startup</h3>
-                <p>No perl interpreter warm-up. For short-lived scripts and CLI tools that get invoked constantly, the difference between 40ms perl startup and a sub-millisecond native exec matters.</p>
+                <p>perl recompiles every module a script loads on each run; a perla binary doesn't. A bare hello-world starts in a few milliseconds either way, but a script that loads a handful of core modules started 3&ndash;4&times; faster as a perla binary than under perl in our tests (about 6&nbsp;ms vs 24&nbsp;ms).</p>
             </div>
             <div class="why-card">
                 <div class="icon">🏎️</div>
@@ -487,7 +487,7 @@
             <div class="why-card">
                 <div class="icon">🧠</div>
                 <h3>Keep your Perl brain</h3>
-                <p>Sigils, regex, <code>map</code>/<code>grep</code>/<code>sort</code>, <code>bless</code>, <code>AUTOLOAD</code>, Moose-style <code>has</code>/<code>extends</code>/<code>with</code>, <code>tie</code>, typeglobs, <code>format</code>/<code>write</code>, <code>try</code>/<code>catch</code> — the idioms you know from Perl work here. The most-used modules (<code>JSON</code>, <code>DBI</code>, <code>Carp</code>, <code>List::Util</code>, <code>Encode</code>…) are native; the rest install from CPAN with <a href="docs.html#cpan" style="color: var(--primary); font-weight: 600;">perla-cpan</a>.</p>
+                <p>Sigils, regex, <code>map</code>/<code>grep</code>/<code>sort</code>, <code>bless</code>, <code>AUTOLOAD</code>, Moose-style <code>has</code>/<code>extends</code>/<code>with</code>, <code>tie</code>, typeglobs, <code>format</code>/<code>write</code>, <code>try</code>/<code>catch</code> — the idioms you know from Perl work here. The most-used modules (<code>JSON</code>, <code>DBI</code>, <code>Carp</code>, <code>List::Util</code>, <code>Encode</code>…) work out of the box, with their XS parts implemented natively; the rest install from CPAN with <a href="docs.html#cpan" style="color: var(--primary); font-weight: 600;">perla-cpan</a>.</p>
             </div>
             <div class="why-card">
                 <div class="icon">💾</div>
@@ -506,16 +506,17 @@
             <p style="color: var(--ink-soft); margin: 0 0 0.8rem; font-size: 0.95rem;">perla is mature, not magic. Most Perl compiles unchanged; here's where you still have to think.</p>
             <ul>
                 <li>Not a 100% drop-in replacement. A large codebase usually compiles, but you'll occasionally meet an idiom that needs a tweak — deep symbol-table tricks, <code>local</code> on some magical variables, or very baroque <code>overload</code> dispatch.</li>
-                <li><code>eval STRING</code> at runtime isn't a native interpreter. There's an opt-in path that shells out to a child compile, but it's not ergonomic. <code>eval BLOCK</code> (exception handling) works normally.</li>
+                <li><code>eval STRING</code> works, but it isn't an interpreter: each new string is compiled to a shared object at run time (about 0.1&nbsp;s the first time, then cached under <code>~/.cache/perla</code>), so a binary that evals new strings needs perla and gcc on the machine where it runs. <code>eval BLOCK</code> (exception handling) works normally.</li>
+                <li>Modules that perla can't resolve at compile time are left to a run-time <code>require</code>, which compiles the module's <code>.pm</code> source on first use (again with perla and gcc) and caches it. <code>--debug</code> shows how each <code>use</code> was resolved; <code>perla -M</code> and <code>--precompile-deps</code> build modules ahead of time.</li>
                 <li>Compile time is real. A large app with deep <code>use</code> chains can take a minute or two at <code>-O2</code>. Warm the cache with <code>perla -M lib/</code> and iterate at <code>-O0</code>.</li>
-                <li>Debugging is C-level, not Perl-level. <code>--keep</code> preserves the generated <code>.c</code> for inspection, but there's no <code>perl -d</code>.</li>
+                <li>Debugging is C-level, not Perl-level. <code>--keep</code> preserves the generated <code>.c</code> for inspection and <code>-g</code> builds a gdb-debuggable binary, but there's no <code>perl -d</code>.</li>
             </ul>
         </div>
     </section>
 
     <section id="capabilities">
         <h2>What actually compiles</h2>
-        <p class="lead">perla isn't a toy subset. It tracks the parts of Perl people really use &mdash; the metaprogramming, the text-processing machinery, the modules &mdash; backed by <strong>119 feature tests</strong> covering everything below.</p>
+        <p class="lead">perla isn't a toy subset. It tracks the parts of Perl people really use &mdash; the metaprogramming, the text-processing machinery, the modules &mdash; backed by a regression suite of <strong>169 test programs</strong> covering everything below.</p>
 
         <div class="why-grid">
             <div class="why-card">
@@ -546,7 +547,7 @@
             <div class="why-card">
                 <div class="icon">🔢</div>
                 <h3>Numbers that match Perl</h3>
-                <p>Tagged 64-bit integers, unsigned 64-bit (UV) arithmetic with overflow promotion, NVs, <code>hex</code>/<code>oct</code>, and <code>srand</code>/<code>rand</code> that's bit-for-bit compatible with perl.</p>
+                <p>64-bit integers (small ones stored as tagged pointers, with no allocation), unsigned 64-bit (UV) arithmetic with overflow promotion, NVs, <code>hex</code>/<code>oct</code>, and <code>srand</code>/<code>rand</code> that's bit-for-bit compatible with perl.</p>
             </div>
             <div class="why-card">
                 <div class="icon">⛓️</div>
@@ -556,12 +557,12 @@
             <div class="why-card">
                 <div class="icon">📚</div>
                 <h3>Batteries included</h3>
-                <p>Native, no install: <code>JSON</code>, <code>DBI</code> (SQLite / MySQL / MariaDB / PostgreSQL), <code>Carp</code>, <code>Data::Dumper</code>, <code>List::Util</code>, <code>Scalar::Util</code>, <code>Storable</code>, <code>Encode</code>, <code>File::Temp</code>, <code>Digest::*</code>, <code>MIME::Base64</code>, <code>Time::HiRes</code>.</p>
+                <p>No separate install (XS parts implemented natively in perla's runtime): <code>JSON</code>, <code>DBI</code> (SQLite / MySQL / MariaDB / PostgreSQL), <code>Carp</code>, <code>Data::Dumper</code>, <code>List::Util</code>, <code>Scalar::Util</code>, <code>Storable</code>, <code>Encode</code>, <code>File::Temp</code>, <code>Digest::*</code>, <code>MIME::Base64</code>, <code>Time::HiRes</code>.</p>
             </div>
             <div class="why-card">
                 <div class="icon">📥</div>
                 <h3>CPAN when you need it</h3>
-                <p><code>perla-cpan Module::Name</code> fetches from MetaCPAN, resolves transitive dependencies, and <strong>compiles XS</strong> &mdash; pure-Perl and C-extension modules alike, no DynaLoader required.</p>
+                <p><code>perla-cpan Module::Name</code> fetches from MetaCPAN, resolves transitive dependencies, and <strong>compiles XS</strong> &mdash; pure-Perl and C-extension modules alike. XS is built against perla's own <code>perl.h</code> shim and loaded by perla's <code>XSLoader</code>, not perl's DynaLoader.</p>
             </div>
         </div>
     </section>
@@ -587,13 +588,13 @@ print greet(<span class="str">"world"</span>), <span class="str">"\n"</span>;
 
 <pre class="code"><span class="prompt">$</span> perla -O2 -o hello hello.pl
 <span class="prompt">$</span> ./hello
-<span class="str">{"hello":"world","time":1755123456}</span>
+<span class="str">{"hello":"world","time":1795001584}</span>
 
 <span class="prompt">$</span> file hello
-<span class="str">hello: ELF 64-bit LSB pie executable, x86-64, statically linked</span>
+<span class="str">hello: ELF 64-bit LSB pie executable, x86-64, version 1 (SYSV), dynamically linked, ...</span>
 </pre>
 
-            <p style="color: var(--ink-soft); margin-top: 1rem; font-size: 0.95rem;">That's the entire workflow. <code>perla</code> reads your <code>.pl</code>, resolves its <code>use</code> tree, lowers it to Strada, compiles to C, and links a binary. No <code>cpanm install JSON</code>, no Carton bundling, no <code>fatpack</code>. The JSON encoder is wired into perla's runtime as a native module.</p>
+            <p style="color: var(--ink-soft); margin-top: 1rem; font-size: 0.95rem;">That's the entire workflow. <code>perla</code> reads your <code>.pl</code>, resolves its <code>use</code> tree, compiles it to C, and links a binary against the Strada and perla runtimes. No <code>cpanm install JSON</code>, no Carton bundling, no <code>fatpack</code>. The JSON encoder is built into perla's runtime as native code.</p>
         </div>
     </section>
 
@@ -603,11 +604,11 @@ print greet(<span class="str">"world"</span>), <span class="str">"\n"</span>;
 
 <pre class="code"><span class="comment"># 1. build &amp; install Strada</span>
 <span class="prompt">$</span> git clone https://github.com/strada-lang/strada-lang
-<span class="prompt">$</span> <span class="kw">cd</span> strada-lang && ./configure && make && sudo make install
+<span class="prompt">$</span> <span class="kw">cd</span> strada-lang &amp;&amp; ./configure &amp;&amp; make &amp;&amp; sudo make install
 
 <span class="comment"># 2. build perla against the system Strada</span>
 <span class="prompt">$</span> git clone https://github.com/strada-lang/perla
-<span class="prompt">$</span> <span class="kw">cd</span> perla && make && sudo make install
+<span class="prompt">$</span> <span class="kw">cd</span> perla &amp;&amp; make &amp;&amp; sudo make install
 
 <span class="comment"># 3. compile any Perl file</span>
 <span class="prompt">$</span> <span class="kw">echo</span> <span class="str">'print "hi\n"'</span> &gt; hi.pl
