@@ -93,10 +93,12 @@ curl -fsSL https://strada-lang.github.io/claude/strada-skill.tar.gz | tar -xz -C
 
                 <div class="step">
                     <h3>OpenAI Codex (CLI and IDE extension)</h3>
-                    <p>Unpack the skill into your personal skills folder:</p>
+                    <p>Ask Codex's built-in skill installer to fetch it. In Codex, type:</p>
+                    <pre><code>$skill-installer install the skill at https://github.com/strada-lang/strada-lang.github.io/tree/main/claude/strada</code></pre>
+                    <p>Or unpack it into your personal skills folder yourself:</p>
                     <pre><code>mkdir -p ~/.agents/skills
 curl -fsSL https://strada-lang.github.io/claude/strada-skill.tar.gz | tar -xz -C ~/.agents/skills</code></pre>
-                    <p>For one project, unpack it into <code>.agents/skills/</code> at the repository root and commit it. Codex picks the skill when a task matches; to ask for it by name, type <code>$strada</code> or use <code>/skills</code>. See OpenAI's <a href="https://learn.chatgpt.com/docs/build-skills">skills documentation</a> for the current details.</p>
+                    <p>For one project, unpack it into <code>.agents/skills/</code> at the repository root and commit it. Restart Codex if <code>strada</code> doesn't appear under <code>/skills</code>. Codex picks the skill when a task matches; to ask for it by name, type <code>$strada</code> or use <code>/skills</code>. See OpenAI's <a href="https://learn.chatgpt.com/docs/build-skills">skills documentation</a> for the current details.</p>
                 </div>
 
                 <div class="step">
