@@ -81,11 +81,25 @@
 
             <div class="steps">
                 <div class="step">
+                    <h3>Quick install: Claude Code and Codex</h3>
+                    <p>One command installs the skill for both Claude Code (<code>~/.claude/skills</code>) and OpenAI Codex (<code>~/.agents/skills</code>):</p>
+                    <pre><code>curl -fsSL https://strada-lang.github.io/claude/install.sh | sh</code></pre>
+                    <p>Options go after <code>sh -s --</code>:</p>
+                    <pre><code><span class="comment"># only one tool</span>
+curl -fsSL https://strada-lang.github.io/claude/install.sh | sh -s -- --claude
+curl -fsSL https://strada-lang.github.io/claude/install.sh | sh -s -- --codex
+
+<span class="comment"># into the current project (.claude/skills and .agents/skills), to commit it</span>
+curl -fsSL https://strada-lang.github.io/claude/install.sh | sh -s -- --project</code></pre>
+                    <p>Run it again to update. It only replaces a folder named <code>strada</code> inside those skills directories, and it tells you if <code>strada</code> is not on your <code>PATH</code> yet. Start a new Claude Code or Codex session afterwards. <a href="../claude/install.sh">Read the script</a> before you pipe it into a shell.</p>
+                </div>
+
+                <div class="step">
                     <h3>Claude Code</h3>
                     <p>Install it as a plugin, which also gives you updates through <code>/plugin</code>:</p>
                     <pre><code>/plugin marketplace add strada-lang/strada-lang.github.io
 /plugin install strada@strada-lang</code></pre>
-                    <p>Or unpack it as a plain skill, available in every project from your next session:</p>
+                    <p>Or install it as a plain skill with the quick install above, or by hand:</p>
                     <pre><code>mkdir -p ~/.claude/skills
 curl -fsSL https://strada-lang.github.io/claude/strada-skill.tar.gz | tar -xz -C ~/.claude/skills</code></pre>
                     <p>To share it with everyone on one project, unpack it into that project's <code>.claude/skills/</code> folder and commit it.</p>
@@ -122,7 +136,7 @@ read docs/strada-reference.md. Check every change with
 
             <div class="info-box warning">
                 <strong>Read what you install</strong>
-                The skill contains two short shell scripts the assistant may run: <code>scripts/check-toolchain.sh</code> looks for
+                The quick-install script downloads the skill tarball from this site and copies it into your skills folders; nothing else. The skill itself contains two short shell scripts the assistant may run: <code>scripts/check-toolchain.sh</code> looks for
                 <code>strada</code> and a C compiler and compiles a hello-world in a temporary directory, and <code>scripts/strada-run.sh</code>
                 compiles a program into a temporary directory, runs it, and deletes the binary. Nothing else. You can browse every file of the skill
                 <a href="https://github.com/strada-lang/strada-lang.github.io/tree/main/claude/strada">here</a> before installing it.
