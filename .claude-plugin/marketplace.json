@@ -1,0 +1,13 @@
+{
+  "name": "strada-lang",
+  "owner": { "name": "Strada", "url": "https://strada-lang.github.io" },
+  "description": "Claude Code plugins for the Strada programming language.",
+  "plugins": [
+    {
+      "name": "strada",
+      "source": "./claude/plugins/strada",
+      "description": "Write, compile, run, test and debug Strada programs (the Perl-inspired language that compiles to native code) with Claude.",
+      "version": "2026.11.19"
+    }
+  ]
+}

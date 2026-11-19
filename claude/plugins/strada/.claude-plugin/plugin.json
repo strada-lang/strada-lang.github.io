@@ -1,0 +1,10 @@
+{
+  "name": "strada",
+  "version": "2026.11.19",
+  "description": "Write, compile, run, test and debug Strada programs (the Perl-inspired language that compiles to native code) with Claude.",
+  "author": { "name": "Strada" },
+  "homepage": "https://strada-lang.github.io/docs/claude.html",
+  "repository": "https://github.com/strada-lang/strada-lang",
+  "license": "GPL-2.0",
+  "keywords": ["strada", "perl", "compiler", "language"]
+}
