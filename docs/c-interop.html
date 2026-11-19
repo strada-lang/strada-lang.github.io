@@ -471,7 +471,18 @@ cc -o host host.c $(strada --embed-ldflags)
 
             <h3>Calling Them from Strada</h3>
 
-            <p>Strada code in the same program, or in a program that pulls the file in with <code>use</code>, calls an extern function like any other: <code>shout("x")</code>, with no conversion. The function names are the plain C symbols, not package-qualified, and <code>import_lib</code> does not list extern functions.</p>
+            <p>Strada code calls an extern function like any other, with no conversion: <code>shout("x")</code> inside its package, and <code>TextLib::shout("x")</code> from a program that pulls the file in with <code>use</code> or loads the compiled library:</p>
+
+            <pre><code><span class="keyword">use lib</span> <span class="string">"."</span>;
+<span class="keyword">import_lib</span> <span class="string">"textlib.so"</span>;
+
+<span class="keyword">func</span> <span class="func">main</span>() <span class="type">int</span> {
+    <span class="func">say</span>(TextLib::shout(<span class="string">"one two one"</span>));   <span class="comment"># ONE TWO ONE (2 distinct words)</span>
+    <span class="func">say</span>(TextLib::add(<span class="number">40</span>, <span class="number">2</span>));            <span class="comment"># 42</span>
+    <span class="keyword">return</span> <span class="number">0</span>;
+}</code></pre>
+
+            <p>So one library serves both C programs and Strada programs. In a package, <code>extern func NAME</code> is also the ordinary function <code>Package::NAME</code>, so a package cannot define both an <code>extern func</code> and a <code>func</code> with the same name. (In package <code>main</code> the extern is only the C function.)</p>
 
             <div class="info-box">
                 <strong>Exceptions:</strong> an exception that escapes an extern function called from C ends the program with the usual uncaught-exception report. If the C caller must continue, catch it inside the function and return an error value.
