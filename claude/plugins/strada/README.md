@@ -17,4 +17,4 @@ or, on older Claude Code:
 
 The skill needs a Strada toolchain on the machine (`strada` on PATH, or a
 strada-lang checkout) and a C compiler. Details:
-https://strada-lang.github.io/docs/claude.html
+https://strada-lang.github.io/docs/ai.html

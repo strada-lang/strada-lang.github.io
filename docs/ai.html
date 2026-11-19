@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Coding Tools - Strada Documentation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <nav>
+        <a href="../index.html" class="logo">Strada<span>Lang</span></a>
+        <ul>
+            <li><a href="quickstart.html">QuickStart</a></li>
+            <li><a href="index.html">Docs</a></li>
+            <li><a href="reference.html">Reference</a></li>
+            <li><a href="https://github.com/strada-lang/strada-lang">GitHub</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <aside class="sidebar">
+            <h3>Getting Started</h3>
+            <ul>
+                <li><a href="quickstart.html">QuickStart</a></li>
+                <li><a href="index.html">Documentation</a></li>
+                <li><a href="repl.html">REPL & Scripting</a></li>
+                <li><a href="interpreter.html">Interpreter</a></li>
+                <li><a href="ai.html" class="active">AI Coding Tools</a></li>
+            </ul>
+            <h3>Language Guide</h3>
+            <ul>
+                <li><a href="basics.html">Language Basics</a></li>
+                <li><a href="types.html">Types & Variables</a></li>
+                <li><a href="functions.html">Functions</a></li>
+                <li><a href="control-flow.html">Control Flow</a></li>
+                <li><a href="oop.html">Object-Oriented Programming</a></li>
+                <li><a href="regex.html">Regular Expressions</a></li>
+            </ul>
+            <h3>Advanced</h3>
+            <ul>
+                <li><a href="memory.html">Memory Management</a></li>
+                <li><a href="debugging.html">Debugging</a></li>
+                <li><a href="async.html">Async/Await</a></li>
+                <li><a href="c-interop.html">C Interoperability</a></li>
+                <li><a href="libraries.html">Libraries Guide</a></li>
+                <li><a href="perl-integration.html">Perl Integration</a></li>
+            </ul>
+            <h3>Reference</h3>
+            <ul>
+                <li><a href="reference.html">Reference</a></li>
+                <li><a href="builtin-functions.html">Built-in Functions</a></li>
+                <li><a href="benchmarks.html">Benchmarks</a></li>
+                <li><a href="cannoli.html">Cannoli Web Framework</a></li>
+                <li><a href="forma.html">Forma Template Engine</a></li>
+                <li><a href="dbi.html">DBI Database Interface</a></li>
+                <li><a href="nesso.html">Nesso ORM</a></li>
+                <li><a href="stradadoc.html">Documentation Tools</a></li>
+            </ul>
+        </aside>
+
+        <main class="content">
+            <div class="breadcrumb">
+                <a href="../index.html">Home</a> / <a href="index.html">Docs</a> / AI Coding Tools
+            </div>
+
+            <h1>Strada with <span>AI coding tools</span></h1>
+            <p class="subtitle">Install the Strada skill so your coding assistant can write, compile, test and debug Strada code with you.</p>
+
+            <div class="info-box success">
+                <strong>Why a skill</strong>
+                AI models know Perl well, and Strada looks like Perl, so without help they write Perl that doesn't compile.
+                The Strada skill gives them what they need: the compile-and-check workflow, the places where Strada and
+                Perl differ, the full language and builtin references, and a script that checks your toolchain. It loads
+                only when you work on Strada code. It uses the open Agent Skills format (a folder with a <code>SKILL.md</code>),
+                so the same skill works in Claude and in OpenAI Codex.
+            </div>
+
+            <p>Current version: <code id="skill-version">2026.11.19</code>. Source: <a href="https://github.com/strada-lang/strada-lang/tree/main/claude/skills/strada"><code>claude/skills/strada</code></a> in the Strada repository.</p>
+
+            <h2>Install</h2>
+
+            <div class="steps">
+                <div class="step">
+                    <h3>Claude Code</h3>
+                    <p>Install it as a plugin, which also gives you updates through <code>/plugin</code>:</p>
+                    <pre><code>/plugin marketplace add strada-lang/strada-lang.github.io
+/plugin install strada@strada-lang</code></pre>
+                    <p>Or unpack it as a plain skill, available in every project from your next session:</p>
+                    <pre><code>mkdir -p ~/.claude/skills
+curl -fsSL https://strada-lang.github.io/claude/strada-skill.tar.gz | tar -xz -C ~/.claude/skills</code></pre>
+                    <p>To share it with everyone on one project, unpack it into that project's <code>.claude/skills/</code> folder and commit it.</p>
+                </div>
+
+                <div class="step">
+                    <h3>OpenAI Codex (CLI and IDE extension)</h3>
+                    <p>Unpack the skill into your personal skills folder:</p>
+                    <pre><code>mkdir -p ~/.agents/skills
+curl -fsSL https://strada-lang.github.io/claude/strada-skill.tar.gz | tar -xz -C ~/.agents/skills</code></pre>
+                    <p>For one project, unpack it into <code>.agents/skills/</code> at the repository root and commit it. Codex picks the skill when a task matches; to ask for it by name, type <code>$strada</code> or use <code>/skills</code>. See OpenAI's <a href="https://learn.chatgpt.com/docs/build-skills">skills documentation</a> for the current details.</p>
+                </div>
+
+                <div class="step">
+                    <h3>Claude apps (claude.ai, desktop, mobile)</h3>
+                    <p>Download <a href="../claude/strada-skill.zip"><code>strada-skill.zip</code></a>, then go to <strong>Settings &rarr; Capabilities &rarr; Skills</strong>, choose <strong>Upload skill</strong>, and pick the zip. Code execution must be turned on.</p>
+                    <p>The sandbox there does not have Strada installed, so the assistant writes the code and you compile and run it on your machine. In Claude Code and Codex the whole loop runs locally.</p>
+                </div>
+
+                <div class="step">
+                    <h3>Other tools</h3>
+                    <p>For an assistant without skill support, give it the language reference: a single Markdown file covering the whole language, written for AI models. Save it in your project:</p>
+                    <pre><code>mkdir -p docs
+curl -fsSL -o docs/strada-reference.md https://strada-lang.github.io/claude/strada/reference/language.md</code></pre>
+                    <p>Then point the assistant at it from its instructions file (<code>AGENTS.md</code>, a rules file, or whatever your tool reads):</p>
+                    <pre><code>This project is written in Strada, not Perl. Before writing Strada code,
+read docs/strada-reference.md. Check every change with
+`strada --check FILE.strada`, then build and run it.</code></pre>
+                    <p>The builtin function list is at <a href="../claude/strada/reference/builtins.md"><code>reference/builtins.md</code></a> if your tool can take a second file.</p>
+                </div>
+            </div>
+
+            <div class="info-box warning">
+                <strong>Read what you install</strong>
+                The skill contains two short shell scripts the assistant may run: <code>scripts/check-toolchain.sh</code> looks for
+                <code>strada</code> and a C compiler and compiles a hello-world in a temporary directory, and <code>scripts/strada-run.sh</code>
+                compiles a program into a temporary directory, runs it, and deletes the binary. Nothing else. You can browse every file of the skill
+                <a href="https://github.com/strada-lang/strada-lang.github.io/tree/main/claude/strada">here</a> before installing it.
+            </div>
+
+            <h2>Before you start</h2>
+
+            <p>A local coding agent runs Strada on your machine, so it needs the toolchain: <code>strada</code> on your <code>PATH</code> (after <code>make install</code>), or a strada-lang checkout where <code>./strada</code> works, plus a C compiler. See the <a href="quickstart.html">QuickStart</a>. When the skill loads, the assistant runs the toolchain check first and tells you if anything is missing.</p>
+
+            <h2>Programming Strada with an assistant</h2>
+
+            <p>Ask for what you want in plain words. Mentioning Strada or having <code>.strada</code> files around is enough for the skill to load:</p>
+
+            <pre><code><span class="comment"># a few prompts that work well</span>
+Write a Strada program that reads access.log and prints the 10 busiest IPs.
+Add an Invoice class with line items and a total() method, plus tests.
+This .strada file fails to compile, fix it.
+Call libsodium's randombytes_buf from Strada through a __C__ block.
+Port this Perl script to Strada.</code></pre>
+
+            <h3>The loop the skill teaches</h3>
+            <ol>
+                <li>Write the code, with a <code>func main() int</code> entry point and no top-level statements.</li>
+                <li>Run <code>strada --check file.strada</code>, which reports every syntax and type error with line, column and a caret, and fix them.</li>
+                <li>Build at <code>-O0</code> into a temporary directory and run the program (<code>scripts/strada-run.sh</code>), so you see real output and no stray binaries land in your project.</li>
+                <li>For tests, write them with <code>use Test;</code> and run them under <code>prove</code>.</li>
+                <li>For <code>__C__</code> code, check for leaks with valgrind.</li>
+            </ol>
+
+            <h3>Tips</h3>
+            <ul>
+                <li><strong>Let it run the compiler.</strong> Code that passed <code>strada --check</code> and ran is worth far more than code that only looks right. Allow the assistant to run <code>strada</code>, and ask it to show the program's output.</li>
+                <li><strong>Watch the classic Perl slips</strong> when reviewing: Strada interpolates only <code>"${name}"</code> (a bare <code>"$name"</code> prints literally), system calls are <code>core::</code> functions, and there is no <code>qr//</code>. The skill teaches these; they are still the first things to check.</li>
+                <li><strong>Ask for types on hot code.</strong> <code>my int $i</code> and <code>int</code> parameters make arithmetic allocation-free; ask for typed loops and numeric functions.</li>
+                <li><strong>Quick experiments</strong> don't need a build: <code>strada-interp file.strada</code> (the bytecode VM) or the REPL (<code>strada --repl</code>) run code directly.</li>
+                <li><strong>Porting Perl:</strong> give the assistant the Perl script and ask for a Strada version that prints the same output; have it run both and compare.</li>
+                <li><strong>Project notes:</strong> put your project's conventions (module layout, how to run its tests) in the file your tool reads at startup: <code>CLAUDE.md</code> for Claude Code, <code>AGENTS.md</code> for Codex. The skill covers the language; that file covers your code.</li>
+            </ul>
+
+            <h2>What's in the skill</h2>
+
+            <table>
+                <tr><th>File</th><th>Contents</th></tr>
+                <tr><td><code>SKILL.md</code></td><td>The workflow, Strada-versus-Perl pitfalls, an OOP example, <code>__C__</code> rules, and when to read the references.</td></tr>
+                <tr><td><code>reference/language.md</code></td><td>The whole language in one file, written for AI models: syntax, OOP, regex, I/O, async, modules, idioms, gotchas.</td></tr>
+                <tr><td><code>reference/builtins.md</code></td><td>Every builtin function by namespace (<code>core::</code>, <code>math::</code>, <code>async::</code>, <code>c::</code>, ...).</td></tr>
+                <tr><td><code>scripts/check-toolchain.sh</code></td><td>Finds <code>strada</code> and a C compiler and compiles a hello-world.</td></tr>
+                <tr><td><code>scripts/strada-run.sh</code></td><td>Compile, run and clean up in one step; also a <code>prove --exec</code> test runner.</td></tr>
+                <tr><td><code>VERSION</code></td><td>The skill version and the Strada commit it was built from.</td></tr>
+            </table>
+
+            <p>The references are built from the Strada repository's docs each release, so the skill tracks the compiler. Update it when you update Strada.</p>
+
+            <div class="page-nav">
+                <a href="interpreter.html">
+                    <span class="label">&larr; Previous</span>
+                    <span class="title">Interpreter</span>
+                </a>
+                <a href="basics.html" class="next">
+                    <span class="label">Next &rarr;</span>
+                    <span class="title">Language Basics</span>
+                </a>
+            </div>
+        </main>
+    </div>
+
+    <footer>
+        <p><a href="../index.html">Strada</a> - A strongly-typed language inspired by Perl</p>
+    </footer>
+</body>
+</html>

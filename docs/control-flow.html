@@ -25,7 +25,7 @@
                 <li><a href="index.html">Documentation</a></li>
                 <li><a href="repl.html">REPL & Scripting</a></li>
                 <li><a href="interpreter.html">Interpreter</a></li>
-                <li><a href="claude.html">Strada with Claude</a></li>
+                <li><a href="ai.html">AI Coding Tools</a></li>
             </ul>
             <h3>Language Guide</h3>
             <ul>
@@ -118,6 +118,18 @@
 <span class="keyword">while</span> (<span class="sigil">$i</span> &lt; <span class="number">5</span>) {
     <span class="func">say</span>(<span class="sigil">$i</span>);
     <span class="sigil">$i</span>++;
+}</code></pre>
+
+            <h3>Declaring Variables in Conditions</h3>
+
+            <p>A condition of <code>if</code>, <code>unless</code>, <code>elsif</code>, <code>while</code> or <code>until</code> may declare a variable with <code>my</code> anywhere inside it, as in Perl. The variable exists only inside that statement:</p>
+
+            <pre><code><span class="keyword">while</span> (<span class="func">defined</span>(<span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$line</span> = &lt;<span class="sigil">$fh</span>&gt;)) {
+    <span class="func">say</span>(<span class="string">"got: "</span> . <span class="sigil">$line</span>);   <span class="comment"># a line "0" or "" does not end the loop</span>
+}
+
+<span class="keyword">if</span> ((<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$n</span> = <span class="func">scalar</span>(<span class="sigil">@items</span>)) &gt; <span class="number">10</span>) {
+    <span class="func">say</span>(<span class="string">"too many: "</span> . <span class="sigil">$n</span>);
 }</code></pre>
 
             <h3>Until Loop</h3>
@@ -493,6 +505,10 @@
 <span class="sigil">$i</span> = <span class="sigil">$i</span> + <span class="number">1</span> <span class="keyword">while</span> <span class="sigil">$i</span> &lt; <span class="number">10</span>;
 <span class="sigil">$i</span> = <span class="sigil">$i</span> + <span class="number">1</span> <span class="keyword">until</span> <span class="sigil">$i</span> >= <span class="number">10</span>;
 
+<span class="comment"># Postfix for/foreach: $_ is each element</span>
+<span class="func">say</span>(<span class="sigil">$_</span>) <span class="keyword">for</span> <span class="sigil">@names</span>;
+<span class="sigil">$total</span> += <span class="sigil">$_</span> <span class="keyword">foreach</span> (<span class="number">1</span>..<span class="number">10</span>);
+
 <span class="comment"># Works with return, last, next, redo</span>
 <span class="keyword">return</span> <span class="number">0</span> <span class="keyword">if</span> <span class="sigil">$error</span>;
 <span class="keyword">return</span> <span class="sigil">$val</span> <span class="keyword">unless</span> <span class="sigil">$invalid</span>;
@@ -505,6 +521,7 @@
                 <code>EXPR unless COND;</code> is equivalent to <code>if (!COND) { EXPR; }</code>.
                 <code>EXPR while COND;</code> is equivalent to <code>while (COND) { EXPR; }</code>.
                 <code>EXPR until COND;</code> is equivalent to <code>while (!COND) { EXPR; }</code>.
+                <code>EXPR for LIST;</code> (or <code>foreach</code>) is equivalent to <code>foreach (LIST) { EXPR; }</code>.
             </div>
 
             <h2>Short-Circuit Evaluation</h2>
