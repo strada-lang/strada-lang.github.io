@@ -418,7 +418,12 @@ Backslash-n stays literal: \n
 EOT</code></pre>
 
             <div class="note">
-                <strong>Note:</strong> The semicolon goes on the <code>&lt;&lt;EOT;</code> line. Supports bare <code>&lt;&lt;EOT</code>, single-quoted <code>&lt;&lt;'EOT'</code>, and double-quoted <code>&lt;&lt;"EOT"</code>.
+                <strong>Note:</strong> The semicolon goes on the <code>&lt;&lt;EOT;</code> line. Heredocs work exactly as in Perl:
+                every body line keeps its newline, the last one too (<code>$text</code> above is
+                <code>"This is a multi-line\nstring literal.\n"</code>; use <code>chomp()</code> to drop it).
+                Bare <code>&lt;&lt;EOT</code> and <code>&lt;&lt;"EOT"</code> interpolate <code>${name}</code> and process escapes;
+                <code>&lt;&lt;'EOT'</code> and <code>&lt;&lt;\EOT</code> are literal. <code>&lt;&lt;~EOT</code> allows an indented body and
+                terminator: the terminator's indentation is removed from every line.
             </div>
 
             <h3>chomp</h3>

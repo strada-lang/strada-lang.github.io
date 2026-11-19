@@ -209,7 +209,7 @@ my int $val = flexible();    # 42</code></pre>
             <pre><code><span class="comment"># Declare our variables at file level</span>
 <span class="keyword">our</span> <span class="type">int</span> <span class="sigil">$count</span> = <span class="number">0</span>;
 <span class="keyword">our</span> <span class="type">str</span> <span class="sigil">$name</span> = <span class="string">"hello"</span>;
-<span class="keyword">our</span> <span class="type">int</span> <span class="sigil">$no_init</span>;          <span class="comment"># undef (unlike "my int $x;", which is 0)</span>
+<span class="keyword">our</span> <span class="type">int</span> <span class="sigil">$no_init</span>;          <span class="comment"># 0, like "my int $x;" (num: 0, str: "")</span>
 
 <span class="comment"># In another package</span>
 <span class="keyword">package</span> Config;
