@@ -935,6 +935,21 @@ async::atomic_cas($counter, $expected, $new);
 
 The default thread pool has 4 workers; call `async::pool_init($n)` before the first async call to choose a different size.
 
+**Shared data and locking.** Threads, pool tasks (`async func`, `async::spawn`,
+`async::map`) and closures share variables and containers; nothing is copied.
+Once a program starts a thread, a global interpreter lock lets only one
+thread run Strada code at a time, so unlocked writes to shared data cannot
+corrupt memory. The lock changes hands when a thread waits (sleep, join,
+await, channels, sockets, pipes, `system`/`qx`) and inside loops. Consequences:
+CPU-bound threads take turns rather than run in parallel (use threads for
+waiting, not for computing); a single statement like `$n++` is safe, but a
+read-modify-write over several statements still needs `async::lock` or
+`thread::mutex_lock`. Building with `strada --no-gil` leaves the lock out for
+parallel execution; then every access to data another thread may write needs
+a mutex. The setting is fixed at build time (no environment variable changes
+a built program); `core::gil_info()` reports it.
+Prefer channels to pass results, and `async::atomic` for counters.
+
 ---
 
 ## Modules
@@ -979,6 +994,62 @@ BEGIN { say("runs before main"); }
 END   { say("runs after main, LIFO order"); }
 ```
 
+### Perl-compatible modules
+
+These library modules follow their Perl namesakes. `use Mod qw(f g);`
+makes `f()` and `g()` callable without the package prefix; without a list,
+call them qualified (`File::Basename::dirname($p)`). There are no default
+exports.
+
+```strada
+use Getopt::Long qw(GetOptions Configure);
+use File::Basename qw(basename dirname fileparse);
+use File::Temp qw(tempfile tempdir);
+use File::Spec;                 # File::Spec->catfile(...), class-method style
+use File::Spec::Functions qw(catfile catdir rel2abs abs2rel);
+use File::Path qw(make_path remove_tree);
+use File::Copy qw(copy move cp);
+use Cwd qw(getcwd abs_path);
+use Carp qw(croak carp confess cluck);
+use Scalar::Util qw(blessed reftype looks_like_number refaddr);
+
+func main() int {
+    my int $verbose = 0;
+    my str $out = "a.out";
+    my array @inc = ();
+    Configure("bundling");
+    GetOptions("verbose|v+" => \$verbose, "output|o=s" => \$out, "I=s" => \@inc)
+        or die("usage: prog [-v] [-o FILE] [-I DIR] FILE...\n");
+    # @ARGV now holds only the non-option arguments
+
+    my ($fh, $tmpname) = tempfile("buildXXXXXX", TMPDIR => 1, UNLINK => 1);
+    my str $dir = tempdir(CLEANUP => 1);
+    make_path(catdir($dir, "a", "b"));
+    copy($tmpname, catfile($dir, "a", basename($tmpname))) or croak("copy failed");
+    return 0;
+}
+```
+
+- **Getopt::Long**: specs `name|alias`, `!`, `+`, `=s =i =f =o`, `:s :i
+  :N :+`, `@`/`%` suffixes, `"<>"`; destinations `\$x`, `\@a`, `\%h`, a code
+  ref, or hash storage `GetOptions(\%opts, "spec", ...)`.
+  `GetOptionsFromArray(\@args, ...)`. Errors print Perl's messages to STDERR
+  and GetOptions returns 0. `Configure` takes bundling, no_ignore_case,
+  pass_through, require_order, gnu_getopt and Perl's other settings.
+- **File::Basename**: fileparse's suffixes are regex strings (there is no
+  `qr//`); basename's are literal.
+- **File::Temp**: `tempfile` returns `(fh, name)`, opened read/write, mode
+  0600. Use the list form `my ($fh, $name) = tempfile(...)`: there is no
+  scalar-context form. There are also `tempdir`, `mktemp`, and the objects
+  `File::Temp::new(...)` / `File::Temp::newdir(...)`, removed when the
+  object is destroyed.
+- **File::Spec** methods return lists (`splitpath`, `splitdir`): assign them
+  to an array before using them, since `join("/", File::Spec->splitdir($d))`
+  sees an array ref.
+- **Scalar::Util**: use `core::weaken` / `core::isweak` directly; do not list
+  `weaken` in the import list.
+- **Carp**: `croak` and `carp` report the caller's file and line.
+
 ---
 
 ## Magic namespaces
@@ -1002,6 +1073,9 @@ Built-in namespaces that don't need importing:
 core::open(...), core::close(...), core::slurp(...), core::spew(...), core::qx(...)
 core::fork(), core::exec(...), core::wait(), core::pipe()
 core::getenv("HOME"), core::setenv("X", "1")
+core::environ()                  # hash of every variable
+core::uname()->{"sysname"}, core::nproc(), core::uuid(), core::crc32($data)
+core::socketpair()               # [fd0, fd1], two-way; core::mkfifo($path, 0600)
 core::caller(), core::stack_trace()
 core::pack("NnC", $a, $b, $c)
 core::unpack("NnC", $packed)

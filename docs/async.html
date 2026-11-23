@@ -68,7 +68,7 @@
 
             <h2>Overview</h2>
 
-            <p>Strada provides first-class async/await support, allowing you to write concurrent code that's easy to read and maintain. Async functions execute on a thread pool, enabling parallel operations without the complexity of manual thread management.</p>
+            <p>Strada provides first-class async/await support, allowing you to write concurrent code that's easy to read and maintain. Async functions execute on a thread pool, so tasks that wait (network, files, sleeps) overlap without manual thread management. See <a href="#thread-safety">Thread Safety</a> for how threads share data.</p>
 
             <h2>Defining Async Functions</h2>
 
@@ -449,6 +449,21 @@ thread::tls_set(<span class="string">"name"</span>, <span class="string">"main"<
 <span class="func">say</span>(<span class="sigil">$_</span>);                         <span class="comment"># main</span>
 <span class="func">say</span>(thread::tls_get(<span class="string">"name"</span>));    <span class="comment"># main</span>
 thread::mutex_destroy(<span class="sigil">$m</span>);</code></pre>
+
+            <h2 id="thread-safety">Thread Safety</h2>
+
+            <p>Threads share data: a variable a thread closure captures is the same variable in every thread, and so are arrays, hashes and everything reachable from them. Nothing is copied.</p>
+
+            <p><strong>One thread runs Strada code at a time.</strong> When a program starts its first thread, pool task or <code>async::map</code>, the runtime turns on a global interpreter lock. Only the thread holding it runs Strada code, so an unlocked write to shared data (<code>push</code>, <code>$h{k}++</code>, <code>$shared = "..."</code>) cannot corrupt memory. A program that starts no thread pays nothing.</p>
+
+            <ul>
+                <li><strong>The lock changes hands</strong> whenever a thread waits (<code>sleep</code>, <code>thread::join</code>, <code>await</code>, channel <code>send</code>/<code>recv</code>, mutex and condition waits, socket <code>accept</code>/<code>connect</code>/<code>recv</code>, reads from pipes and terminals, <code>system</code>, <code>qx</code>, <code>waitpid</code>, <code>flock</code>, <code>poll</code>/<code>select</code>/<code>epoll_wait</code>, DNS lookups) and, for a busy thread, inside its loops once another thread has waited about 5 ms.</li>
+                <li><strong>What it costs.</strong> CPU-bound threads take turns instead of running in parallel: <code>async::map</code> over pure computation is no faster than a plain loop. Threads that mostly wait (I/O, sleeps, channels) are unaffected.</li>
+                <li><strong>Mutexes still matter for correctness.</strong> A simple statement such as <code>$n++</code> or <code>push(@a, $v)</code> completes before the lock can change hands, but a sequence of statements does not: <code>if (!exists($h{$k})) { $h{$k} = make(); }</code> can interleave with another thread. Hold a mutex around read-modify-write sequences, or use <code>async::atomic</code>.</li>
+                <li><strong>Limits.</strong> A tight arithmetic loop that calls nothing, and recursion with no loop, keep the lock until they finish. A thread blocked writing to a full pipe or socket, or inside a C library call (a database query, a TLS read), holds it too; C code can bracket long work with <code>strada_gil_release()</code> / <code>strada_gil_acquire()</code>.</li>
+                <li><strong>Turning it off.</strong> Build the program with <code>strada --no-gil</code> to let threads run in parallel. Then every read and write of data another thread may write needs a mutex: an unlocked concurrent write corrupts memory. Read-only sharing needs no lock either way.</li>
+                <li><strong>The setting is part of the built program.</strong> <code>--no-gil</code> and <code>--gil-interval-us N</code> (handover interval for a busy thread, default 5000) are compiler options; no environment variable changes how a built program behaves. <code>strada-interp</code> takes the same two options, and <code>core::gil_info()</code> returns <code>{ enabled, active, interval_us }</code>. A library built on its own gets loop handover checks with <code>--gil-polls</code>.</li>
+            </ul>
 
             <h2>Event Loop and Green Tasks (Async::Loop)</h2>
 

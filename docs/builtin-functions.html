@@ -349,6 +349,7 @@
                     <tr><td><code>core::fputs(s, fh)</code></td><td><code>str, scalar → int</code></td><td>Write string to fh.</td></tr>
                     <tr><td><code>core::dup(fd)</code></td><td><code>int → int</code></td><td>dup(2).</td></tr>
                     <tr><td><code>core::pipe()</code></td><td><code>→ array</code></td><td>Returns [read_fd, write_fd].</td></tr>
+                    <tr><td><code>core::socketpair()</code></td><td><code>→ array</code></td><td>Connected Unix stream sockets as [fd0, fd1]; both ends read and write (<code>core::read_fd</code> / <code>core::write_fd</code>). undef on error.</td></tr>
                     <tr><td><code>core::popen(cmd, mode)</code></td><td><code>str, str → scalar</code></td><td>popen(3); returns a filehandle.</td></tr>
                     <tr><td><code>core::pclose(fh)</code></td><td><code>scalar → int</code></td><td>pclose(3).</td></tr>
                     <tr><td><code>core::tmpfile()</code></td><td><code>→ scalar</code></td><td>tmpfile(3) — auto-deleted filehandle.</td></tr>
@@ -393,6 +394,7 @@
                     <tr><td><code>core::rename(old, new)</code></td><td><code>str, str → int</code></td><td>rename(2).</td></tr>
                     <tr><td><code>core::mkdir(path, mode)</code></td><td><code>str, int → int</code></td><td>mkdir(2).</td></tr>
                     <tr><td><code>core::rmdir(path)</code></td><td><code>str → int</code></td><td>rmdir(2).</td></tr>
+                    <tr><td><code>core::mkfifo(path, mode)</code></td><td><code>str, int → int</code></td><td>mkfifo(3): create a named pipe. 0 / -1.</td></tr>
                     <tr><td><code>core::chmod(path, mode)</code></td><td><code>str, int → int</code></td><td>chmod(2).</td></tr>
                     <tr><td><code>core::fchmod(fd, mode)</code></td><td><code>int, int → int</code></td><td>fchmod(2).</td></tr>
                     <tr><td><code>core::chown(path, uid, gid)</code></td><td><code>str, int, int → int</code></td><td>chown(2).</td></tr>
@@ -412,6 +414,7 @@
                     <tr><td><code>core::opendir(path)</code></td><td><code>str → scalar</code></td><td>Open directory.</td></tr>
                     <tr><td><code>core::readdir(path)</code></td><td><code>str → array</code></td><td>All entry names in directory <code>path</code> (no <code>.</code>/<code>..</code>).</td></tr>
                     <tr><td><code>core::readdir_next(dh)</code></td><td><code>scalar → str</code></td><td>One entry (undef when done).</td></tr>
+                    <tr><td><code>core::rewinddir(dh)</code></td><td><code>scalar → int</code></td><td>Restart reading at the first entry. 0, or -1 for a closed handle.</td></tr>
                     <tr><td><code>core::readdir_full(path)</code></td><td><code>str → array</code></td><td>Entries of directory <code>path</code> as full paths.</td></tr>
                     <tr><td><code>core::closedir(dh)</code></td><td><code>scalar → int</code></td><td>Close directory.</td></tr>
                 </tbody>
@@ -469,6 +472,10 @@
                     <tr><td><code>core::udp_sendto(sock, data, host, port)</code></td><td><code>scalar, str, str, int → int</code></td><td>sendto.</td></tr>
                     <tr><td><code>core::udp_recvfrom(sock, max)</code></td><td><code>scalar, int → array</code></td><td>Returns [data, from_addr, from_port].</td></tr>
                     <tr><td><code>core::gethostname()</code></td><td><code>→ str</code></td><td>gethostname(3).</td></tr>
+                    <tr><td><code>core::uname()</code></td><td><code>→ hash</code></td><td>uname(2): <code>sysname</code>, <code>nodename</code>, <code>release</code>, <code>version</code>, <code>machine</code>.</td></tr>
+                    <tr><td><code>core::nproc()</code></td><td><code>→ int</code></td><td>Processors this process may run on (at least 1).</td></tr>
+                    <tr><td><code>core::gil_info()</code></td><td><code>→ hash</code></td><td>Thread lock settings of this program: <code>enabled</code> (0 when built with <code>--no-gil</code>), <code>active</code> (1 once a thread has started and the lock is running), <code>interval_us</code> (handover interval).</td></tr>
+                    <tr><td><code>core::getservbyname(name, proto)</code></td><td><code>str, str → int</code></td><td>Port number of a service (<code>"https"</code>, <code>"tcp"</code> → 443); <code>proto</code> may be undef. undef when unknown.</td></tr>
                     <tr><td><code>core::gethostbyname(host)</code></td><td><code>str → str</code></td><td>First IP for hostname.</td></tr>
                     <tr><td><code>core::gethostbyname_all(host)</code></td><td><code>str → array</code></td><td>All IPs.</td></tr>
                     <tr><td><code>core::getaddrinfo(host, service)</code></td><td><code>str, str → str</code></td><td>First getaddrinfo(3) result as a numeric address string.</td></tr>
@@ -525,6 +532,7 @@
                 <tbody>
                     <tr><td><code>core::getenv(name)</code></td><td><code>str → str</code></td><td>Get env variable (or undef).</td></tr>
                     <tr><td><code>core::setenv(name, val)</code></td><td><code>str, str → int</code></td><td>setenv(3).</td></tr>
+                    <tr><td><code>core::environ()</code></td><td><code>→ hash</code></td><td>The whole environment as name → value. A copy: change variables with <code>core::setenv</code>.</td></tr>
                     <tr><td><code>core::unsetenv(name)</code></td><td><code>str → int</code></td><td>unsetenv(3).</td></tr>
                     <tr><td><code>core::argv()</code></td><td><code>→ array</code></td><td>Command-line args (without program name).</td></tr>
                     <tr><td><code>core::getprocname()</code></td><td><code>→ str</code></td><td>Current process name (argv[0]).</td></tr>
@@ -579,6 +587,8 @@
                     <tr><td><code>core::hex(s)</code></td><td><code>str → int</code></td><td>Parse hex string.</td></tr>
                     <tr><td><code>core::random_bytes(n)</code></td><td><code>int → str</code></td><td>Cryptographic random bytes.</td></tr>
                     <tr><td><code>core::random_bytes_hex(n)</code></td><td><code>int → str</code></td><td>Random bytes as hex.</td></tr>
+                    <tr><td><code>core::uuid()</code></td><td><code>→ str</code></td><td>Random (version 4) UUID, lower-case.</td></tr>
+                    <tr><td><code>core::crc32(data)</code></td><td><code>str → int</code></td><td>CRC-32 of the bytes (the zlib/PNG polynomial), 0 to 4294967295.</td></tr>
                     <tr><td><code>core::strerror(errno)</code></td><td><code>int → str</code></td><td>Errno → message.</td></tr>
                     <tr><td><code>core::strtod(s)</code></td><td><code>str → array</code></td><td>strtod(3); returns <code>[value, chars_consumed]</code>.</td></tr>
                     <tr><td><code>core::strtol(s, base)</code></td><td><code>str, int → array</code></td><td>strtol(3); returns <code>[value, chars_consumed]</code>.</td></tr>
