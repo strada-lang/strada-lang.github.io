@@ -428,9 +428,10 @@ strada-profhtml strada-prof.out my-report/   <span class="comment"># Custom outp
 
             <h2>Checking Cleanup Balance</h2>
 
-            <p>When working on code generation or <code>__C__</code> blocks that push and pop the runtime's cleanup stack, compile with <code>--check-cleanup</code> (or set <code>STRADA_CHECK_CLEANUP=1</code> in the environment, e.g. for a whole test run). Every function then records the cleanup depth on entry, and a normal return with a different depth aborts with <code>cleanup stack imbalance in FUNC()</code>. Set <code>STRADA_CLEANUP_CHECK_WARN=1</code> to report without aborting.</p>
+            <p>When working on code generation or <code>__C__</code> blocks that push and pop the runtime's cleanup stack, compile with <code>--check-cleanup</code> (or set <code>STRADA_CHECK_CLEANUP=1</code> in the environment, e.g. for a whole test run). Every function then records the cleanup depth on entry, and a normal return with a different depth aborts with <code>cleanup stack imbalance in FUNC()</code>. Compile with <code>--check-cleanup=warn</code> to report without aborting.</p>
 
             <pre><code>./strada --check-cleanup myprogram.strada
+./strada --check-cleanup=warn myprogram.strada
 STRADA_CHECK_CLEANUP=1 ./strada myprogram.strada</code></pre>
 
             <h2>Using GDB</h2>
@@ -481,6 +482,8 @@ gdb ./myprogram
                     <tr><td><code>core::full_profile_start($file)</code></td><td>Start line-level profiling to file</td></tr>
                     <tr><td><code>core::full_profile_stop()</code></td><td>Stop profiling and flush data</td></tr>
                     <tr><td><code>strada --check-cleanup</code></td><td>Abort on an unbalanced cleanup stack (see below)</td></tr>
+                    <tr><td><code>strada --debug-bless</code></td><td>Trace <code>bless</code> and method dispatch to stderr</td></tr>
+                    <tr><td><code>strada --no-pool</code></td><td>Turn off the runtime's free-list pools, so valgrind reports each block at the call that allocated it</td></tr>
                 </tbody>
             </table>
 
