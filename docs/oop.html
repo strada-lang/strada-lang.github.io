@@ -525,6 +525,16 @@
                 <p>If you define an explicit <code>func new(...)</code> in the package, the auto-generated constructor is skipped.</p>
             </div>
 
+            <h4>Typed attributes are fast</h4>
+            <p>Give attributes their real types. The compiler uses them:</p>
+            <ul>
+                <li>Inside the class's own methods, arithmetic over <code>num</code> and <code>int</code> accessors is compiled to plain C numbers. <code>$self-&gt;set_x($self-&gt;x() + $self-&gt;v() * 0.01)</code> reads two doubles, computes, and writes the result into the attribute's existing slot, with no temporary values.</li>
+                <li>Those accessor and setter calls on <code>$self</code> (and accessor reads on a variable the compiler can see was just built with <code>Pkg::new(...)</code>) remember where the attribute lives in the object, so repeated calls skip the hash lookup.</li>
+                <li>A call on a variable whose class the compiler does not know (an object taken out of an array, a <code>scalar</code> parameter) is an ordinary method call. Put hot arithmetic on attributes in a method of the class.</li>
+                <li>Objects are still ordinary hashes: <code>$self-&gt;{"x"}</code>, <code>keys</code>, <code>clone</code> and hand-written <code>bless</code> constructors behave exactly as before.</li>
+            </ul>
+            <p>Measured on 1000 objects with 20,000 calls each of a method that updates a <code>num</code> attribute this way: 1.92&nbsp;s before these changes, 0.40&nbsp;s after. In a file with <code>use strict "types";</code>, values passed to typed parameters and returned from typed methods are also <a href="types.html#checked-types">checked at compile time</a>.</p>
+
             <h3>Inheritance with <code>extends</code></h3>
 
             <p>Use <code>extends</code> to declare that a class inherits from one or more parent classes. Child classes inherit parent attributes and their auto-generated constructor includes parent attributes.</p>

@@ -7,7 +7,7 @@
       "name": "strada",
       "source": "./claude/plugins/strada",
       "description": "Write, compile, run, test and debug Strada programs (the Perl-inspired language that compiles to native code) with Claude.",
-      "version": "2026.11.23"
+      "version": "2026.11.24"
     }
   ]
 }

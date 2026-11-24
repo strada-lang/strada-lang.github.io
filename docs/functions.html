@@ -120,6 +120,8 @@
 <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@nums</span> = (<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>);
 <span class="func">say</span>(<span class="func">sum_array</span>(<span class="sigil">@nums</span>));  <span class="comment"># 15</span></code></pre>
 
+            <p>A parameter can say what the array holds: <code>func sum_array(array&lt;int&gt; @numbers) int</code>. In a file with <code>use strict "types";</code>, passing an <code>array&lt;str&gt;</code> there is a compile error; see <a href="types.html#checked-types">Checked Types</a>. A loop like the one above, where the <code>int</code> loop variable is only read, runs with the variable as a plain machine integer.</p>
+
             <h3>Hash Parameters</h3>
 
             <pre><code><span class="keyword">func</span> <span class="func">print_config</span>(<span class="type">hash</span> <span class="sigil">%config</span>) <span class="type">void</span> {

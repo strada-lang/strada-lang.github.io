@@ -443,6 +443,101 @@ my int $val = flexible();    # 42</code></pre>
 <span class="keyword">my</span> <span class="type">str</span> <span class="sigil">$str</span> = <span class="number">42</span>;       <span class="comment"># "42"</span>
 <span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$i</span> = <span class="string">"12abc"</span>;    <span class="comment"># 12</span></code></pre>
 
+            <p>That is the default. In a file with <code>use strict "types";</code> the last two lines are compile errors; see <a href="#checked-types">Checked Types</a> below.</p>
+
+            <h2 id="checked-types">Checked Types</h2>
+
+            <p>By default an annotation <em>converts</em>: <code>my int $n = "12abc";</code> quietly makes <code>$n</code> the integer 12. A file that starts with <code>use strict "types";</code> gets compile errors for type mismatches instead, from that line to the end of the file.</p>
+
+<pre><code>use strict "types";
+
+func total(array&lt;int&gt; @prices, num $tax) num {
+    my int $sum = 0;
+    foreach my int $p (@prices) { $sum += $p; }
+    return $sum * (1 + $tax);
+}
+
+func main() int {
+    my array&lt;int&gt; @list = (10, 20, 30);
+    my hash&lt;str, int&gt; %age = ();          # hash&lt;int&gt; means the same
+    my str $in = "0.5";
+
+    push(@list, "forty");                 # error: storing a str value in '@list' (declared array&lt;int&gt;)
+    $age{"bob"} = "old";                  # error
+    my int $half = $list[0] / 2;          # error: `/` gives a num; write int($list[0] / 2)
+    say(total(@list, $in));               # error: argument 2 to 'total': expected num, got str
+    say(total(@list, $in + 0));           # fine: explicit conversion
+    return 0;
+}</code></pre>
+
+            <p>Every error is reported in one run, with file and line (each is followed by the source line, left out here):</p>
+
+<pre><code>app.strada:14: error: storing a str value in '@list' (declared array&lt;int&gt;)
+app.strada:15: error: storing a str value in '%age' (declared hash&lt;int&gt;)
+app.strada:16: error: initializing '$half' (declared int) with a num value
+app.strada:17: error: argument 2 to 'total': expected num, got str
+compilation failed: 4 semantic errors</code></pre>
+
+            <h3>What is checked</h3>
+            <ul>
+                <li><code>my</code> and <code>our</code> initializers, and assignments to declared scalars</li>
+                <li>arguments against declared parameter types, and <code>return</code> values against the declared return type</li>
+                <li>values put into a <code>my</code> variable or parameter that declares an element type: literal initializer and assignment lists (<code>(1, 2)</code>, <code>(a =&gt; 1)</code>), <code>$a[i] = v</code>, <code>$h{k} = v</code>, <code>push</code>, <code>unshift</code>, the declared type of a <code>foreach</code> variable, and array arguments. A hash list that contains more than plain scalar expressions (<code>(%base, k =&gt; 1)</code>, a call) is not checked.</li>
+            </ul>
+
+            <h3>Element types</h3>
+            <p>Arrays and hashes can say what they hold: <code>array&lt;T&gt;</code>, <code>hash&lt;T&gt;</code> or <code>hash&lt;str, T&gt;</code>, where <code>T</code> is <code>int</code>, <code>num</code>, <code>str</code>, <code>scalar</code> or a class name. Reading an element (<code>$list[0]</code>, <code>$age{"bob"}</code>, <code>shift(@list)</code>) gives a value of that type. They work in <code>my</code> declarations, parameters and return types.</p>
+
+            <h3>Conversions</h3>
+            <table>
+                <thead><tr><th>From</th><th>To</th><th>How</th></tr></thead>
+                <tbody>
+                    <tr><td><code>int</code></td><td><code>num</code></td><td>implicit</td></tr>
+                    <tr><td><code>num</code></td><td><code>int</code></td><td>the cast <code>int($x)</code></td></tr>
+                    <tr><td>one character, <code>'/'</code></td><td><code>int</code> or <code>str</code></td><td>implicit (its character code, or the text)</td></tr>
+                    <tr><td>text</td><td>number</td><td><code>$s + 0</code> or <code>int($s)</code></td></tr>
+                    <tr><td>number</td><td><code>str</code></td><td><code>"" . $n</code></td></tr>
+                </tbody>
+            </table>
+
+            <p>The cast you will write most often is for division. <code>/</code> always gives a <code>num</code>, so integer division is spelled out; <code>int(...)</code> truncates toward zero, exactly as the implicit conversion did. <code>%</code> is integer modulo and needs no cast.</p>
+
+<pre><code>my int $days = int($diff / 86400);     # cast the division
+my int $rest = $diff % 86400;          # % is already an int
+my num $frac = $diff / 86400;          # or keep the fraction
+return int($total / $count);           # same in a function that returns int</code></pre>
+
+            <h3>Gradual, one file at a time</h3>
+            <ul>
+                <li><code>scalar</code>, unannotated variables and plain <code>array</code>/<code>hash</code> are never checked, in either direction, so typed and untyped code mix freely.</li>
+                <li>The pragma covers its own file: functions, methods, method modifiers, closures, <code>BEGIN</code>/<code>END</code> blocks and file-level initializers. A strict module does not make its users strict, and a strict program does not check the modules it uses.</li>
+                <li>Without the pragma nothing changes. <code>strada --strict-types</code> reports the same mismatches as warnings.</li>
+                <li><code>strada-interp file.strada</code> reports the same type errors and does not run the program. It enforces the type checks only. Code given with <code>-e</code> and REPL input are not checked.</li>
+            </ul>
+
+            <div class="info-box warning">
+                <strong>Limits.</strong> Element types are checked at compile time only: a value that reaches a typed container through untyped code is not converted. Not checked yet: arguments of method calls (<code>$obj-&gt;m("x")</code>), element types on <code>our</code> containers, a container returned from a function against its declared <code>array&lt;T&gt;</code> return type, and class element types (<code>array&lt;Point&gt;</code> is accepted). Nested element types (<code>array&lt;array&lt;int&gt;&gt;</code>) are a syntax error. Bare <code>use strict;</code> is accepted and does nothing (Strada already requires declared variables); type checking is <code>use strict "types";</code>.
+            </div>
+
+            <h3 id="typing-speed">What typing buys in speed</h3>
+
+            <p>The pragma itself only adds compile-time checks. The speed comes from the types, with or without it:</p>
+
+            <table>
+                <thead><tr><th>What you type</th><th>What the compiler does</th><th>Measured</th></tr></thead>
+                <tbody>
+                    <tr><td><code>my int $i</code>, <code>my num $x</code> locals</td><td>plain C <code>int64_t</code> / <code>double</code>, no allocation</td><td>a Mandelbrot inner loop runs at the speed of the C version</td></tr>
+                    <tr><td><code>int</code> parameters</td><td>no reference counting on entry or exit</td><td></td></tr>
+                    <tr><td><code>has rw num $x</code>, <code>has rw int $n</code>, used in the class's own methods</td><td>arithmetic in C numbers, written back into the attribute's slot; the call site remembers where the attribute lives</td><td>1.92&nbsp;s &rarr; 0.40&nbsp;s on 20 million method calls</td></tr>
+                    <tr><td><code>foreach my int $v (@a)</code> with a body that only reads <code>$v</code></td><td>the loop variable is a C integer</td><td>0.12&nbsp;s &rarr; 0.10&nbsp;s summing 100 million elements</td></tr>
+                    <tr><td><code>/</code> and <code>**</code> assigned to a <code>num</code></td><td>plain C arithmetic, no temporary value</td><td>0.09&nbsp;s &rarr; 0.02&nbsp;s on a 2000&times;2000 Mandelbrot</td></tr>
+                </tbody>
+            </table>
+
+            <p>No speed difference yet: element types (<code>array&lt;int&gt;</code> and <code>hash&lt;str, num&gt;</code> are checked, but storage is unchanged), <code>str</code>, and method calls on an object whose class the compiler cannot see (one taken out of an array, or a <code>scalar</code> parameter).</p>
+
+            <p>A complete program that uses all of this is in the repository: <a href="https://github.com/strada-lang/strada-lang/blob/main/examples/checked_types.strada"><code>examples/checked_types.strada</code></a>.</p>
+
             <h2>The scalar Type</h2>
 
             <p>The <code>scalar</code> type can hold any value and is useful for generic programming:</p>

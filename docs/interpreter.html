@@ -129,8 +129,13 @@ make interpreter
 <span class="comment"># With library search paths</span>
 ./interpreter/strada-interp -L lib program.strada
 
+<span class="comment"># Without the JIT (bytecode interpreter loop only; for debugging the VM)</span>
+./interpreter/strada-interp --no-jit program.strada
+
 <span class="comment"># Start the interactive REPL</span>
 ./interpreter/strada-interp</code></pre>
+
+            <p>A program file that says <code>use strict "types";</code> gets the compiler's type checks before it runs: <a href="types.html#checked-types">type mismatches</a> are reported and the program does not start. Only the type checks are enforced; other things that only the compiler rejects still run in the VM as before. Code given with <code>-e</code> and REPL input are not checked.</p>
 
             <h2>Interactive REPL</h2>
 
@@ -375,6 +380,13 @@ Options:
   -e CODE       Execute code (wraps in main() if needed)
   --vm          Use bytecode VM backend (default)
   -L PATH       Add library search path
+  --no-jit      Run bytecode in the interpreter loop only (no native code)
+  --no-gil      Threads run in parallel with no interpreter lock
+  --gil-interval-us N  Lock handover interval for a busy thread (default 5000)
+  --no-gc       Start with the runtime's cycle collector off
+  --exit-task-wait-ms N  How long exit waits for running pool tasks (default 1000)
+  --no-pool     Debug: no free-list pools in the runtime
+  --debug-bless Debug: trace bless and method dispatch to stderr
   -h, --help    Show this help message</code></pre>
 
             <h3>One-Liner Execution</h3>

@@ -1,6 +1,6 @@
 {
   "name": "strada",
-  "version": "2026.11.23",
+  "version": "2026.11.24",
   "description": "Write, compile, run, test and debug Strada programs (the Perl-inspired language that compiles to native code) with Claude.",
   "author": { "name": "Strada" },
   "homepage": "https://strada-lang.github.io/docs/ai.html",
