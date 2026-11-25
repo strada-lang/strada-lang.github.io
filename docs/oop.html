@@ -533,7 +533,7 @@
                 <li>A call on a variable whose class the compiler does not know (an object taken out of an array, a <code>scalar</code> parameter) is an ordinary method call. Put hot arithmetic on attributes in a method of the class.</li>
                 <li>Objects are still ordinary hashes: <code>$self-&gt;{"x"}</code>, <code>keys</code>, <code>clone</code> and hand-written <code>bless</code> constructors behave exactly as before.</li>
             </ul>
-            <p>Measured on 1000 objects with 20,000 calls each of a method that updates a <code>num</code> attribute this way: 1.92&nbsp;s before these changes, 0.40&nbsp;s after. In a file with <code>use strict "types";</code>, values passed to typed parameters and returned from typed methods are also <a href="types.html#checked-types">checked at compile time</a>.</p>
+            <p>Measured on 1000 objects with 20,000 calls each of a method that updates a <code>num</code> attribute this way: 1.92&nbsp;s before these changes, 0.40&nbsp;s after. In a file with <code>use strict "types";</code>, values passed to typed parameters and returned from typed methods are also <a href="types.html#checked-types">checked at compile time</a>, including <a href="types.html#checked-objects">method calls and constructor arguments</a> where the compiler knows the object's class.</p>
 
             <h3>Inheritance with <code>extends</code></h3>
 

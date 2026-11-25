@@ -515,8 +515,36 @@ return int($total / $count);           # same in a function that returns int</co
                 <li><code>strada-interp file.strada</code> reports the same type errors and does not run the program. It enforces the type checks only. Code given with <code>-e</code> and REPL input are not checked.</li>
             </ul>
 
+            <h3 id="checked-objects">Objects and method calls</h3>
+            <p>Where the compiler knows an object's class, it checks method arguments against the method's parameters, gives the call the method's declared return type, and checks constructor arguments against the attribute types.</p>
+<pre><code>use strict "types";
+
+package Account;
+has ro str $owner (required);
+has rw num $balance = 0.0;
+func deposit(scalar $self, num $amount) void {
+    $self-&gt;set_balance($self-&gt;balance() + $amount);
+}
+
+package main;
+func main() int {
+    my scalar $acct = Account::new(owner =&gt; "Ann");
+    $acct-&gt;deposit("fifty");                  # error: argument 1 to 'Account::deposit': expected num, got str
+    my int $who = $acct-&gt;owner();             # error: initializing '$who' (declared int) with a str value
+    my scalar $b = Account::new(owner =&gt; 7);  # error: attribute 'owner' of 'Account': expected str, got int
+    return 0;
+}</code></pre>
+            <p>The class is known for:</p>
+            <ul>
+                <li><code>$self</code> in a class's own functions;</li>
+                <li>a variable declared <code>my $v = Pkg::new(...)</code> that the function never assigns again;</li>
+                <li>a typed catch variable, <code>catch (Pkg $e)</code>;</li>
+                <li>a class name, <code>Pkg-&gt;method(...)</code>, and <code>SUPER::method(...)</code>.</li>
+            </ul>
+            <p>An object that arrives as a parameter, from a function or out of a container has no known class, and calls on it are not checked. Neither is a method with an <code>around</code> modifier, nor a call through <code>$self</code> to a method that a subclass overrides.</p>
+
             <div class="info-box warning">
-                <strong>Limits.</strong> Element types are checked at compile time only: a value that reaches a typed container through untyped code is not converted. Not checked yet: arguments of method calls (<code>$obj-&gt;m("x")</code>), element types on <code>our</code> containers, a container returned from a function against its declared <code>array&lt;T&gt;</code> return type, and class element types (<code>array&lt;Point&gt;</code> is accepted). Nested element types (<code>array&lt;array&lt;int&gt;&gt;</code>) are a syntax error. Bare <code>use strict;</code> is accepted and does nothing (Strada already requires declared variables); type checking is <code>use strict "types";</code>.
+                <strong>Limits.</strong> Element types are checked at compile time only: a value that reaches a typed container through untyped code is not converted. Not checked yet: method calls on an object whose class the compiler does not know (see below), element types on <code>our</code> containers, a container returned from a function against its declared <code>array&lt;T&gt;</code> return type, and class element types (<code>array&lt;Point&gt;</code> is accepted). Nested element types (<code>array&lt;array&lt;int&gt;&gt;</code>) are a syntax error. Bare <code>use strict;</code> is accepted and does nothing (Strada already requires declared variables); type checking is <code>use strict "types";</code>.
             </div>
 
             <h3 id="typing-speed">What typing buys in speed</h3>
