@@ -482,7 +482,8 @@ compilation failed: 4 semantic errors</code></pre>
             <ul>
                 <li><code>my</code> and <code>our</code> initializers, and assignments to declared scalars</li>
                 <li>arguments against declared parameter types, and <code>return</code> values against the declared return type</li>
-                <li>values put into a <code>my</code> variable or parameter that declares an element type: literal initializer and assignment lists (<code>(1, 2)</code>, <code>(a =&gt; 1)</code>), <code>$a[i] = v</code>, <code>$h{k} = v</code>, <code>push</code>, <code>unshift</code>, the declared type of a <code>foreach</code> variable, and array arguments. A hash list that contains more than plain scalar expressions (<code>(%base, k =&gt; 1)</code>, a call) is not checked.</li>
+                <li>values put into a variable, parameter or function result that declares an element type (<code>my</code>, <code>our</code> and file-level variables alike): literal initializer and assignment lists (<code>(1, 2)</code>, <code>(a =&gt; 1)</code>), <code>$a[i] = v</code>, <code>$h{k} = v</code>, <code>push</code>, <code>unshift</code>, the declared type of a <code>foreach</code> variable, and array arguments. A hash list that contains more than plain scalar expressions (<code>(%base, k =&gt; 1)</code>, a call) is not checked.</li>
+                <li>the <code>return</code> values of a function declared <code>array&lt;T&gt;</code> or <code>hash&lt;T&gt;</code>, and that function's result where it is stored, pushed, passed or looped over: <code>my array&lt;int&gt; @a = names();</code> is an error when <code>names()</code> returns <code>array&lt;str&gt;</code>.</li>
             </ul>
 
             <h3>Element types</h3>
@@ -544,7 +545,7 @@ func main() int {
             <p>An object that arrives as a parameter, from a function or out of a container has no known class, and calls on it are not checked. Neither is a method with an <code>around</code> modifier, nor a call through <code>$self</code> to a method that a subclass overrides.</p>
 
             <div class="info-box warning">
-                <strong>Limits.</strong> Element types are checked at compile time only: a value that reaches a typed container through untyped code is not converted. Not checked yet: method calls on an object whose class the compiler does not know (see below), element types on <code>our</code> containers, a container returned from a function against its declared <code>array&lt;T&gt;</code> return type, and class element types (<code>array&lt;Point&gt;</code> is accepted). Nested element types (<code>array&lt;array&lt;int&gt;&gt;</code>) are a syntax error. Bare <code>use strict;</code> is accepted and does nothing (Strada already requires declared variables); type checking is <code>use strict "types";</code>.
+                <strong>Limits.</strong> Element types are checked at compile time only: a value that reaches a typed container through untyped code is not converted. Not checked yet: method calls on an object whose class the compiler does not know (see below) and class element types (<code>array&lt;Point&gt;</code> is accepted). Nested element types (<code>array&lt;array&lt;int&gt;&gt;</code>) are a syntax error. Bare <code>use strict;</code> is accepted and does nothing (Strada already requires declared variables); type checking is <code>use strict "types";</code>.
             </div>
 
             <h3 id="typing-speed">What typing buys in speed</h3>
