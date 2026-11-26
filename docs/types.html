@@ -328,11 +328,24 @@ my int $val = flexible();    # 42</code></pre>
 <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@lit</span> = (<span class="number">1</span>, (<span class="number">2</span>, <span class="number">3</span>), <span class="number">4</span>);      <span class="comment"># (1, 2, 3, 4)     parenthesized list</span>
 <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@sp</span>  = (<span class="string">"a"</span>, <span class="func">split</span>(<span class="string">","</span>, <span class="string">"b,c"</span>)); <span class="comment"># ("a","b","c")    array-returns / builtins</span>
 
+<span class="comment"># ?: in a list gives the chosen branch's elements; X // () gives X or nothing</span>
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@opt</span> = (<span class="number">0</span>, <span class="sigil">$verbose</span> ? <span class="sigil">@middle</span> : (), <span class="number">9</span>);  <span class="comment"># (0, 3, 4, 9) or (0, 9)</span>
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@some</span> = (<span class="sigil">$maybe</span> // (), <span class="string">"x"</span>);          <span class="comment"># skips an undef $maybe</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$cfg</span> = { <span class="sigil">%defaults</span>, <span class="sigil">$debug</span> ? (level =&gt; <span class="number">9</span>) : () };  <span class="comment"># lists inside { }</span>
+
 <span class="comment"># References are scalars - they do NOT flatten (nest one array via a ref)</span>
 <span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@withref</span> = (<span class="number">1</span>, [<span class="number">2</span>, <span class="number">3</span>], <span class="number">4</span>);    <span class="comment"># 3 elements: 1, an arrayref, 4</span>
 
 <span class="comment"># Scalar context - assign array to scalar to get count</span>
-<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$n</span> = <span class="sigil">@all</span>;  <span class="comment"># 5</span></code></pre>
+<span class="keyword">my</span> <span class="type">int</span> <span class="sigil">$n</span> = <span class="sigil">@all</span>;  <span class="comment"># 5</span>
+
+<span class="comment"># Other list expressions where one value is wanted follow Perl's scalar rules</span>
+<span class="keyword">my</span> <span class="sigil">$nk</span> = <span class="sigil">%person</span>;            <span class="comment"># key count</span>
+<span class="keyword">my</span> <span class="sigil">$lastv</span> = (<span class="number">7</span>, <span class="number">8</span>, <span class="number">9</span>);       <span class="comment"># 9: the comma operator yields its last item</span>
+<span class="keyword">my</span> <span class="sigil">$c</span> = <span class="sigil">$ok</span> ? <span class="sigil">@all</span> : <span class="number">0</span>;      <span class="comment"># count of @all, or 0</span>
+<span class="keyword">my</span> <span class="sigil">$np</span> = <span class="func">get_pair</span>();          <span class="comment"># count, when get_pair() is declared array</span>
+<span class="keyword">my</span> <span class="type">scalar</span> <span class="sigil">$keep</span> = [<span class="func">get_pair</span>()]; <span class="comment"># keep the list: an array reference</span>
+<span class="keyword">my</span> <span class="type">array</span> <span class="sigil">@one</span> = <span class="sigil">$aref</span>;      <span class="comment"># ONE element (the reference); copy with @{$aref}</span></code></pre>
 
             <div class="info-box">
                 <strong>What flattens</strong>
@@ -342,8 +355,12 @@ my int $val = flexible();    # 42</code></pre>
                 declared to return <code>array</code>, and array builtins
                 (<code>split</code>, <code>keys</code>, <code>values</code>, …). References
                 (<code>[…]</code>, <code>\@a</code>) are scalars and stay one element, exactly
-                as in Perl. To spread an array as separate <em>function arguments</em>,
-                use <code>...@array</code>.
+                as in Perl. A <code>?:</code> splices in the branch it chooses. Arguments
+                flatten the same way into a variadic function or method and into the
+                no-parens <code>@_</code> form (<code>$obj-&gt;add(@items)</code>); a parameter
+                declared <code>array @p</code> receives the array whole. To spread an
+                array as separate <em>function arguments</em> explicitly, use
+                <code>...@array</code>.
             </div>
 
             <div class="info-box warning">
