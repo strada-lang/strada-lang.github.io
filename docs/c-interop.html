@@ -488,6 +488,49 @@ cc -o host host.c $(strada --embed-ldflags)
                 <strong>Exceptions:</strong> an exception that escapes an extern function called from C ends the program with the usual uncaught-exception report. If the C caller must continue, catch it inside the function and return an error value.
             </div>
 
+            <h3 id="hand-written-wrapper">Writing the C Wrapper by Hand</h3>
+
+            <p>An <code>extern func</code> covers the types in the table above. When the C side needs a signature it cannot express &mdash; a struct pointer, a callback with a <code>void *</code> context, an <code>int32</code> result &mdash; write the wrapper yourself in a top-level <code>__C__</code> block. Any function there that is not <code>static</code> is an exported C symbol.</p>
+
+            <p>From C, a Strada function is called by its C name: the package and function name joined with underscores (<code>Geo::Point::describe</code> is <code>Geo_Point_describe</code>; in package <code>main</code> it is just the function name). Every parameter and the result are <code>StradaValue*</code>, and the result is a new reference the caller releases. Declare it before use:</p>
+
+            <pre><code><span class="comment"># pointlib.strada</span>
+<span class="keyword">package</span> Geo::Point;
+
+<span class="keyword">__C__</span> {
+<span class="keyword">typedef struct</span> { <span class="keyword">double</span> x, y; } point_t;
+
+StradaValue *Geo_Point_describe(StradaValue *x, StradaValue *y);   <span class="comment">/* the Strada function below */</span>
+
+<span class="comment">/* Exported: not static. */</span>
+<span class="keyword">char</span> *point_describe(<span class="keyword">const</span> point_t *p) {
+    StradaValue *x = strada_new_num(p-&gt;x);
+    StradaValue *y = strada_new_num(p-&gt;y);
+    StradaValue *r = Geo_Point_describe(x, y);
+    <span class="keyword">char</span> *out = strada_to_str(r);     <span class="comment">/* malloc'd copy: the caller frees it */</span>
+    strada_decref(r);
+    strada_decref(x);
+    strada_decref(y);
+    <span class="keyword">return</span> out;
+}
+}
+
+<span class="keyword">func</span> <span class="func">describe</span>(<span class="type">num</span> <span class="sigil">$x</span>, <span class="type">num</span> <span class="sigil">$y</span>) <span class="type">str</span> {
+    <span class="keyword">return</span> <span class="string">"("</span> . <span class="sigil">$x</span> . <span class="string">", "</span> . <span class="sigil">$y</span> . <span class="string">") is "</span> . math::sqrt(<span class="sigil">$x</span> * <span class="sigil">$x</span> + <span class="sigil">$y</span> * <span class="sigil">$y</span>) . <span class="string">" from the origin"</span>;
+}</code></pre>
+
+            <p>Build and call it exactly like the <code>extern func</code> library above (<code>strada --shared pointlib.strada</code>, then <code>dlsym(lib, "point_describe")</code> or link against it). Passing <code>{3, 4}</code> prints <code>(3, 4) is 5 from the origin</code>.</p>
+
+            <p>What you take on compared with <code>extern func</code>:</p>
+
+            <ul>
+                <li><strong>Conversion and reference counting are yours.</strong> Release every value you create and every result you receive; free every <code>strada_to_str</code> copy.</li>
+                <li><strong>Libraries and executables declare differently.</strong> In a <code>--shared</code>, <code>--object</code> or <code>--static-lib</code> build, Strada functions are global and the declaration above is right. In a plain executable they are <code>static inline</code>, so the declaration must be <code>static inline StradaValue *describe(StradaValue *x, StradaValue *y);</code> &mdash; and an optimized executable may drop a C function nothing in the program calls.</li>
+                <li><strong>One namespace.</strong> Your function's name must not match anything in the C library, the runtime, or another Strada function's C name.</li>
+                <li><strong>Strada callers are unaffected.</strong> The C function is not part of the module's Strada interface; Strada code keeps calling <code>Geo::Point::describe()</code>.</li>
+                <li><strong>Compiled only for the C-to-Strada call.</strong> Under <code>strada-interp</code> a Strada function is not a C symbol, so a block that calls one by name fails to load. C functions that only do C work run in the interpreter as usual.</li>
+            </ul>
+
             <h2>Complete Example: Compression Library</h2>
 
             <p>Here's a complete example wrapping zlib for compression:</p>
@@ -562,7 +605,7 @@ cc -o host host.c $(strada --embed-ldflags)
                 <li><strong><code>__C__</code> blocks are JIT-compiled</strong>: the VM compiles a program's <code>__C__</code> blocks with the C compiler into one shared object (so file-scope <code>static</code> state is shared between blocks), caches it in <code>~/.cache/strada/cblocks/</code>, and loads it with <code>dlopen</code>. Libraries a module declares with <code>link_lib</code> are linked into that object. A C compiler is therefore needed at run time for such programs.</li>
                 <li><strong><code>c::callback</code></strong>, the <code>c::</code> memory helpers, <code>import_lib</code> libraries and the <code>core::dl_*</code> functions work as in compiled programs.</li>
                 <li><strong>Body-less <code>extern func</code> declarations</strong> (<code>extern func my_c_function(int $x) int;</code>) call the C function in the VM too: the arguments and result are converted with the same C types as in compiled code.</li>
-                <li><strong>Compiled-only</strong>: functions declared in an <code>extern "C" { ... }</code> block are not callable in the VM &mdash; calling one throws <code>extern "C" function NAME() is not available in the bytecode VM (compiled backend only)</code>. Raw pointers into Strada variables (<code>core::int_ptr(\$x)</code>, <code>core::num_ptr</code>) are also compiled-only; the VM raises an error.</li>
+                <li><strong>Compiled-only</strong>: a <code>__C__</code> block that calls a Strada function by its C name (see <a href="#hand-written-wrapper">Writing the C Wrapper by Hand</a>) fails to load in the VM. Also compiled-only: functions declared in an <code>extern "C" { ... }</code> block are not callable in the VM &mdash; calling one throws <code>extern "C" function NAME() is not available in the bytecode VM (compiled backend only)</code>. Raw pointers into Strada variables (<code>core::int_ptr(\$x)</code>, <code>core::num_ptr</code>) are also compiled-only; the VM raises an error.</li>
             </ul>
 
             <h2>Best Practices</h2>
