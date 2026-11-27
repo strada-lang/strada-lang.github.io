@@ -72,6 +72,8 @@
 
             <p>The <code>core::dumper()</code> function returns a human-readable string representation of any value &mdash; pass it to <code>say()</code> (or <code>warn()</code>) to print it. (The bare spellings <code>dumper</code>, <code>refcount</code>, <code>stacktrace</code>, ... remain as legacy aliases.)</p>
 
+            <p>Coming from Perl: Strada has no <code>Data::Dumper</code> module and nothing to <code>use</code>. Where Perl has <code>print Dumper($x)</code>, write <code>say(dumper($x))</code>. A bare <code>dumper($x);</code> statement prints nothing, because the function only returns the text; <code>dump($x)</code> prints it for you.</p>
+
             <pre><code><span class="keyword">my</span> <span class="type">hash</span> <span class="sigil">%user</span> = {
     <span class="string">"name"</span> => <span class="string">"Alice"</span>,
     <span class="string">"age"</span> => <span class="number">30</span>,
