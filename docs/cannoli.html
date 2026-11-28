@@ -101,6 +101,18 @@
                     <h4>Static Files</h4>
                     <p>Built-in static file serving with directory listing</p>
                 </div>
+                <div class="card">
+                    <h4>Four Ways to Deploy</h4>
+                    <p>Standalone server, behind nginx with FastCGI, or as a plain CGI program under Apache</p>
+                </div>
+                <div class="card">
+                    <h4>Compiled or Interpreted Apps</h4>
+                    <p>Load a handler library as a compiled <code>.so</code>, or as a <code>.strada</code> file run by the built-in VM</p>
+                </div>
+                <div class="card">
+                    <h4>Production Hardening</h4>
+                    <p>Timeouts, limits, stuck-worker watchdog, metrics, reload, systemd</p>
+                </div>
             </div>
 
             <h2>Quick Start</h2>
@@ -145,8 +157,8 @@
             <code>--fastcgi</code>, <code>--socket</code>), which override both: <code>/tmp/myapp -p 3000</code>.
             Visit <code>http://localhost:8080/</code> to see your app.</p>
 
-            <p>Handlers can also be built as a shared library and loaded by the stock
-            <code>cannoli</code> server with <code>./cannoli --library ./myapp.so</code>; see the Cannoli README.</p>
+            <p>Handlers can also live in a library that the stock <code>cannoli</code> server
+            loads, compiled or interpreted: see <a href="#libraries">Handler Libraries</a>.</p>
 
             <h2>Handlers, Request &amp; Response</h2>
 
@@ -229,15 +241,164 @@
     <span class="keyword">return</span> <span class="func">Cannoli::App::run</span>(<span class="sigil">$app</span>);
 }</code></pre>
 
+            <h2 id="libraries">Handler Libraries</h2>
+
+            <p>Instead of compiling your routes into a program, you can write a handler
+            library and load it into the stock <code>cannoli</code> server. A library exports
+            <code>cannoli_dispatch($c)</code>: it receives the Cannoli object for the request,
+            builds the response on it, and returns <code>$c-&gt;done()</code>, or <code>""</code>
+            to leave the request to the next library.</p>
+
+            <pre><code><span class="comment"># app.strada</span>
+<span class="keyword">func</span> <span class="func">cannoli_dispatch</span>(<span class="type">scalar</span> <span class="sigil">$c</span>) <span class="type">str</span> {
+    <span class="keyword">if</span> (<span class="sigil">$c</span>-&gt;<span class="func">path</span>() eq <span class="string">"/hello"</span>) {
+        <span class="sigil">$c</span>-&gt;<span class="func">render_text</span>(<span class="string">"Hello, "</span> . <span class="sigil">$c</span>-&gt;<span class="func">param</span>(<span class="string">"name"</span>));
+        <span class="keyword">return</span> <span class="sigil">$c</span>-&gt;<span class="func">done</span>();
+    }
+    <span class="keyword">if</span> (<span class="sigil">$c</span>-&gt;<span class="func">is_post</span>() &amp;&amp; <span class="sigil">$c</span>-&gt;<span class="func">path</span>() eq <span class="string">"/api/items"</span>) {
+        <span class="sigil">$c</span>-&gt;<span class="func">status</span>(<span class="number">201</span>);
+        <span class="sigil">$c</span>-&gt;<span class="func">render_json</span>({<span class="string">"created"</span> =&gt; <span class="sigil">$c</span>-&gt;<span class="func">json_body</span>()});
+        <span class="keyword">return</span> <span class="sigil">$c</span>-&gt;<span class="func">done</span>();
+    }
+    <span class="keyword">return</span> <span class="string">""</span>;   <span class="comment"># not ours: next library, the router, or 404</span>
+}</code></pre>
+
+            <p>The same file runs two ways:</p>
+
+            <pre><code>./cannoli --library ./app.strada --dev          <span class="comment"># interpreted by the built-in VM: no build step</span>
+strada --shared app.strada -o app.so
+./cannoli --library ./app.so                    <span class="comment"># compiled</span>
+./cannoli --library "./app.so:key=value"         <span class="comment"># options, passed to cannoli_init()</span></code></pre>
+
+            <table>
+                <thead><tr><th>Export</th><th>When it runs</th></tr></thead>
+                <tbody>
+                    <tr><td><code>cannoli_dispatch($c)</code></td><td>Every request (required)</td></tr>
+                    <tr><td><code>cannoli_init($config)</code></td><td>Once at startup, with the options after the colon; returning 0 stops the server from starting</td></tr>
+                    <tr><td><code>cannoli_after_request($c, $ms)</code></td><td>After the response is sent</td></tr>
+                    <tr><td><code>cannoli_worker_exit()</code></td><td>When a worker process ends</td></tr>
+                    <tr><td><code>cannoli_tick()</code></td><td>Periodically, in a separate ticker process</td></tr>
+                </tbody>
+            </table>
+
+            <p>Commonly used methods of <code>$c</code>: <code>method()</code>, <code>path()</code>,
+            <code>path_info()</code>, <code>param($name)</code>, <code>header($name)</code>,
+            <code>body()</code>, <code>json_body()</code>, <code>is_get()</code> / <code>is_post()</code>;
+            <code>status($code)</code>, <code>set_header($name, $value)</code>,
+            <code>set_cookie(...)</code>, <code>render_text()</code>, <code>render_html()</code>,
+            <code>render_json($data)</code>, <code>redirect($url, 0)</code>;
+            <code>session_get()</code> / <code>session_set()</code>; <code>start_chunked()</code> /
+            <code>write_chunk()</code> / <code>end_chunked()</code> for streaming; and
+            <code>ws_accept()</code> / <code>ws_recv()</code> / <code>ws_send()</code> for WebSockets.</p>
+
+            <div class="info-box">
+                <strong>The return value is not a response.</strong>
+                A string returned without touching <code>$c</code> is sent as the body only:
+                <code>application/json</code> when it starts with <code>{</code> or <code>[</code>,
+                otherwise <code>text/plain</code>. Older Cannoli versions read
+                <code>STATUS:</code>, <code>REDIRECT:</code> and <code>RESPONSE:</code> prefixes
+                (and a leading <code>&lt;</code> as HTML) from it, which let user input that a
+                handler echoed choose a redirect or headers. Set
+                <code>library_prefixes = true</code> under <code>[app]</code> to keep that
+                behaviour for an old library.
+            </div>
+
+            <p>Mount a library under a URL prefix in the configuration file; the library then
+            sees the rest of the path in <code>$c-&gt;path_info()</code>:</p>
+
+            <pre><code>[library]
+/app = /srv/app/app.so
+/admin = /srv/admin/admin.strada</code></pre>
+
+            <h3>Interpreted applications</h3>
+
+            <p>A <code>.strada</code> file is loaded into the Strada bytecode VM linked into
+            Cannoli; the server itself stays compiled. With <code>--dev</code> (or
+            <code>reload=1</code>) the file is reread when it changes, and a version that fails
+            to load is logged while the last good one keeps serving. <code>lib=DIR</code> adds a
+            directory for the script's own <code>use</code>.</p>
+
+            <div class="info-box warning">
+                <strong>Differences from a compiled library</strong>
+                <ul style="margin: 0.5rem 0 0 1rem;">
+                    <li>Use <code>$c</code>'s methods: interpreted code cannot read the object's
+                    fields or call Cannoli's own package functions
+                    (<code>$c-&gt;html_escape()</code> is there for that reason).</li>
+                    <li>All scripts share one VM per worker: give each application's helpers their
+                    own <code>package</code>.</li>
+                    <li>One interpreted handler runs at a time per worker. That is how classic workers
+                    run anyway; with <code>--loop-workers</code>, a handler that waits inside the VM
+                    (a slow stream, a WebSocket) holds up that worker's other interpreted requests.</li>
+                    <li>Speed: a small text route measured about 86% of the compiled library's
+                    throughput. Modules with <code>__C__</code> blocks (such as <code>JSON</code>)
+                    are compiled by the VM with <code>gcc</code> the first time they load.</li>
+                </ul>
+            </div>
+
+            <h2 id="deploying">Deploying</h2>
+
+            <table>
+                <thead><tr><th>Mode</th><th>Command</th><th>Use it for</th></tr></thead>
+                <tbody>
+                    <tr><td>Standalone, classic workers</td><td><code>cannoli -p 8080 -w 5</code></td><td>The default: one connection per worker at a time; best for handlers that block (databases, Perl)</td></tr>
+                    <tr><td>Standalone, loop workers</td><td><code>cannoli --loop-workers</code></td><td>Many long-lived connections (WebSockets, streams): each worker juggles many connections in an event loop</td></tr>
+                    <tr><td>FastCGI</td><td><code>cannoli --fastcgi --socket unix:/run/app.sock</code></td><td>Behind nginx or Apache with <code>fastcgi_pass</code></td></tr>
+                    <tr><td>CGI</td><td><code>cannoli --cgi --library app.so</code></td><td>Old-school <code>cgi-bin</code> under Apache: one process per request</td></tr>
+                </tbody>
+            </table>
+
+            <h3>CGI</h3>
+
+            <p>In CGI mode Cannoli serves exactly one request: it reads the request from the CGI
+            environment and standard input, writes the response to standard output, and exits.
+            Any application, compiled or interpreted, can be dropped into <code>cgi-bin</code>:</p>
+
+            <pre><code><span class="comment">#!/bin/sh</span>
+<span class="comment"># /usr/lib/cgi-bin/app.cgi  (chmod +x)</span>
+exec /usr/local/bin/cannoli --cgi --library /srv/app/app.so</code></pre>
+
+            <pre><code>ScriptAlias /app /usr/lib/cgi-bin/app.cgi     <span class="comment"># Apache, with mod_cgi or mod_cgid</span>
+<span class="comment"># http://host/app/users/7  -&gt;  the application sees the path /users/7</span></code></pre>
+
+            <p>The application sees the path after the script's URL; <code>$c-&gt;script_name()</code>
+            gives the script's own URL for building links. <code>--cgi</code> is implied when the
+            web server sets <code>GATEWAY_INTERFACE</code>. Startup messages and errors go to
+            standard error (the web server's error log), never into the response. CGI cannot do
+            WebSockets or keep anything in memory between requests, and each request pays for a
+            process start (about 15&nbsp;ms for a small library).</p>
+
+            <h3>Production settings</h3>
+
+            <table>
+                <thead><tr><th>Setting (<code>[server]</code>)</th><th>Effect</th></tr></thead>
+                <tbody>
+                    <tr><td><code>header_timeout</code>, <code>timeout</code>, <code>body_min_rate</code>, <code>write_timeout</code></td><td>Bound slow or silent clients (slowloris, stalled uploads, clients that stop reading)</td></tr>
+                    <tr><td><code>handler_timeout = 60</code></td><td>A worker whose handler makes no progress for this long is killed and replaced</td></tr>
+                    <tr><td><code>keep_alive_requests = 100</code></td><td>Requests per connection; classic workers also close while other clients wait</td></tr>
+                    <tr><td><code>max_body_size</code>, <code>body_spool_size</code></td><td>Body limit; bodies over the spool size are received into a temporary file instead of memory</td></tr>
+                    <tr><td><code>max_connections_per_ip</code>, <code>rate_limit</code></td><td>Per-client limits shared by all workers</td></tr>
+                    <tr><td><code>health_path</code>, <code>[admin]</code></td><td>Health check and Prometheus metrics (<code>/__admin/metrics</code>)</td></tr>
+                    <tr><td><code>user</code>, <code>group</code>, <code>pid_file</code></td><td>Drop privileges after binding; <code>SIGHUP</code> reloads configuration and certificates</td></tr>
+                    <tr><td><code>[log] rotate_size</code>, <code>rotate_keep</code></td><td>Log rotation; rejected requests are logged too</td></tr>
+                </tbody>
+            </table>
+
+            <p>A <code>#</code> after a value starts a comment (<code>port = 8080  # http</code>);
+            <code>cannoli -t -c file.conf</code> checks a configuration without starting. See
+            <code>contrib/</code> in the repository for a systemd unit and an nginx example.</p>
+
             <h2>More Features</h2>
 
             <p>Cannoli also includes form/JSON body parsing, file uploads, cookies and
-            sessions, static-file serving, chunked/streaming responses, HTTPS/SSL, and
-            WebSockets (see the Cannoli README). Many of these are demonstrated in the <code>examples/</code> directory of
-            the <a href="https://github.com/strada-lang/cannoli">Cannoli repository</a>
+            sessions, templates, static-file serving with ranges and compression,
+            chunked/streaming responses, HTTPS/TLS, WebSockets, and Perl handlers through an
+            embedded interpreter (<code>lib/perl</code>). See the
+            <a href="https://github.com/strada-lang/cannoli">Cannoli README</a> for all of them.
+            The <code>examples/</code> directory has programs built on <code>Cannoli::App</code>
             (<code>hello_app</code>, <code>api_app</code>, <code>upload_demo</code>,
-            <code>headers_demo</code>, <code>static_server</code>,
-            <code>template_demo</code>).</p>
+            <code>headers_demo</code>, <code>static_server</code>, <code>template_demo</code>),
+            a handler library that runs compiled or interpreted (<code>myapp.strada</code>), and a
+            Perl application (<code>perl/</code>).</p>
 
 
             <div class="page-nav">
